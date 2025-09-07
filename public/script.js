@@ -696,6 +696,12 @@ class AcquisitionAdvisorApp {
         const statusIcon = engine.available ? '✅' : '❌';
         const statusText = engine.available ? 'Available' : 'Not Available';
         
+        console.log(`Creating engine card for ${engineKey}:`, {
+            available: engine.available,
+            enabled: engine.enabled,
+            name: engine.name
+        });
+        
         card.innerHTML = `
             <div class="engine-header">
                 <h4>${engine.name} ${statusIcon}</h4>
@@ -757,10 +763,14 @@ class AcquisitionAdvisorApp {
 
     toggleComparisonMode() {
         this.comparisonMode = document.getElementById('enableComparison').checked;
+        console.log('Comparison mode toggled:', this.comparisonMode);
         
         // Show/hide appropriate controls
         const radioLabels = document.querySelectorAll('.engine-radio');
         const checkboxLabels = document.querySelectorAll('.engine-checkbox');
+        
+        console.log('Found radio labels:', radioLabels.length);
+        console.log('Found checkbox labels:', checkboxLabels.length);
         
         radioLabels.forEach(label => {
             label.style.display = this.comparisonMode ? 'none' : 'flex';
@@ -768,6 +778,7 @@ class AcquisitionAdvisorApp {
         
         checkboxLabels.forEach(label => {
             label.style.display = this.comparisonMode ? 'flex' : 'none';
+            console.log('Checkbox label display set to:', label.style.display);
         });
 
         this.updateEngineSelection();
