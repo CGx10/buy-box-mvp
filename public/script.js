@@ -686,6 +686,13 @@ class AcquisitionAdvisorApp {
             engineGrid.appendChild(engineCard);
         });
 
+        // Set initial comparison mode state
+        this.comparisonMode = document.getElementById('enableComparison').checked;
+        console.log('Initial comparison mode from toggle:', this.comparisonMode);
+        
+        // Apply initial state to controls
+        this.toggleComparisonMode();
+        
         // Set default selection
         this.updateEngineSelection();
         
@@ -768,8 +775,14 @@ class AcquisitionAdvisorApp {
             const radio = card.querySelector('input[type="radio"]');
             const checkbox = card.querySelector('input[type="checkbox"]');
             
-            radio.addEventListener('change', () => this.updateEngineSelection());
-            checkbox.addEventListener('change', () => this.updateEngineSelection());
+            radio.addEventListener('change', () => {
+                console.log('Radio changed:', engineKey);
+                this.updateEngineSelection();
+            });
+            checkbox.addEventListener('change', () => {
+                console.log('Checkbox changed:', engineKey, 'checked:', checkbox.checked);
+                this.updateEngineSelection();
+            });
         }
 
         return card;
