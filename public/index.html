@@ -228,8 +228,34 @@
                         </div>
                     </section>
 
+                    <!-- AI Engine Selection -->
+                    <section class="ai-engine-selection">
+                        <h2>🤖 Choose Your AI Analysis Method</h2>
+                        <p class="selection-description">Select how you want your profile to be analyzed. Each method offers different strengths and capabilities.</p>
+                        
+                        <div class="engine-options">
+                            <div class="engine-grid" id="engineGrid">
+                                <!-- Engine options will be populated by JavaScript -->
+                            </div>
+                            
+                            <div class="comparison-option">
+                                <div class="comparison-toggle">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="enableComparison">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label">Compare Multiple AI Methods</span>
+                                </div>
+                                <p class="comparison-description">Get insights from multiple AI engines and see how they compare</p>
+                            </div>
+                        </div>
+                    </section>
+
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary" id="analyzeBtn">Analyze My Profile</button>
+                        <button type="submit" class="btn-primary" id="analyzeBtn">
+                            <span id="analyzeButtonText">Analyze My Profile</span>
+                            <span id="selectedEngines"></span>
+                        </button>
                     </div>
                 </form>
             </div>

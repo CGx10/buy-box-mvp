@@ -2,13 +2,19 @@ class AcquisitionAdvisorApp {
     constructor() {
         this.currentPhase = 1;
         this.analysisResults = null;
+        this.availableEngines = {};
+        this.selectedEngine = 'traditional';
+        this.selectedEngines = [];
+        this.comparisonMode = false;
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupEventListeners();
         this.setupFormValidation();
         this.updateProgress();
+        await this.loadAvailableEngines();
+        this.setupEngineSelection();
     }
 
     setupEventListeners() {
@@ -47,6 +53,9 @@ class AcquisitionAdvisorApp {
         
         // Transparency toggle
         document.getElementById('toggleTransparency').addEventListener('click', this.toggleTransparency.bind(this));
+        
+        // Engine comparison toggle
+        document.getElementById('enableComparison').addEventListener('change', this.toggleComparisonMode.bind(this));
     }
 
     setupRatingSliders() {
@@ -202,15 +211,35 @@ class AcquisitionAdvisorApp {
         this.startAnalysisAnimation();
         
         try {
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
+            let response, result;
+            
+            if (this.comparisonMode && this.selectedEngines.length > 1) {
+                // Multi-engine comparison
+                response = await fetch('/api/analyze/compare', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userData: formData,
+                        engines: this.selectedEngines
+                    })
+                });
+            } else {
+                // Single engine analysis
+                response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userData: formData,
+                        engine: this.selectedEngine
+                    })
+                });
+            }
 
-            const result = await response.json();
+            result = await response.json();
             
             if (result.success) {
                 this.analysisResults = result.data;
@@ -222,7 +251,7 @@ class AcquisitionAdvisorApp {
             }
         } catch (error) {
             console.error('Analysis error:', error);
-            alert('Sorry, there was an error analyzing your profile. Please try again.');
+            alert(`Sorry, there was an error analyzing your profile: ${error.message}`);
             this.currentPhase = 1;
             this.updateProgress();
             this.showPhase('discoveryPhase');
@@ -288,6 +317,15 @@ class AcquisitionAdvisorApp {
     populateResults() {
         if (!this.analysisResults) return;
 
+        // Check if this is a comparison result
+        if (this.analysisResults.results && this.analysisResults.comparison) {
+            this.populateComparisonResults();
+        } else {
+            this.populateSingleEngineResults();
+        }
+    }
+
+    populateSingleEngineResults() {
         // Populate AI insights if available
         if (this.analysisResults.aiInsights) {
             this.populateAIInsights();
@@ -315,6 +353,28 @@ class AcquisitionAdvisorApp {
             `;
             tableBody.appendChild(tr);
         });
+    }
+
+    populateComparisonResults() {
+        const results = this.analysisResults.results;
+        const comparison = this.analysisResults.comparison;
+        
+        // Add comparison summary to AI insights section
+        this.populateComparisonSummary(comparison);
+        
+        // Populate with consensus/primary result for thesis
+        const primaryResult = this.selectPrimaryResult(results);
+        if (primaryResult) {
+            const thesisContent = document.getElementById('thesisContent');
+            thesisContent.innerHTML = this.formatThesis(primaryResult.acquisitionThesis) + 
+                this.generateComparisonNote(comparison);
+        }
+
+        // Populate comparison table
+        this.populateComparisonTable(results, comparison);
+        
+        // Add engine-specific results tabs
+        this.addEngineResultsTabs(results);
     }
 
     populateAIInsights() {
@@ -592,6 +652,265 @@ class AcquisitionAdvisorApp {
             'depthAnalysis': 'Response Depth'
         };
         return names[key] || key;
+    }
+
+    // Engine Management Methods
+    async loadAvailableEngines() {
+        try {
+            const response = await fetch('/api/engines');
+            const result = await response.json();
+            
+            if (result.success) {
+                this.availableEngines = result.engines;
+                this.selectedEngine = result.defaultEngine;
+            }
+        } catch (error) {
+            console.error('Failed to load engines:', error);
+            // Fallback to traditional engine
+            this.availableEngines = {
+                traditional: { name: 'Traditional AI', enabled: true, available: true }
+            };
+        }
+    }
+
+    setupEngineSelection() {
+        const engineGrid = document.getElementById('engineGrid');
+        if (!engineGrid) return;
+
+        engineGrid.innerHTML = '';
+        
+        Object.entries(this.availableEngines).forEach(([key, engine]) => {
+            const engineCard = this.createEngineCard(key, engine);
+            engineGrid.appendChild(engineCard);
+        });
+
+        // Set default selection
+        this.updateEngineSelection();
+    }
+
+    createEngineCard(engineKey, engine) {
+        const card = document.createElement('div');
+        card.className = `engine-card ${engine.available ? 'available' : 'unavailable'}`;
+        card.dataset.engine = engineKey;
+        
+        const statusIcon = engine.available ? '✅' : '❌';
+        const statusText = engine.available ? 'Available' : 'Not Available';
+        
+        card.innerHTML = `
+            <div class="engine-header">
+                <h4>${engine.name} ${statusIcon}</h4>
+                <span class="engine-status ${engine.available ? 'available' : 'unavailable'}">${statusText}</span>
+            </div>
+            <div class="engine-details">
+                <p><strong>Type:</strong> ${engine.type || 'AI Engine'}</p>
+                <p><strong>Provider:</strong> ${engine.provider || 'Local'}</p>
+                ${engine.capabilities ? `
+                    <div class="engine-capabilities">
+                        <strong>Capabilities:</strong>
+                        <ul>
+                            ${engine.capabilities.slice(0, 3).map(cap => `<li>${cap}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+            <div class="engine-actions">
+                <label class="engine-radio">
+                    <input type="radio" name="engineSelect" value="${engineKey}" ${engineKey === this.selectedEngine ? 'checked' : ''} ${!engine.available ? 'disabled' : ''}>
+                    <span class="radio-custom"></span>
+                    Select
+                </label>
+                <label class="engine-checkbox" style="display: none;">
+                    <input type="checkbox" value="${engineKey}" ${!engine.available ? 'disabled' : ''}>
+                    <span class="checkbox-custom"></span>
+                    Compare
+                </label>
+            </div>
+        `;
+
+        // Add click handler
+        if (engine.available) {
+            card.addEventListener('click', (e) => {
+                if (e.target.type !== 'radio' && e.target.type !== 'checkbox') {
+                    const radio = card.querySelector('input[type="radio"]');
+                    const checkbox = card.querySelector('input[type="checkbox"]');
+                    
+                    if (this.comparisonMode) {
+                        checkbox.checked = !checkbox.checked;
+                        this.updateEngineSelection();
+                    } else {
+                        radio.checked = true;
+                        this.updateEngineSelection();
+                    }
+                }
+            });
+
+            // Add individual input handlers
+            const radio = card.querySelector('input[type="radio"]');
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            
+            radio.addEventListener('change', () => this.updateEngineSelection());
+            checkbox.addEventListener('change', () => this.updateEngineSelection());
+        }
+
+        return card;
+    }
+
+    toggleComparisonMode() {
+        this.comparisonMode = document.getElementById('enableComparison').checked;
+        
+        // Show/hide appropriate controls
+        const radioLabels = document.querySelectorAll('.engine-radio');
+        const checkboxLabels = document.querySelectorAll('.engine-checkbox');
+        
+        radioLabels.forEach(label => {
+            label.style.display = this.comparisonMode ? 'none' : 'flex';
+        });
+        
+        checkboxLabels.forEach(label => {
+            label.style.display = this.comparisonMode ? 'flex' : 'none';
+        });
+
+        this.updateEngineSelection();
+    }
+
+    updateEngineSelection() {
+        if (this.comparisonMode) {
+            // Multi-selection mode
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][value]');
+            this.selectedEngines = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+        } else {
+            // Single selection mode
+            const selectedRadio = document.querySelector('input[type="radio"][name="engineSelect"]:checked');
+            this.selectedEngine = selectedRadio ? selectedRadio.value : 'traditional';
+            this.selectedEngines = [this.selectedEngine];
+        }
+
+        this.updateAnalyzeButton();
+    }
+
+    updateAnalyzeButton() {
+        const button = document.getElementById('analyzeBtn');
+        const buttonText = document.getElementById('analyzeButtonText');
+        const selectedEngines = document.getElementById('selectedEngines');
+        
+        if (this.comparisonMode && this.selectedEngines.length > 1) {
+            buttonText.textContent = 'Compare AI Methods';
+            selectedEngines.textContent = ` (${this.selectedEngines.length} engines)`;
+            button.classList.add('comparison-mode');
+        } else if (this.comparisonMode && this.selectedEngines.length === 1) {
+            buttonText.textContent = 'Analyze My Profile';
+            selectedEngines.textContent = ` (${this.availableEngines[this.selectedEngines[0]]?.name || 'AI'})`;
+            button.classList.remove('comparison-mode');
+        } else {
+            buttonText.textContent = 'Analyze My Profile';
+            selectedEngines.textContent = ` (${this.availableEngines[this.selectedEngine]?.name || 'AI'})`;
+            button.classList.remove('comparison-mode');
+        }
+    }
+
+    // Comparison Dashboard Methods
+    populateComparisonSummary(comparison) {
+        const aiInsightsContent = document.getElementById('aiInsightsContent');
+        if (!aiInsightsContent) return;
+
+        let html = '<div class="comparison-insights">';
+        
+        // Comparison Overview
+        html += '<div class="comparison-overview">';
+        html += '<h4>🔬 Multi-Engine Analysis Overview</h4>';
+        html += `<p><strong>Engines Analyzed:</strong> ${comparison.engineCount}</p>`;
+        html += `<p><strong>Archetype Agreement:</strong> ${comparison.archetypeAgreement.agreement ? 'Yes' : 'No'} (${comparison.archetypeAgreement.agreementPercentage}%)</p>`;
+        html += `<p><strong>Industry Overlap:</strong> ${comparison.industryOverlap.overlapPercentage}%</p>`;
+        html += `<p><strong>Confidence Consistency:</strong> ${comparison.confidenceVariation.consistency}</p>`;
+        html += '</div>';
+
+        // Recommendations
+        html += '<div class="comparison-recommendations">';
+        html += '<h4>💡 Analysis Recommendations</h4>';
+        html += '<ul>';
+        comparison.recommendations.forEach(rec => {
+            html += `<li>${rec}</li>`;
+        });
+        html += '</ul>';
+        html += '</div>';
+
+        html += '</div>';
+        aiInsightsContent.innerHTML = html;
+    }
+
+    selectPrimaryResult(results) {
+        // Select the result with highest confidence or traditional as fallback
+        const engineKeys = Object.keys(results);
+        if (engineKeys.length === 0) return null;
+        
+        // Prefer traditional or hybrid engines, then highest confidence
+        const priorities = ['hybrid', 'traditional', 'openai', 'claude', 'ollama'];
+        for (const engine of priorities) {
+            if (results[engine]) return results[engine];
+        }
+        
+        return results[engineKeys[0]];
+    }
+
+    generateComparisonNote(comparison) {
+        return `<div class="comparison-note">
+            <h4>🔍 Multi-Engine Analysis Note</h4>
+            <p>This analysis represents a ${comparison.engineCount}-engine comparison. 
+            ${comparison.archetypeAgreement.agreement ? 
+                `All engines agree on the primary archetype with ${comparison.archetypeAgreement.agreementPercentage}% consensus.` :
+                `Engines show mixed results across ${comparison.archetypeAgreement.uniqueArchetypes} different archetypes.`
+            }
+            Industry recommendations show ${comparison.industryOverlap.overlapPercentage}% overlap.</p>
+        </div>`;
+    }
+
+    populateComparisonTable(results, comparison) {
+        const tableBody = document.getElementById('buyboxTableBody');
+        tableBody.innerHTML = '';
+
+        // Create comparison-specific table headers
+        const headerRow = document.createElement('tr');
+        headerRow.innerHTML = `
+            <td class="criterion-cell"><strong>Engine Comparison</strong></td>
+            <td class="target-cell"><strong>Results</strong></td>
+            <td class="rationale-cell"><strong>Analysis</strong></td>
+        `;
+        tableBody.appendChild(headerRow);
+
+        // Archetype comparison
+        const archetypeRow = document.createElement('tr');
+        const archetypes = Object.entries(results).map(([engine, result]) => 
+            `${engine}: ${result.operatorArchetype?.title || 'Unknown'}`
+        ).join('<br>');
+        archetypeRow.innerHTML = `
+            <td class="criterion-cell">Operator Archetype</td>
+            <td class="target-cell">${archetypes}</td>
+            <td class="rationale-cell">${comparison.archetypeAgreement.agreement ? 'Strong consensus' : 'Mixed results - requires attention'}</td>
+        `;
+        tableBody.appendChild(archetypeRow);
+
+        // Industry comparison
+        const industryRow = document.createElement('tr');
+        const industries = comparison.industryOverlap.industries.length > 0 ?
+            comparison.industryOverlap.industries.join(', ') :
+            'No common industries identified';
+        industryRow.innerHTML = `
+            <td class="criterion-cell">Target Industries</td>
+            <td class="target-cell">${industries}</td>
+            <td class="rationale-cell">${comparison.industryOverlap.overlapPercentage}% overlap across engines</td>
+        `;
+        tableBody.appendChild(industryRow);
+
+        // Confidence comparison
+        const confidenceRow = document.createElement('tr');
+        confidenceRow.innerHTML = `
+            <td class="criterion-cell">Confidence Levels</td>
+            <td class="target-cell">Range: ${comparison.confidenceVariation.range.min}% - ${comparison.confidenceVariation.range.max}%</td>
+            <td class="rationale-cell">Average: ${comparison.confidenceVariation.average}% (${comparison.confidenceVariation.consistency} consistency)</td>
+        `;
+        tableBody.appendChild(confidenceRow);
     }
 }
 
