@@ -757,14 +757,17 @@ class AcquisitionAdvisorApp {
         // Add click handler
         if (engine.available) {
             card.addEventListener('click', (e) => {
+                console.log('Card clicked:', engineKey, 'target:', e.target, 'type:', e.target.type);
                 if (e.target.type !== 'radio' && e.target.type !== 'checkbox') {
                     const radio = card.querySelector('input[type="radio"]');
                     const checkbox = card.querySelector('input[type="checkbox"]');
                     
                     if (this.comparisonMode) {
+                        console.log('Toggling checkbox:', engineKey, 'current state:', checkbox.checked);
                         checkbox.checked = !checkbox.checked;
                         this.updateEngineSelection();
                     } else {
+                        console.log('Selecting radio:', engineKey);
                         radio.checked = true;
                         this.updateEngineSelection();
                     }
