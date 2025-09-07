@@ -98,12 +98,43 @@ ENTREPRENEUR PROFILE:
 - Exit Timeline: ${userData.exit_timeline || 'Not provided'}
 - Additional Criteria: ${userData.additional_criteria || 'Not provided'}
 
+ANALYSIS METHODOLOGY:
+You must use the same multi-factor scoring methodology as our Traditional AI system:
+
+1. ARCHETYPE DETECTION (Weighted Composite Scoring):
+   - User Self-Rating (30% weight): Direct competency ratings 1-5
+   - Keyword Analysis (30% weight): Match evidence text against archetype-specific key phrases
+   - Sentiment Analysis (20% weight): Analyze confidence and achievement language
+   - Confidence Indicators (10% weight): Look for success/achievement words vs uncertainty
+   - Response Depth (10% weight): Evaluate specificity and detail level
+
+2. ARCHETYPE MAPPINGS (Use these exact mappings):
+   - sales_marketing → "The Growth Catalyst" (leverage: Weak Marketing / Strong Product)
+   - operations_systems → "The Efficiency Expert" (leverage: Good Revenue / Inefficient Operations)  
+   - product_technology → "The Visionary Builder" (leverage: Loyal Customer Base / Outdated Products)
+   - team_culture → "The People Leader" (leverage: High Turnover / Cultural Issues)
+   - finance_analytics → "The Financial Strategist" (leverage: Undervalued / Financial Restructuring)
+
+3. KEY PHRASE ANALYSIS:
+   For each competency, look for these specific phrases in the evidence:
+   - Sales/Marketing: revenue, growth, customers, marketing, sales, acquisition, conversion, funnel, leads, campaigns
+   - Operations/Systems: efficiency, process, systems, automation, workflow, optimization, streamline, cost reduction, scalability, operations
+   - Product/Technology: innovation, technology, product, development, features, technical, software, platform, architecture, engineering
+   - Team/Culture: leadership, team, culture, people, management, collaboration, mentoring, hiring, retention, motivation
+   - Finance/Analytics: financial, analytics, data, metrics, roi, profit, budget, forecasting, analysis, strategy
+
+4. CONFIDENCE INDICATORS:
+   - High: successfully, achieved, led, increased, improved, delivered, exceeded, won, built, created
+   - Medium: helped, contributed, participated, involved, worked, supported, assisted
+   - Low: tried, attempted, learning, studying, interested, hope, plan, want
+
 ANALYSIS REQUIREMENTS:
-1. Determine the operator archetype (Growth Catalyst, Efficiency Expert, Turnaround Specialist, Lifestyle Operator, or Strategic Builder)
-2. Identify target industries with specific rationale
-3. Calculate financial parameters (max purchase price, SDE range, etc.)
-4. Generate acquisition thesis
-5. Create personalized buybox criteria
+1. Calculate composite scores for each competency using the weighted methodology above
+2. Identify the highest-scoring competency as the primary archetype
+3. Determine target industries with specific rationale
+4. Calculate financial parameters (max purchase price, SDE range, etc.)
+5. Generate acquisition thesis
+6. Create personalized buybox criteria
 
 Please provide your analysis in the following JSON format:
 {

@@ -1018,6 +1018,48 @@ class AcquisitionAdvisorApp {
         html += '</div>';
         html += '</div>';
 
+        // Methodology explanation
+        html += '<div class="transparency-section-item">';
+        html += '<h4>🔬 Archetype Detection Methodology</h4>';
+        html += '<div class="methodology-grid">';
+        html += '<div class="methodology-card">';
+        html += '<h5>Traditional AI Method</h5>';
+        html += '<p><strong>Multi-Factor Scoring:</strong></p>';
+        html += '<ul>';
+        html += '<li>User Self-Rating (30%): Direct 1-5 competency scores</li>';
+        html += '<li>Keyword Analysis (30%): Evidence text matched against archetype-specific phrases</li>';
+        html += '<li>Sentiment Analysis (20%): Confidence and achievement language analysis</li>';
+        html += '<li>Confidence Indicators (10%): Success vs uncertainty word detection</li>';
+        html += '<li>Response Depth (10%): Specificity and detail level evaluation</li>';
+        html += '</ul>';
+        html += '<p><strong>Archetype Mappings:</strong></p>';
+        html += '<ul>';
+        html += '<li>Operations/Systems → "The Efficiency Expert"</li>';
+        html += '<li>Sales/Marketing → "The Growth Catalyst"</li>';
+        html += '<li>Product/Technology → "The Visionary Builder"</li>';
+        html += '<li>Team/Culture → "The People Leader"</li>';
+        html += '<li>Finance/Analytics → "The Financial Strategist"</li>';
+        html += '</ul>';
+        html += '</div>';
+        html += '<div class="methodology-card">';
+        html += '<h5>Gemini Method</h5>';
+        html += '<p><strong>LLM Analysis:</strong></p>';
+        html += '<ul>';
+        html += '<li>Uses same weighted scoring methodology as Traditional AI</li>';
+        html += '<li>Analyzes evidence text for key phrases and confidence indicators</li>';
+        html += '<li>Applies same archetype mappings and leverage points</li>';
+        html += '<li>Generates reasoning based on composite score calculations</li>';
+        html += '</ul>';
+        html += '<p><strong>Key Differences:</strong></p>';
+        html += '<ul>';
+        html += '<li>Natural language understanding vs algorithmic scoring</li>';
+        html += '<li>Contextual analysis vs pattern matching</li>';
+        html += '<li>Semantic comprehension vs keyword frequency</li>';
+        html += '</ul>';
+        html += '</div>';
+        html += '</div>';
+        html += '</div>';
+
         // Engine-specific details
         html += '<div class="transparency-section-item">';
         html += '<h4>🤖 Engine-Specific Results</h4>';
@@ -1030,6 +1072,7 @@ class AcquisitionAdvisorApp {
             html += `<p><strong>Processing Time:</strong> ${result.processingTimeMs || 'N/A'}ms</p>`;
             html += `<p><strong>Confidence:</strong> ${result.confidenceScores?.overall ? Math.round(result.confidenceScores.overall * 100) + '%' : 'N/A'}</p>`;
             html += `<p><strong>Archetype:</strong> ${result.operatorArchetype?.name || 'Not identified'}</p>`;
+            html += `<p><strong>Method:</strong> ${engineName === 'traditional' ? 'Algorithmic Multi-Factor Scoring' : 'LLM with Same Methodology'}</p>`;
             html += `</div>`;
         });
         

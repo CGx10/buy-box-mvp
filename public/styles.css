@@ -1016,6 +1016,38 @@ input:checked + .toggle-slider:before {
     100% { box-shadow: 0 0 0 0 rgba(240, 147, 251, 0); }
 }
 
+/* Methodology Grid */
+.methodology-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.methodology-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.methodology-card h5 {
+    margin: 0 0 1rem 0;
+    color: #333;
+    font-size: 1.1rem;
+}
+
+.methodology-card ul {
+    margin: 0.5rem 0;
+    padding-left: 1.2rem;
+}
+
+.methodology-card li {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
 /* Engine Results Tabs */
 .engine-results-tabs {
     margin-top: 30px;
