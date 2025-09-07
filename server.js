@@ -118,6 +118,6 @@ app.post('/api/analyze/compare', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`AI Acquisition Advisor running on port ${PORT}`);
+    console.log(`Buybox Generator running on port ${PORT}`);
     console.log(`Open http://localhost:${PORT} to access the application`);
 });

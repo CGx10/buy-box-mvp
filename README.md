@@ -1,6 +1,6 @@
-# AI-Powered Acquisition Advisor
+# Buybox Generator
 
-A specialized AI agent that generates personalized acquisition strategies for entrepreneurs looking to buy businesses. The system follows a "Fit-First" principle, prioritizing optimal matches between entrepreneurs and potential business acquisitions.
+A specialized AI system that generates personalized acquisition buyboxes for entrepreneurs looking to buy businesses. The system follows a "Fit-First" principle, prioritizing optimal matches between entrepreneurs and potential business acquisitions.
 
 ## Features
 
@@ -139,4 +139,4 @@ The application includes comprehensive error handling and user-friendly validati
 
 ---
 
-*Built with ❤️ for acquisition entrepreneurs seeking their perfect business match.*
+*Built with ❤️ for acquisition entrepreneurs seeking their perfect business buybox.*

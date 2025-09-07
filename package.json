@@ -1,7 +1,7 @@
 {
-  "name": "ai-acquisition-advisor",
+  "name": "buybox-generator",
   "version": "1.0.0",
-  "description": "AI-Powered Acquisition Advisor - A specialized system to generate personalized acquisition strategies",
+  "description": "Buybox Generator - A specialized AI system to generate personalized acquisition strategies and buybox criteria",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -25,7 +25,7 @@
   "devDependencies": {
     "nodemon": "^3.0.1"
   },
-  "keywords": ["ai", "acquisition", "business", "advisor"],
-  "author": "AI Acquisition Advisor",
+  "keywords": ["ai", "acquisition", "business", "buybox", "generator"],
+  "author": "Buybox Generator",
   "license": "MIT"
 }
