@@ -4,7 +4,7 @@ class GeminiAnalysisEngine {
     constructor() {
         this.name = 'Google Gemini';
         this.description = 'Google\'s advanced multimodal AI model with strong reasoning capabilities';
-        this.isAvailable = false;
+        this.available = false;
         this.model = null;
         
         // Initialize Gemini only if API key is available
@@ -12,15 +12,19 @@ class GeminiAnalysisEngine {
             try {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
                 this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-                this.isAvailable = true;
+                this.available = true;
                 console.log('✅ Gemini engine initialized successfully');
             } catch (error) {
                 console.log('⚠️  Gemini engine initialization failed:', error.message);
-                this.isAvailable = false;
+                this.available = false;
             }
         } else {
             console.log('ℹ️  Gemini engine disabled - set GEMINI_API_KEY and ENABLE_GEMINI=true to enable');
         }
+    }
+
+    isAvailable() {
+        return this.available;
     }
 
     async getEngineInfo() {
@@ -36,13 +40,13 @@ class GeminiAnalysisEngine {
                 "Cost-effective processing"
             ],
             requirements: ["Gemini API key", "Internet connectivity"],
-            enabled: this.isAvailable,
-            available: this.isAvailable
+            enabled: this.available,
+            available: this.available
         };
     }
 
     async analyzeUserData(userData) {
-        if (!this.isAvailable) {
+        if (!this.available) {
             throw new Error('Gemini engine is not available. Please check your API key configuration.');
         }
 
