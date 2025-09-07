@@ -729,7 +729,7 @@ class AcquisitionAdvisorApp {
                     <span class="radio-custom"></span>
                     Select
                 </label>
-                <label class="engine-checkbox" style="display: none;">
+                <label class="engine-checkbox hidden">
                     <input type="checkbox" value="${engineKey}" ${engine.available ? '' : 'disabled'}>
                     <span class="checkbox-custom"></span>
                     Compare
@@ -785,12 +785,20 @@ class AcquisitionAdvisorApp {
         console.log('Found checkbox labels:', checkboxLabels.length);
         
         radioLabels.forEach(label => {
-            label.style.display = this.comparisonMode ? 'none' : 'flex';
+            if (this.comparisonMode) {
+                label.classList.add('hidden');
+            } else {
+                label.classList.remove('hidden');
+            }
         });
         
         checkboxLabels.forEach(label => {
-            label.style.display = this.comparisonMode ? 'flex' : 'none';
-            console.log('Checkbox label display set to:', label.style.display);
+            if (this.comparisonMode) {
+                label.classList.remove('hidden');
+            } else {
+                label.classList.add('hidden');
+            }
+            console.log('Checkbox label classes:', label.className);
         });
 
         this.updateEngineSelection();
