@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
-const AcquisitionAdvisor = require('./src/advisor');
+const AIEnhancedAcquisitionAdvisor = require('./src/aiEnhancedAdvisor');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,8 +13,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Initialize the AI Advisor
-const advisor = new AcquisitionAdvisor();
+// Initialize the AI-Enhanced Advisor
+const advisor = new AIEnhancedAcquisitionAdvisor();
 
 // Routes
 app.get('/', (req, res) => {

@@ -285,6 +285,11 @@ class AcquisitionAdvisorApp {
     populateResults() {
         if (!this.analysisResults) return;
 
+        // Populate AI insights if available
+        if (this.analysisResults.aiInsights) {
+            this.populateAIInsights();
+        }
+
         // Populate acquisition thesis
         const thesisContent = document.getElementById('thesisContent');
         thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
@@ -302,6 +307,62 @@ class AcquisitionAdvisorApp {
             `;
             tableBody.appendChild(tr);
         });
+    }
+
+    populateAIInsights() {
+        const insights = this.analysisResults.aiInsights;
+        const confidenceScores = this.analysisResults.confidenceScores;
+        
+        let html = '<div class="ai-insights-grid">';
+        
+        // Confidence Summary
+        html += '<div class="insight-card confidence-card">';
+        html += '<h4>📊 Analysis Confidence</h4>';
+        html += `<div class="confidence-meter">`;
+        html += `<div class="confidence-bar" style="width: ${Math.round(confidenceScores.overall * 100)}%"></div>`;
+        html += `</div>`;
+        html += `<p>Overall: ${Math.round(confidenceScores.overall * 100)}% confident</p>`;
+        html += `<small>Archetype: ${Math.round(confidenceScores.archetype * 100)}% | Industry: ${Math.round(confidenceScores.industry * 100)}% | Data Quality: ${Math.round(confidenceScores.dataQuality * 100)}%</small>`;
+        html += '</div>';
+        
+        // Key Strengths
+        html += '<div class="insight-card strengths-card">';
+        html += '<h4>💪 Key Strengths</h4>';
+        html += '<ul>';
+        insights.keyStrengths.forEach(strength => {
+            html += `<li>${strength}</li>`;
+        });
+        html += '</ul>';
+        html += '</div>';
+        
+        // AI Recommendations
+        html += '<div class="insight-card recommendations-card">';
+        html += '<h4>🎯 AI Recommendations</h4>';
+        html += '<ul>';
+        insights.recommendations.forEach(rec => {
+            html += `<li>${rec}</li>`;
+        });
+        html += '</ul>';
+        html += '</div>';
+        
+        // Risk Factors
+        if (insights.risks.length > 0) {
+            html += '<div class="insight-card risks-card">';
+            html += '<h4>⚠️ Considerations</h4>';
+            html += '<ul>';
+            insights.risks.forEach(risk => {
+                html += `<li>${risk}</li>`;
+            });
+            html += '</ul>';
+            html += '</div>';
+        }
+        
+        html += '</div>';
+        
+        const aiInsightsContent = document.getElementById('aiInsightsContent');
+        if (aiInsightsContent) {
+            aiInsightsContent.innerHTML = html;
+        }
     }
 
     formatThesis(thesis) {
