@@ -383,7 +383,7 @@ class AcquisitionAdvisorApp {
         const comparison = this.analysisResults.comparison;
         
         // Safety checks
-        if (!results || !Array.isArray(results)) {
+        if (!results || typeof results !== 'object') {
             console.error('Invalid results data for comparison');
             return;
         }
