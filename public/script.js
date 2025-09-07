@@ -726,7 +726,7 @@ class AcquisitionAdvisorApp {
                     Select
                 </label>
                 <label class="engine-checkbox" style="display: none;">
-                    <input type="checkbox" value="${engineKey}" ${!engine.available ? 'disabled' : ''}>
+                    <input type="checkbox" value="${engineKey}" ${engine.available ? '' : 'disabled'}>
                     <span class="checkbox-custom"></span>
                     Compare
                 </label>
