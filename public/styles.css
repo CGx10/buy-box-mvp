@@ -1089,6 +1089,38 @@ input:checked + .toggle-slider:before {
     font-style: italic;
 }
 
+.prompt-section {
+    margin-top: 20px;
+    border-top: 2px solid #e9ecef;
+    padding-top: 15px;
+}
+
+.prompt-content {
+    background: #2d3748;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.prompt-content pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.prompt-content code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
 /* Engine Results Tabs */
 .engine-results-tabs {
     margin-top: 30px;

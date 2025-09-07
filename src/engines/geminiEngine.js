@@ -266,7 +266,8 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
                 },
                 aiEngine: 'Google Gemini',
                 analysisTimestamp: new Date().toISOString(),
-                rawResponse: responseText
+                rawResponse: responseText,
+                promptUsed: prompt
             };
         } catch (error) {
             console.error('Error parsing Gemini response:', error);
@@ -307,6 +308,7 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
                 aiEngine: 'Google Gemini',
                 analysisTimestamp: new Date().toISOString(),
                 rawResponse: responseText,
+                promptUsed: 'Fallback prompt due to parsing error',
                 error: 'Response parsing failed, using fallback analysis'
             };
         }

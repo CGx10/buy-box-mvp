@@ -1078,17 +1078,17 @@ class AcquisitionAdvisorApp {
             html += `<p><strong>Archetype:</strong> ${result.operatorArchetype?.name || 'Not identified'}</p>`;
             html += `<p><strong>Method:</strong> ${engineName === 'traditional' ? 'Algorithmic Multi-Factor Scoring' : 'LLM with Same Methodology'}</p>`;
             
-            // Add Gemini-specific configuration details
-            if (engineName === 'gemini') {
-                html += `<div class="engine-config">`;
-                html += `<h6>Configuration:</h6>`;
-                html += `<p><strong>Model:</strong> gemini-1.5-flash</p>`;
-                html += `<p><strong>API Version:</strong> v1beta</p>`;
-                html += `<p><strong>Max Tokens:</strong> 8,192</p>`;
-                html += `<p><strong>Temperature:</strong> 0.7</p>`;
-                html += `<p><strong>Prompt Length:</strong> ${result.rawResponse ? 'Sent to model' : 'N/A'}</p>`;
-                html += `</div>`;
-            }
+                // Add Gemini-specific configuration details
+                if (engineName === 'gemini') {
+                    html += `<div class="engine-config">`;
+                    html += `<h6>Configuration:</h6>`;
+                    html += `<p><strong>Model:</strong> gemini-1.5-flash</p>`;
+                    html += `<p><strong>API Version:</strong> v1beta</p>`;
+                    html += `<p><strong>Max Tokens:</strong> 8,192</p>`;
+                    html += `<p><strong>Temperature:</strong> 0.7</p>`;
+                    html += `<p><strong>Prompt Length:</strong> ${result.promptUsed ? result.promptUsed.length + ' characters' : 'N/A'}</p>`;
+                    html += `</div>`;
+                }
             
             html += `</div>`;
         });
@@ -1096,18 +1096,31 @@ class AcquisitionAdvisorApp {
         html += '</div>';
         html += '</div>';
 
-        // Gemini Debug Information
-        html += '<div class="transparency-section-item">';
-        html += '<h4>🔍 Gemini Debug Information</h4>';
-        html += '<div class="debug-info">';
-        html += '<p><strong>Model Used:</strong> gemini-1.5-flash</p>';
-        html += '<p><strong>Prompt Methodology:</strong> Same as Traditional AI (Multi-Factor Scoring)</p>';
-        html += '<p><strong>Archetype Detection:</strong> Weighted composite scoring with key phrase analysis</p>';
-        html += '<p><strong>Key Phrases Analyzed:</strong> efficiency, process, systems, automation, workflow, optimization, streamline, cost reduction, scalability, operations</p>';
-        html += '<p><strong>Confidence Indicators:</strong> successfully, achieved, led, increased, improved, delivered, exceeded, won, built, created</p>';
-        html += '<p><em>Check browser console for detailed prompt and response debugging information.</em></p>';
-        html += '</div>';
-        html += '</div>';
+                // Gemini Debug Information
+                html += '<div class="transparency-section-item">';
+                html += '<h4>🔍 Gemini Debug Information</h4>';
+                html += '<div class="debug-info">';
+                html += '<p><strong>Model Used:</strong> gemini-1.5-flash</p>';
+                html += '<p><strong>Prompt Methodology:</strong> Same as Traditional AI (Multi-Factor Scoring)</p>';
+                html += '<p><strong>Archetype Detection:</strong> Weighted composite scoring with key phrase analysis</p>';
+                html += '<p><strong>Key Phrases Analyzed:</strong> efficiency, process, systems, automation, workflow, optimization, streamline, cost reduction, scalability, operations</p>';
+                html += '<p><strong>Confidence Indicators:</strong> successfully, achieved, led, increased, improved, delivered, exceeded, won, built, created</p>';
+                
+                // Show actual prompt if available
+                const geminiResult = results.gemini;
+                if (geminiResult && geminiResult.promptUsed) {
+                    html += '<div class="prompt-section">';
+                    html += '<h5>📝 Actual AI Prompt Sent to Gemini:</h5>';
+                    html += '<div class="prompt-content">';
+                    html += `<pre><code>${geminiResult.promptUsed}</code></pre>`;
+                    html += '</div>';
+                    html += '</div>';
+                } else {
+                    html += '<p><em>Check browser console for detailed prompt and response debugging information.</em></p>';
+                }
+                
+                html += '</div>';
+                html += '</div>';
 
         html += '</div>';
         transparencyContent.innerHTML = html;
