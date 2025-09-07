@@ -221,6 +221,7 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
             
             return {
                 operatorArchetype: {
+                    name: parsed.operatorArchetype?.type || 'Strategic Builder',
                     title: parsed.operatorArchetype?.type || 'Strategic Builder',
                     type: parsed.operatorArchetype?.type || 'Strategic Builder',
                     confidence: parsed.operatorArchetype?.confidence || 0.8,
