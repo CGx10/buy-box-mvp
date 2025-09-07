@@ -52,6 +52,7 @@ class AcquisitionAdvisorApp {
 
         // Action buttons
         document.getElementById('downloadBtn').addEventListener('click', this.downloadReport.bind(this));
+        document.getElementById('downloadPDFBtn').addEventListener('click', this.downloadPDF.bind(this));
         document.getElementById('restartBtn').addEventListener('click', this.restart.bind(this));
         
         // Transparency toggle
@@ -342,6 +343,17 @@ class AcquisitionAdvisorApp {
         this.updateProgress();
         this.showPhase('strategyPhase');
         this.populateResults();
+        
+        // Enable download buttons
+        this.enableDownloadButtons();
+    }
+
+    enableDownloadButtons() {
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadPDFBtn = document.getElementById('downloadPDFBtn');
+        
+        if (downloadBtn) downloadBtn.disabled = false;
+        if (downloadPDFBtn) downloadPDFBtn.disabled = false;
     }
 
     populateResults() {
@@ -567,6 +579,123 @@ class AcquisitionAdvisorApp {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+    }
+
+    async downloadPDF() {
+        if (!this.analysisResults) return;
+
+        try {
+            // Show loading state
+            const pdfBtn = document.getElementById('downloadPDFBtn');
+            const originalText = pdfBtn.textContent;
+            pdfBtn.textContent = '🔄 Generating PDF...';
+            pdfBtn.disabled = true;
+
+            // Get the results container
+            const resultsContainer = document.querySelector('.results-container');
+            if (!resultsContainer) {
+                throw new Error('Results container not found');
+            }
+
+            // Create a temporary container for PDF generation
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '0';
+            tempContainer.style.width = '800px';
+            tempContainer.style.backgroundColor = 'white';
+            tempContainer.style.padding = '40px';
+            tempContainer.style.fontFamily = 'Arial, sans-serif';
+            tempContainer.style.fontSize = '14px';
+            tempContainer.style.lineHeight = '1.6';
+            tempContainer.style.color = '#333';
+
+            // Clone the results content
+            const clonedContent = resultsContainer.cloneNode(true);
+            
+            // Remove the download buttons from the clone
+            const downloadOptions = clonedContent.querySelector('.download-options');
+            if (downloadOptions) {
+                downloadOptions.remove();
+            }
+
+            // Add PDF-specific styling
+            clonedContent.style.width = '100%';
+            clonedContent.style.margin = '0';
+            clonedContent.style.padding = '0';
+            
+            // Apply PDF-friendly styles to all elements
+            const styleElements = clonedContent.querySelectorAll('*');
+            styleElements.forEach(el => {
+                el.style.boxShadow = 'none';
+                el.style.border = el.style.border || '1px solid #ddd';
+                if (el.tagName === 'BUTTON') {
+                    el.style.display = 'none';
+                }
+            });
+
+            tempContainer.appendChild(clonedContent);
+            document.body.appendChild(tempContainer);
+
+            // Generate PDF using html2canvas and jsPDF
+            const canvas = await html2canvas(tempContainer, {
+                scale: 2,
+                useCORS: true,
+                allowTaint: true,
+                backgroundColor: '#ffffff',
+                width: 800,
+                height: tempContainer.scrollHeight
+            });
+
+            // Clean up temporary container
+            document.body.removeChild(tempContainer);
+
+            // Create PDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+            
+            const imgWidth = 210; // A4 width in mm
+            const pageHeight = 295; // A4 height in mm
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+
+            let position = 0;
+
+            // Add first page
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            // Add additional pages if needed
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            // Add header
+            pdf.setFontSize(20);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('Buybox Generator Report', 20, 20);
+            
+            // Add timestamp
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
+
+            // Download the PDF
+            pdf.save('buybox-generator-report.pdf');
+
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+            alert('Error generating PDF. Please try again or use the Markdown download instead.');
+        } finally {
+            // Reset button state
+            const pdfBtn = document.getElementById('downloadPDFBtn');
+            pdfBtn.textContent = '📋 Download PDF';
+            pdfBtn.disabled = false;
+        }
     }
 
     generateMarkdownReport() {
