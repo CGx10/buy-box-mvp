@@ -1020,6 +1020,153 @@ class AcquisitionAdvisorApp {
         tableBody.appendChild(confidenceRow);
     }
 
+    addEngineResultsTabs(results) {
+        // Create tabs container
+        const tabsContainer = document.createElement('div');
+        tabsContainer.className = 'engine-results-tabs';
+        tabsContainer.innerHTML = `
+            <div class="tabs-header">
+                <h3>Detailed Engine Results</h3>
+                <p>Compare detailed analysis from each AI engine</p>
+            </div>
+            <div class="tabs-nav">
+                ${Object.keys(results).map((engineName, index) => `
+                    <button class="tab-button ${index === 0 ? 'active' : ''}" data-engine="${engineName}">
+                        ${this.getEngineDisplayName(engineName)}
+                    </button>
+                `).join('')}
+            </div>
+            <div class="tabs-content">
+                ${Object.keys(results).map((engineName, index) => `
+                    <div class="tab-panel ${index === 0 ? 'active' : ''}" data-engine="${engineName}">
+                        ${this.createEngineResultPanel(results[engineName], engineName)}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Add to the results section
+        const resultsSection = document.querySelector('.results-section');
+        if (resultsSection) {
+            resultsSection.appendChild(tabsContainer);
+        }
+
+        // Add tab switching functionality
+        this.setupTabSwitching();
+    }
+
+    getEngineDisplayName(engineName) {
+        const displayNames = {
+            'traditional': 'Traditional AI',
+            'openai': 'OpenAI GPT-4',
+            'claude': 'Anthropic Claude',
+            'gemini': 'Google Gemini',
+            'ollama': 'Ollama llama3.1',
+            'hybrid': 'Hybrid AI'
+        };
+        return displayNames[engineName] || engineName;
+    }
+
+    createEngineResultPanel(result, engineName) {
+        if (!result) {
+            return '<div class="no-data">No analysis data available for this engine.</div>';
+        }
+
+        return `
+            <div class="engine-result-panel">
+                <div class="engine-header">
+                    <h4>${this.getEngineDisplayName(engineName)} Analysis</h4>
+                    <div class="engine-meta">
+                        <span class="processing-time">Processing: ${result.processingTimeMs || 'N/A'}ms</span>
+                        <span class="confidence">Confidence: ${result.confidenceScores?.overall ? Math.round(result.confidenceScores.overall * 100) + '%' : 'N/A'}</span>
+                    </div>
+                </div>
+                
+                <div class="engine-content">
+                    <div class="archetype-section">
+                        <h5>Operator Archetype</h5>
+                        <div class="archetype-card">
+                            <div class="archetype-title">${result.operatorArchetype?.title || 'Not Identified'}</div>
+                            <div class="archetype-score">Score: ${result.operatorArchetype?.compositeScore ? result.operatorArchetype.compositeScore.toFixed(2) + '/5.0' : 'N/A'}</div>
+                            <div class="archetype-evidence">${result.operatorArchetype?.evidence || 'No evidence provided'}</div>
+                        </div>
+                    </div>
+
+                    <div class="thesis-section">
+                        <h5>Acquisition Thesis</h5>
+                        <div class="thesis-content">${this.formatThesis(result.acquisitionThesis || 'No thesis available')}</div>
+                    </div>
+
+                    <div class="buybox-section">
+                        <h5>Personalized Buybox</h5>
+                        <div class="buybox-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Criterion</th>
+                                        <th>Target Profile</th>
+                                        <th>Rationale</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${result.personalizedBuybox ? result.personalizedBuybox.map(item => `
+                                        <tr>
+                                            <td>${item.criterion || 'N/A'}</td>
+                                            <td>${item.target || 'N/A'}</td>
+                                            <td>${item.rationale || 'N/A'}</td>
+                                        </tr>
+                                    `).join('') : '<tr><td colspan="3">No buybox data available</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="insights-section">
+                        <h5>AI Insights</h5>
+                        <div class="insights-content">
+                            ${result.aiInsights ? `
+                                <div class="insights-item">
+                                    <strong>Key Strengths:</strong>
+                                    <ul>${result.aiInsights.keyStrengths?.map(strength => `<li>${strength}</li>`).join('') || '<li>No strengths identified</li>'}</ul>
+                                </div>
+                                <div class="insights-item">
+                                    <strong>Recommendations:</strong>
+                                    <ul>${result.aiInsights.recommendations?.map(rec => `<li>${rec}</li>`).join('') || '<li>No recommendations available</li>'}</ul>
+                                </div>
+                                <div class="insights-item">
+                                    <strong>Risks:</strong>
+                                    <ul>${result.aiInsights.risks?.map(risk => `<li>${risk}</li>`).join('') || '<li>No risks identified</li>'}</ul>
+                                </div>
+                            ` : '<p>No insights available for this engine.</p>'}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    setupTabSwitching() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+        const tabPanels = document.querySelectorAll('.tab-panel');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const engineName = button.dataset.engine;
+                
+                // Remove active class from all buttons and panels
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabPanels.forEach(panel => panel.classList.remove('active'));
+                
+                // Add active class to clicked button and corresponding panel
+                button.classList.add('active');
+                const targetPanel = document.querySelector(`.tab-panel[data-engine="${engineName}"]`);
+                if (targetPanel) {
+                    targetPanel.classList.add('active');
+                }
+            });
+        });
+    }
+
     setupSaveLoadButtons() {
         // Save button
         document.getElementById('saveFormBtn').addEventListener('click', () => {
