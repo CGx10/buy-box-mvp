@@ -72,25 +72,31 @@ class GeminiAnalysisEngine {
 You are an expert acquisition advisor analyzing an entrepreneur's profile to generate a personalized buybox strategy.
 
 ENTREPRENEUR PROFILE:
-- Experience Level: ${userData.experienceLevel}
-- Industry Experience: ${userData.industryExperience}
-- Financial Capacity: ${userData.financialCapacity}
-- Risk Tolerance: ${userData.riskTolerance}
-- Time Commitment: ${userData.timeCommitment}
-- Growth Ambitions: ${userData.growthAmbitions}
-- Preferred Industries: ${userData.preferredIndustries}
-- Geographic Preferences: ${userData.geographicPreferences}
-- Deal Size Range: ${userData.dealSizeRange}
-- Revenue Range: ${userData.revenueRange}
-- EBITDA Range: ${userData.ebitdaRange}
-- Employee Count: ${userData.employeeCount}
-- Business Model: ${userData.businessModel}
-- Technology Level: ${userData.technologyLevel}
-- Customer Concentration: ${userData.customerConcentration}
-- Market Position: ${userData.marketPosition}
-- Growth Stage: ${userData.growthStage}
-- Exit Timeline: ${userData.exitTimeline}
-- Additional Criteria: ${userData.additionalCriteria}
+- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+- Interests & Topics: ${userData.interests_topics || 'Not provided'}
+- Recent Books: ${userData.recent_books || 'Not provided'}
+- Problem to Solve: ${userData.problem_to_solve || 'Not provided'}
+- Customer Affinity: ${userData.customer_affinity || 'Not provided'}
+- Total Liquid Capital: $${userData.total_liquid_capital || 'Not provided'}
+- Potential Loan Amount: $${userData.potential_loan_amount || 'Not provided'}
+- Risk Tolerance: ${userData.risk_tolerance || 'Not provided'}
+- Time Commitment: ${userData.time_commitment || 'Not provided'}
+- Geographic Preferences: ${userData.geographic_preferences || 'Not provided'}
+- Deal Size Range: ${userData.deal_size_range || 'Not provided'}
+- Revenue Range: ${userData.revenue_range || 'Not provided'}
+- EBITDA Range: ${userData.ebitda_range || 'Not provided'}
+- Employee Count: ${userData.employee_count || 'Not provided'}
+- Business Model: ${userData.business_model || 'Not provided'}
+- Technology Level: ${userData.technology_level || 'Not provided'}
+- Customer Concentration: ${userData.customer_concentration || 'Not provided'}
+- Market Position: ${userData.market_position || 'Not provided'}
+- Growth Stage: ${userData.growth_stage || 'Not provided'}
+- Exit Timeline: ${userData.exit_timeline || 'Not provided'}
+- Additional Criteria: ${userData.additional_criteria || 'Not provided'}
 
 ANALYSIS REQUIREMENTS:
 1. Determine the operator archetype (Growth Catalyst, Efficiency Expert, Turnaround Specialist, Lifestyle Operator, or Strategic Builder)

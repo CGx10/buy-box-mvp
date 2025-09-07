@@ -433,6 +433,9 @@ class AcquisitionAdvisorApp {
         // Add comparison summary to AI insights section
         this.populateComparisonSummary(comparison);
         
+        // Populate transparency report for comparison
+        this.populateComparisonTransparencyReport(results, comparison);
+        
         // Populate with consensus/primary result for thesis
         const primaryResult = this.selectPrimaryResult(results);
         if (primaryResult) {
@@ -965,11 +968,12 @@ class AcquisitionAdvisorApp {
         
         // Comparison Overview
         html += '<div class="comparison-overview">';
-        html += '<h4>🔬 Multi-Engine Analysis Overview</h4>';
-        html += `<p><strong>Engines Analyzed:</strong> ${comparison.engineCount}</p>`;
+        html += '<h4>🔬 AI Engine Comparison Results</h4>';
+        html += `<p><strong>Engines Compared:</strong> Traditional AI + Google Gemini</p>`;
         html += `<p><strong>Archetype Agreement:</strong> ${comparison.archetypeAgreement.agreement ? 'Yes' : 'No'} (${comparison.archetypeAgreement.agreementPercentage}%)</p>`;
         html += `<p><strong>Industry Overlap:</strong> ${comparison.industryOverlap.overlapPercentage}%</p>`;
         html += `<p><strong>Confidence Consistency:</strong> ${comparison.confidenceVariation.consistency}</p>`;
+        html += '<p><em>Note: The main analysis below represents a consensus view. Use the tabs below to see detailed results from each engine.</em></p>';
         html += '</div>';
 
         // Recommendations
@@ -984,6 +988,56 @@ class AcquisitionAdvisorApp {
 
         html += '</div>';
         aiInsightsContent.innerHTML = html;
+    }
+
+    populateComparisonTransparencyReport(results, comparison) {
+        const transparencyContent = document.getElementById('transparencyContent');
+        if (!transparencyContent) return;
+
+        let html = '<div class="transparency-sections">';
+        
+        // Comparison Summary
+        html += '<div class="transparency-section-item">';
+        html += '<h4>🔬 Multi-Engine Analysis Summary</h4>';
+        html += '<div class="summary-grid">';
+        html += `<div class="summary-card">`;
+        html += `<h5>Engines Analyzed</h5>`;
+        html += `<p>${Object.keys(results).length} AI engines</p>`;
+        html += `<p>Traditional AI + Google Gemini</p>`;
+        html += `</div>`;
+        html += `<div class="summary-card">`;
+        html += `<h5>Agreement Level</h5>`;
+        html += `<p>${comparison.archetypeAgreement.agreementPercentage}% archetype agreement</p>`;
+        html += `<p>${comparison.industryOverlap.overlapPercentage}% industry overlap</p>`;
+        html += `</div>`;
+        html += `<div class="summary-card">`;
+        html += `<h5>Confidence Range</h5>`;
+        html += `<p>${comparison.confidenceVariation.range.min}% - ${comparison.confidenceVariation.range.max}%</p>`;
+        html += `<p>Average: ${comparison.confidenceVariation.average}%</p>`;
+        html += `</div>`;
+        html += '</div>';
+        html += '</div>';
+
+        // Engine-specific details
+        html += '<div class="transparency-section-item">';
+        html += '<h4>🤖 Engine-Specific Results</h4>';
+        html += '<div class="engine-comparison-grid">';
+        
+        Object.keys(results).forEach(engineName => {
+            const result = results[engineName];
+            html += `<div class="engine-card">`;
+            html += `<h5>${this.getEngineDisplayName(engineName)}</h5>`;
+            html += `<p><strong>Processing Time:</strong> ${result.processingTimeMs || 'N/A'}ms</p>`;
+            html += `<p><strong>Confidence:</strong> ${result.confidenceScores?.overall ? Math.round(result.confidenceScores.overall * 100) + '%' : 'N/A'}</p>`;
+            html += `<p><strong>Archetype:</strong> ${result.operatorArchetype?.name || 'Not identified'}</p>`;
+            html += `</div>`;
+        });
+        
+        html += '</div>';
+        html += '</div>';
+
+        html += '</div>';
+        transparencyContent.innerHTML = html;
     }
 
     selectPrimaryResult(results) {
