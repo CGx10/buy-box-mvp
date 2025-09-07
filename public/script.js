@@ -762,6 +762,13 @@ class AcquisitionAdvisorApp {
         if (engine.available) {
             card.addEventListener('click', (e) => {
                 console.log('Card clicked:', engineKey, 'target:', e.target, 'type:', e.target.type);
+                
+                // Prevent default behavior for checkbox clicks
+                if (e.target.type === 'checkbox') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                
                 if (e.target.type !== 'radio' && e.target.type !== 'checkbox') {
                     const radio = card.querySelector('input[type="radio"]');
                     const checkbox = card.querySelector('input[type="checkbox"]');
@@ -771,10 +778,10 @@ class AcquisitionAdvisorApp {
                         if (!checkbox.disabled) {
                             checkbox.checked = !checkbox.checked;
                             console.log('Checkbox toggled to:', checkbox.checked);
+                            this.updateEngineSelection();
                         } else {
                             console.log('Checkbox is disabled, cannot toggle');
                         }
-                        this.updateEngineSelection();
                     } else {
                         console.log('Selecting radio:', engineKey);
                         radio.checked = true;
@@ -791,10 +798,8 @@ class AcquisitionAdvisorApp {
                 console.log('Radio changed:', engineKey);
                 this.updateEngineSelection();
             });
-            checkbox.addEventListener('change', () => {
-                console.log('Checkbox changed:', engineKey, 'checked:', checkbox.checked);
-                this.updateEngineSelection();
-            });
+            
+            // Checkbox changes are handled by the card click handler
         }
 
         return card;
