@@ -343,6 +343,27 @@ body {
     border-top: 1px solid #e2e8f0;
 }
 
+.form-utility-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-utility-buttons .btn-secondary {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+}
+
+.form-utility-buttons .btn-secondary:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
 .btn-primary {
     background: linear-gradient(90deg, #667eea, #764ba2);
     color: white;

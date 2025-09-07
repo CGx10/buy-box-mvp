@@ -47,6 +47,9 @@ class AcquisitionAdvisorApp {
         // Character counters
         this.setupCharacterCounters();
 
+        // Save/Load functionality
+        this.setupSaveLoadButtons();
+
         // Action buttons
         document.getElementById('downloadBtn').addEventListener('click', this.downloadReport.bind(this));
         document.getElementById('restartBtn').addEventListener('click', this.restart.bind(this));
@@ -1015,6 +1018,198 @@ class AcquisitionAdvisorApp {
             <td class="rationale-cell">Average: ${comparison.confidenceVariation.average}% (${comparison.confidenceVariation.consistency} consistency)</td>
         `;
         tableBody.appendChild(confidenceRow);
+    }
+
+    setupSaveLoadButtons() {
+        // Save button
+        document.getElementById('saveFormBtn').addEventListener('click', () => {
+            this.saveFormData();
+        });
+
+        // Load button
+        document.getElementById('loadFormBtn').addEventListener('click', () => {
+            document.getElementById('fileInput').click();
+        });
+
+        // File input handler
+        document.getElementById('fileInput').addEventListener('change', (e) => {
+            this.loadFormData(e.target.files[0]);
+        });
+    }
+
+    saveFormData() {
+        try {
+            const formData = this.collectFormData();
+            const dataToSave = {
+                formData: formData,
+                selectedEngines: this.selectedEngines,
+                comparisonMode: this.comparisonMode,
+                timestamp: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `buybox-form-responses-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Show success message
+            this.showNotification('Form responses saved successfully!', 'success');
+        } catch (error) {
+            console.error('Error saving form data:', error);
+            this.showNotification('Error saving form data. Please try again.', 'error');
+        }
+    }
+
+    loadFormData(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                // Validate the data structure
+                if (!data.formData) {
+                    throw new Error('Invalid file format: missing formData');
+                }
+
+                // Load form data
+                this.populateForm(data.formData);
+
+                // Load engine selection
+                if (data.selectedEngines) {
+                    this.selectedEngines = data.selectedEngines;
+                }
+
+                // Load comparison mode
+                if (data.comparisonMode !== undefined) {
+                    this.comparisonMode = data.comparisonMode;
+                    const toggle = document.getElementById('enableComparison');
+                    if (toggle) {
+                        toggle.checked = data.comparisonMode;
+                        this.toggleComparisonMode();
+                    }
+                }
+
+                this.showNotification('Form responses loaded successfully!', 'success');
+            } catch (error) {
+                console.error('Error loading form data:', error);
+                this.showNotification('Error loading form data. Please check the file format.', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    populateForm(formData) {
+        // Populate competency ratings and evidence
+        const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
+        competencies.forEach(competency => {
+            if (formData[competency]) {
+                // Set rating
+                const ratingSlider = document.getElementById(`${competency}_rating`);
+                if (ratingSlider && formData[competency].rating) {
+                    ratingSlider.value = formData[competency].rating;
+                    const valueDisplay = document.getElementById(`${competency}_value`);
+                    if (valueDisplay) {
+                        valueDisplay.textContent = formData[competency].rating;
+                    }
+                }
+
+                // Set evidence
+                const evidenceTextarea = document.getElementById(`${competency}_evidence`);
+                if (evidenceTextarea && formData[competency].evidence) {
+                    evidenceTextarea.value = formData[competency].evidence;
+                }
+            }
+        });
+
+        // Populate other form fields
+        const fields = [
+            'interests_topics', 'recent_books', 'problem_to_solve', 'customer_affinity',
+            'total_liquid_capital', 'potential_loan_amount', 'min_annual_income',
+            'time_commitment', 'location_preference', 'location_regions', 'risk_tolerance'
+        ];
+
+        fields.forEach(field => {
+            const element = document.getElementById(field);
+            if (element && formData[field] !== undefined) {
+                element.value = formData[field];
+            }
+        });
+
+        // Update time commitment display
+        const timeValue = document.getElementById('time_commitment_value');
+        if (timeValue && formData.time_commitment) {
+            timeValue.textContent = `${formData.time_commitment} hours/week`;
+        }
+
+        // Update location details visibility
+        const locationSelect = document.getElementById('location_preference');
+        const locationDetails = document.getElementById('location_details');
+        if (locationSelect && locationDetails) {
+            if (formData.location_preference === 'willing_to_relocate' || formData.location_preference === 'local_only') {
+                locationDetails.style.display = 'block';
+                document.getElementById('location_regions').required = true;
+            } else {
+                locationDetails.style.display = 'none';
+                document.getElementById('location_regions').required = false;
+            }
+        }
+    }
+
+    showNotification(message, type = 'info') {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        
+        // Style the notification
+        Object.assign(notification.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            padding: '15px 20px',
+            borderRadius: '8px',
+            color: 'white',
+            fontWeight: '500',
+            zIndex: '10000',
+            maxWidth: '300px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+            transform: 'translateX(100%)',
+            transition: 'transform 0.3s ease'
+        });
+
+        // Set background color based on type
+        const colors = {
+            success: '#48bb78',
+            error: '#f56565',
+            info: '#4299e1'
+        };
+        notification.style.backgroundColor = colors[type] || colors.info;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Animate in
+        setTimeout(() => {
+            notification.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateX(100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
     }
 }
 

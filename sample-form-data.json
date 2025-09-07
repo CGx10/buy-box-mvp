@@ -1,0 +1,39 @@
+{
+  "formData": {
+    "sales_marketing": {
+      "rating": 5,
+      "evidence": "I started or managed several businesses and was responsible for sales & marketing. Examples include: (1) CEO of FCR Software and generating $600K/year revenues in software licenses; (2) Director Business Development of Prospero (formerly Delphi Forums) and forming strategic partnerships for key technologies; (3) Founder & Manager of Glovsky Law, Indigo Venture Law Offices, Glovsky & Koenig, and Glovsky Law Offices (all law firms) generating clients with revenues up to $500K/year; (3) Manager of Employa project repurposing SaaS platform to API that was licensed to staffing agency with 10,000 plus employees as a $75K pilot project."
+    },
+    "operations_systems": {
+      "rating": 5,
+      "evidence": "I was Director of Operations at Gold Wire Technologies, responsible for managing finance, systems administration, legal and operations for 1-2 years. I was COO & General Counsel, at Analog Photonics, responsible for finance, legal and operations for 2 years. I was CEO of FCR Software, a start-up that grew to $600K/yr, responsible for all business functions other than engineering and product development."
+    },
+    "finance_analytics": {
+      "rating": 5,
+      "evidence": "I was COO of Analog Photonics, responsible for overseeing finance & taxes, responsible for financial projections & reconciliation, strategic tax initiatives such as PPP loans & R&D credits. I was also head of Finance for the Watershed school overseeing budget process and strategic planning."
+    },
+    "team_culture": {
+      "rating": 5,
+      "evidence": "I was CEO of FCR Software, responsible for vision, hiring & team building. At Analog Photonics, I was COO responsible for all non-engineering aspects of managing the business. I started and managed an organization called 'Business Lawyers Network' that included 300+ lawyers. I recruited a management team and lead the organization for 10 years. That organization is still going strong today."
+    },
+    "product_technology": {
+      "rating": 5,
+      "evidence": "I was CEO of FCR Software and lead the strategic roadmap for product development. As Director of Business Development at Prospero (formerly Delphi Forums), I developed strategic relationships to integrate critical product features. At Analog Photonics, I negotiated strategic partnerships for development of photonic chip sensors for self-driving cars. At Proxet, I managed the Employa project and lead the development of an API for licensing. At Business Lawyers Network, I developed an online community based on Drupal (open source project)."
+    },
+    "interests_topics": "AI/ML, blockchain, ecommerce, software development, online communities",
+    "recent_books": "Never Split the Difference by Chris Voss - Understanding the psychology of negotiation and the ability to resolve differences and quickly come to agreement. Built to Sell by John Warrillow - Understanding how to position businesses for sale, growth strategy, maximizing revenues, and planning an exit. Launch by Jeff Walker - How to use content marketing to build a personal brand, leverage email, newsletters & social media.",
+    "problem_to_solve": "How do you build agentic systems that streamline business operations, accelerate processes, and improve the quality of results. AI is the future...making it simple and easy to use is critical. It's important to democratize the technology and make it accessible to everyone.",
+    "customer_affinity": "Small Business Owners",
+    "total_liquid_capital": 50000,
+    "potential_loan_amount": 500000,
+    "min_annual_income": 100000,
+    "time_commitment": 60,
+    "location_preference": "willing_to_relocate",
+    "location_regions": "Denver CO, San Diego CA, San Francisco CA, Miami FL",
+    "risk_tolerance": "high"
+  },
+  "selectedEngines": ["traditional", "gemini"],
+  "comparisonMode": true,
+  "timestamp": "2025-09-07T20:00:00.000Z",
+  "version": "1.0"
+}
