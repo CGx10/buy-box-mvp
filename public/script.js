@@ -165,7 +165,9 @@ class AcquisitionAdvisorApp {
 
     clearFieldError(field) {
         const inputGroup = field.closest('.input-group') || field.closest('.competency');
-        inputGroup.classList.remove('error');
+        if (inputGroup) {
+            inputGroup.classList.remove('error');
+        }
     }
 
     validateForm() {
@@ -784,21 +786,24 @@ class AcquisitionAdvisorApp {
         console.log('Found radio labels:', radioLabels.length);
         console.log('Found checkbox labels:', checkboxLabels.length);
         
-        radioLabels.forEach(label => {
+        radioLabels.forEach((label, index) => {
             if (this.comparisonMode) {
                 label.classList.add('hidden');
+                console.log(`Radio ${index} hidden`);
             } else {
                 label.classList.remove('hidden');
+                console.log(`Radio ${index} shown`);
             }
         });
         
-        checkboxLabels.forEach(label => {
+        checkboxLabels.forEach((label, index) => {
             if (this.comparisonMode) {
                 label.classList.remove('hidden');
+                console.log(`Checkbox ${index} shown, classes:`, label.className);
             } else {
                 label.classList.add('hidden');
+                console.log(`Checkbox ${index} hidden, classes:`, label.className);
             }
-            console.log('Checkbox label classes:', label.className);
         });
 
         this.updateEngineSelection();
