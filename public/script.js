@@ -345,7 +345,12 @@ class AcquisitionAdvisorApp {
     }
 
     populateResults() {
-        if (!this.analysisResults) return;
+        console.log('populateResults called with analysisResults:', this.analysisResults);
+        
+        if (!this.analysisResults) {
+            console.log('No analysisResults, returning');
+            return;
+        }
 
         // Debug: Log the analysis results structure
         console.log('Analysis results structure:', {
