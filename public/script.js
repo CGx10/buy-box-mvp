@@ -205,6 +205,9 @@ class AcquisitionAdvisorApp {
             return;
         }
 
+        // Update engine selection before collecting form data
+        this.updateEngineSelection();
+        
         const formData = this.collectFormData();
         
         // Debug: Log the form data being sent
@@ -278,9 +281,19 @@ class AcquisitionAdvisorApp {
         // Competency ratings and evidence
         const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
         competencies.forEach(competency => {
+            const ratingElement = document.getElementById(`${competency}_rating`);
+            const evidenceElement = document.getElementById(`${competency}_evidence`);
+            
+            console.log(`Collecting ${competency}:`, {
+                ratingElement: ratingElement,
+                evidenceElement: evidenceElement,
+                ratingValue: ratingElement ? ratingElement.value : 'NOT FOUND',
+                evidenceValue: evidenceElement ? evidenceElement.value : 'NOT FOUND'
+            });
+            
             formData[competency] = {
-                rating: parseInt(document.getElementById(`${competency}_rating`).value),
-                evidence: document.getElementById(`${competency}_evidence`).value
+                rating: ratingElement ? parseInt(ratingElement.value) : 0,
+                evidence: evidenceElement ? evidenceElement.value : ''
             };
         });
 
