@@ -1221,13 +1221,14 @@ class AcquisitionAdvisorApp {
             try {
                 const data = JSON.parse(e.target.result);
                 
-                // Validate the data structure
-                if (!data.formData) {
-                    throw new Error('Invalid file format: missing formData');
+                // Validate the data structure - handle both formats
+                const formData = data.formData || data.userData;
+                if (!formData) {
+                    throw new Error('Invalid file format: missing formData or userData');
                 }
 
                 // Load form data
-                this.populateForm(data.formData);
+                this.populateForm(formData);
 
                 // Load engine selection
                 if (data.selectedEngines) {
