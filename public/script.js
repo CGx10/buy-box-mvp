@@ -44,6 +44,9 @@ class AcquisitionAdvisorApp {
         // Action buttons
         document.getElementById('downloadBtn').addEventListener('click', this.downloadReport.bind(this));
         document.getElementById('restartBtn').addEventListener('click', this.restart.bind(this));
+        
+        // Transparency toggle
+        document.getElementById('toggleTransparency').addEventListener('click', this.toggleTransparency.bind(this));
     }
 
     setupRatingSliders() {
@@ -290,6 +293,11 @@ class AcquisitionAdvisorApp {
             this.populateAIInsights();
         }
 
+        // Populate transparency report if available
+        if (this.analysisResults.transparencyReport) {
+            this.populateTransparencyReport();
+        }
+
         // Populate acquisition thesis
         const thesisContent = document.getElementById('thesisContent');
         thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
@@ -468,6 +476,122 @@ class AcquisitionAdvisorApp {
         errorGroups.forEach(group => {
             group.classList.remove('error');
         });
+    }
+
+    toggleTransparency() {
+        const content = document.getElementById('transparencyContent');
+        const button = document.getElementById('toggleTransparency');
+        
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            button.textContent = 'Hide Detailed AI Analysis';
+        } else {
+            content.style.display = 'none';
+            button.textContent = 'Show Detailed AI Analysis';
+        }
+    }
+
+    populateTransparencyReport() {
+        const report = this.analysisResults.transparencyReport;
+        if (!report) return;
+
+        let html = '<div class="transparency-sections">';
+        
+        // Executive Summary
+        html += '<div class="transparency-section-item">';
+        html += '<h4>📊 Executive Summary</h4>';
+        html += '<div class="summary-grid">';
+        html += `<div class="summary-card">`;
+        html += `<h5>Primary Archetype</h5>`;
+        html += `<p><strong>${report.executiveSummary.primaryArchetype.type}</strong></p>`;
+        html += `<p>Confidence: ${report.executiveSummary.primaryArchetype.confidence}</p>`;
+        html += `<p>Composite Score: ${report.executiveSummary.primaryArchetype.compositeScore}</p>`;
+        html += `</div>`;
+        html += `<div class="summary-card">`;
+        html += `<h5>Algorithm Consensus</h5>`;
+        html += `<p>Agreement: ${report.executiveSummary.algorithmConsensus.agreementLevel}</p>`;
+        html += `<p>Primary Drivers: ${report.executiveSummary.algorithmConsensus.primaryDrivers.join(', ')}</p>`;
+        html += `</div>`;
+        html += `<div class="summary-card">`;
+        html += `<h5>Data Reliability</h5>`;
+        html += `<p>Overall: ${report.executiveSummary.dataReliability.overall}</p>`;
+        html += `</div>`;
+        html += '</div></div>';
+        
+        // Algorithm Breakdown
+        html += '<div class="transparency-section-item">';
+        html += '<h4>🔬 Algorithm Breakdown</h4>';
+        html += '<div class="algorithm-details">';
+        html += '<table class="transparency-table">';
+        html += '<thead><tr><th>Component</th><th>Value</th><th>Weight</th><th>Contribution</th><th>Interpretation</th></tr></thead>';
+        html += '<tbody>';
+        
+        const breakdown = report.algorithmBreakdown;
+        if (breakdown && breakdown.detailedScoring) {
+            Object.entries(breakdown.detailedScoring).forEach(([key, data]) => {
+                html += '<tr>';
+                html += `<td><strong>${this.formatComponentName(key)}</strong></td>`;
+                html += `<td>${data.value}</td>`;
+                html += `<td>${data.weight}</td>`;
+                html += `<td>${data.contribution}</td>`;
+                html += `<td>${data.interpretation}</td>`;
+                html += '</tr>';
+            });
+        }
+        
+        html += '</tbody></table>';
+        html += '</div></div>';
+        
+        // Methodology References
+        html += '<div class="transparency-section-item">';
+        html += '<h4>📚 Methodology & References</h4>';
+        html += '<div class="methodology-content">';
+        html += '<h5>Academic Foundations:</h5>';
+        html += '<ul>';
+        report.methodologyReferences.academicFoundations.forEach(ref => {
+            html += `<li>${ref}</li>`;
+        });
+        html += '</ul>';
+        html += '<h5>Industry Data Sources:</h5>';
+        html += '<ul>';
+        report.methodologyReferences.industryReports.forEach(ref => {
+            html += `<li>${ref}</li>`;
+        });
+        html += '</ul>';
+        html += '</div></div>';
+        
+        // Limitations
+        html += '<div class="transparency-section-item">';
+        html += '<h4>⚠️ Limitations & Considerations</h4>';
+        html += '<div class="limitations-content">';
+        html += '<h5>Algorithmic Limitations:</h5>';
+        html += '<ul>';
+        report.limitationsAndBiases.algorithmicLimitations.forEach(limitation => {
+            html += `<li>${limitation}</li>`;
+        });
+        html += '</ul>';
+        html += '<h5>Data Limitations:</h5>';
+        html += '<ul>';
+        report.limitationsAndBiases.dataLimitations.forEach(limitation => {
+            html += `<li>${limitation}</li>`;
+        });
+        html += '</ul>';
+        html += '</div></div>';
+        
+        html += '</div>';
+        
+        document.getElementById('transparencyContent').innerHTML = html;
+    }
+
+    formatComponentName(key) {
+        const names = {
+            'userRating': 'User Self-Rating',
+            'sentimentAnalysis': 'Sentiment Analysis',
+            'keywordRelevance': 'Keyword Relevance',
+            'confidenceIndicators': 'Confidence Indicators',
+            'depthAnalysis': 'Response Depth'
+        };
+        return names[key] || key;
     }
 }
 

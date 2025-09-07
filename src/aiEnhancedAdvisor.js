@@ -4,6 +4,7 @@ const Sentiment = require('sentiment');
 const vaderSentiment = require('vader-sentiment');
 const keyword = require('keyword-extractor');
 const { Matrix } = require('ml-matrix');
+const AITransparencyEngine = require('./aiTransparency');
 
 class AIEnhancedAcquisitionAdvisor {
     constructor() {
@@ -12,6 +13,7 @@ class AIEnhancedAcquisitionAdvisor {
         this.tokenizer = new natural.WordTokenizer();
         this.stemmer = natural.PorterStemmer;
         this.tfidf = new natural.TfIdf();
+        this.transparencyEngine = new AITransparencyEngine();
         
         // Enhanced industry knowledge base with semantic vectors
         this.industrySemantics = this.buildIndustrySemantics();
@@ -207,6 +209,14 @@ class AIEnhancedAcquisitionAdvisor {
             userData
         });
 
+        // Generate transparency report
+        const transparencyReport = this.transparencyEngine.generateTransparencyReport({
+            operatorArchetype,
+            targetIndustries,
+            confidenceScores,
+            userData
+        });
+
         return {
             operatorArchetype,
             leverageThesis,
@@ -215,7 +225,8 @@ class AIEnhancedAcquisitionAdvisor {
             confidenceScores,
             acquisitionThesis,
             personalizedBuybox,
-            aiInsights: this.generateAIInsights(operatorArchetype, targetIndustries, confidenceScores)
+            aiInsights: this.generateAIInsights(operatorArchetype, targetIndustries, confidenceScores),
+            transparencyReport
         };
     }
 
