@@ -686,6 +686,10 @@ class AcquisitionAdvisorApp {
 
         // Set default selection
         this.updateEngineSelection();
+        
+        // Debug: Check initial state
+        console.log('Initial comparison mode:', this.comparisonMode);
+        console.log('Available engines:', this.availableEngines);
     }
 
     createEngineCard(engineKey, engine) {
@@ -732,6 +736,14 @@ class AcquisitionAdvisorApp {
                 </label>
             </div>
         `;
+
+        // Debug: Check checkbox state after creation
+        const checkbox = card.querySelector('input[type="checkbox"]');
+        console.log(`Checkbox for ${engineKey}:`, {
+            disabled: checkbox.disabled,
+            available: engine.available,
+            value: checkbox.value
+        });
 
         // Add click handler
         if (engine.available) {
