@@ -258,7 +258,10 @@ class AcquisitionAdvisorApp {
             console.log('Server response:', result);
             
             if (result.success) {
+                console.log('Setting analysisResults to:', result.data);
+                console.log('result.data keys:', Object.keys(result.data));
                 this.analysisResults = result.data;
+                console.log('this.analysisResults after setting:', this.analysisResults);
                 setTimeout(() => {
                     this.showResults();
                 }, 3000); // Show results after animation completes
