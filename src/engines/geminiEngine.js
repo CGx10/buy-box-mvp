@@ -88,7 +88,7 @@ class GeminiAnalysisEngine {
             console.log('Response length:', text.length, 'characters');
             console.log('Raw response:', text);
             
-            return this.parseGeminiResponse(text, userData);
+                    return this.parseGeminiResponse(text, userData, prompt);
         } catch (error) {
             console.error('Gemini analysis error:', error);
             throw new Error(`Gemini analysis failed: ${error.message}`);
@@ -204,7 +204,7 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
         `.trim();
     }
 
-    parseGeminiResponse(responseText, userData) {
+    parseGeminiResponse(responseText, userData, prompt) {
         try {
             // Extract JSON from the response (handle cases where Gemini includes extra text)
             const jsonMatch = responseText.match(/\{[\s\S]*\}/);
