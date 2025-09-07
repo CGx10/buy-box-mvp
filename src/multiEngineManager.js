@@ -3,6 +3,7 @@ require('dotenv').config();
 const AIEnhancedAcquisitionAdvisor = require('./aiEnhancedAdvisor');
 const OpenAIAnalysisEngine = require('./engines/openaiEngine');
 const ClaudeAnalysisEngine = require('./engines/claudeEngine');
+const GeminiAnalysisEngine = require('./engines/geminiEngine');
 const OllamaAnalysisEngine = require('./engines/ollamaEngine');
 const HybridAnalysisEngine = require('./engines/hybridEngine');
 
@@ -12,6 +13,7 @@ class MultiEngineManager {
             traditional: new AIEnhancedAcquisitionAdvisor(),
             openai: new OpenAIAnalysisEngine(),
             claude: new ClaudeAnalysisEngine(),
+            gemini: new GeminiAnalysisEngine(),
             ollama: new OllamaAnalysisEngine(),
             hybrid: new HybridAnalysisEngine()
         };

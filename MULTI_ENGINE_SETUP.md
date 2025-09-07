@@ -2,7 +2,7 @@
 
 ## ✅ **System is Now Ready!**
 
-Your Buybox Generator now supports **5 different AI analysis methods**. The application is running at http://localhost:3000 with the Traditional AI engine enabled by default.
+Your Buybox Generator now supports **6 different AI analysis methods**. The application is running at http://localhost:3000 with the Traditional AI engine enabled by default.
 
 ## 🤖 **Available AI Engines**
 
@@ -21,12 +21,17 @@ Your Buybox Generator now supports **5 different AI analysis methods**. The appl
 - **Features**: Transparent reasoning, analytical depth
 - **Setup**: Add Anthropic API key
 
-### 4. **Ollama (Local LLM)** (⚙️ Requires installation)
+### 4. **Google Gemini** (⚙️ Requires setup)
+- **Type**: Multimodal AI
+- **Features**: Advanced reasoning, multimodal capabilities
+- **Setup**: Add Gemini API key
+
+### 5. **Ollama (Local LLM)** (⚙️ Requires installation)
 - **Type**: Privacy-first local AI
 - **Features**: 100% private, no data leaves your computer
 - **Setup**: Install Ollama + download model
 
-### 5. **Hybrid AI** (⚙️ Requires LLM)
+### 6. **Hybrid AI** (⚙️ Requires LLM)
 - **Type**: Traditional + LLM synthesis
 - **Features**: Multi-methodology validation, enhanced accuracy
 - **Setup**: Enable any LLM engine above
@@ -52,9 +57,18 @@ ENABLE_OPENAI=true
 ANTHROPIC_API_KEY=your_api_key_here  
 ENABLE_CLAUDE=true
 ```
-3. Restart the server
+3. Restart the server: `npm start`
 
-### **Option D: Add Local Ollama (Privacy-focused)**
+### **Option D: Add Google Gemini**
+1. Get a Gemini API key from https://makersuite.google.com/app/apikey
+2. Add to `.env` file:
+```bash
+GEMINI_API_KEY=your_api_key_here
+ENABLE_GEMINI=true
+```
+3. Restart the server: `npm start`
+
+### **Option E: Add Local Ollama (Privacy-focused)**
 1. Install Ollama: https://ollama.ai/download
 2. Download a model: `ollama pull llama3.1`
 3. Add to `.env` file:
@@ -65,13 +79,15 @@ OLLAMA_MODEL=llama3.1
 ```
 4. Restart the server
 
-### **Option E: Enable All + Hybrid**
+### **Option F: Enable All + Hybrid**
 ```bash
 # .env file
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_anthropic_key
+GEMINI_API_KEY=your_gemini_key
 ENABLE_OPENAI=true
 ENABLE_CLAUDE=true
+ENABLE_GEMINI=true
 ENABLE_OLLAMA=true
 ENABLE_HYBRID=true
 ```
