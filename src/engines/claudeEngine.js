@@ -2,11 +2,21 @@ const Anthropic = require('@anthropic-ai/sdk');
 
 class ClaudeAnalysisEngine {
     constructor() {
-        this.client = new Anthropic({
-            apiKey: process.env.ANTHROPIC_API_KEY
-        });
         this.model = 'claude-3-5-sonnet-20241022'; // Latest Claude 3.5 Sonnet
         this.enabled = process.env.ENABLE_CLAUDE === 'true' && !!process.env.ANTHROPIC_API_KEY;
+        
+        // Only initialize client if API key is available
+        this.client = null;
+        if (this.enabled) {
+            try {
+                this.client = new Anthropic({
+                    apiKey: process.env.ANTHROPIC_API_KEY
+                });
+            } catch (error) {
+                console.warn('Claude client initialization failed:', error.message);
+                this.enabled = false;
+            }
+        }
     }
 
     async processUserData(userData) {

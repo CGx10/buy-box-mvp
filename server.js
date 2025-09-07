@@ -2,6 +2,18 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+
+// Load environment variables with defaults
+require('dotenv').config();
+
+// Set default environment variables if not provided
+process.env.DEFAULT_AI_ENGINE = process.env.DEFAULT_AI_ENGINE || 'traditional';
+process.env.ENABLE_TRADITIONAL = process.env.ENABLE_TRADITIONAL || 'true';
+process.env.ENABLE_OPENAI = process.env.ENABLE_OPENAI || 'false';
+process.env.ENABLE_CLAUDE = process.env.ENABLE_CLAUDE || 'false';
+process.env.ENABLE_OLLAMA = process.env.ENABLE_OLLAMA || 'false';
+process.env.ENABLE_HYBRID = process.env.ENABLE_HYBRID || 'false';
+
 const MultiEngineManager = require('./src/multiEngineManager');
 
 const app = express();

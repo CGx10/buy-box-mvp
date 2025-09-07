@@ -2,11 +2,21 @@ const OpenAI = require('openai');
 
 class OpenAIAnalysisEngine {
     constructor() {
-        this.client = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
-        });
         this.model = 'gpt-4-1106-preview'; // Latest GPT-4 Turbo
         this.enabled = process.env.ENABLE_OPENAI === 'true' && !!process.env.OPENAI_API_KEY;
+        
+        // Only initialize client if API key is available
+        this.client = null;
+        if (this.enabled) {
+            try {
+                this.client = new OpenAI({
+                    apiKey: process.env.OPENAI_API_KEY
+                });
+            } catch (error) {
+                console.warn('OpenAI client initialization failed:', error.message);
+                this.enabled = false;
+            }
+        }
     }
 
     async processUserData(userData) {
