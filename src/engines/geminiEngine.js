@@ -41,7 +41,15 @@ class GeminiAnalysisEngine {
             ],
             requirements: ["Gemini API key", "Internet connectivity"],
             enabled: this.available,
-            available: this.available
+            available: this.available,
+            configuration: {
+                model: "gemini-1.5-flash",
+                apiVersion: "v1beta",
+                maxTokens: 8192,
+                temperature: 0.7,
+                promptMethodology: "Same as Traditional AI (Multi-Factor Scoring)",
+                archetypeDetection: "Weighted composite scoring with key phrase analysis"
+            }
         };
     }
 
@@ -56,9 +64,29 @@ class GeminiAnalysisEngine {
 
         try {
             const prompt = this.buildAnalysisPrompt(userData);
+            
+            // Debug: Log the prompt being sent to Gemini
+            console.log('🔍 GEMINI PROMPT DEBUG:');
+            console.log('Model:', 'gemini-1.5-flash');
+            console.log('Prompt length:', prompt.length, 'characters');
+            console.log('Prompt preview (first 500 chars):', prompt.substring(0, 500));
+            console.log('User data keys:', Object.keys(userData));
+            console.log('Competency data:', {
+                sales_marketing: userData.sales_marketing,
+                operations_systems: userData.operations_systems,
+                finance_analytics: userData.finance_analytics,
+                team_culture: userData.team_culture,
+                product_technology: userData.product_technology
+            });
+            
             const result = await this.model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
+            
+            // Debug: Log the raw response from Gemini
+            console.log('🔍 GEMINI RESPONSE DEBUG:');
+            console.log('Response length:', text.length, 'characters');
+            console.log('Raw response:', text);
             
             return this.parseGeminiResponse(text, userData);
         } catch (error) {

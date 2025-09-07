@@ -1048,6 +1048,47 @@ input:checked + .toggle-slider:before {
     line-height: 1.4;
 }
 
+/* Engine Configuration */
+.engine-config {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f0f8ff;
+    border-radius: 6px;
+    border-left: 3px solid #007bff;
+}
+
+.engine-config h6 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.engine-config p {
+    margin: 0.2rem 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+/* Debug Information */
+.debug-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.debug-info p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.debug-info em {
+    color: #6c757d;
+    font-style: italic;
+}
+
 /* Engine Results Tabs */
 .engine-results-tabs {
     margin-top: 30px;
