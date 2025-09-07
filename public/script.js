@@ -331,10 +331,20 @@ class AcquisitionAdvisorApp {
     populateResults() {
         if (!this.analysisResults) return;
 
+        // Debug: Log the analysis results structure
+        console.log('Analysis results structure:', {
+            hasResults: !!this.analysisResults.results,
+            hasComparison: !!this.analysisResults.comparison,
+            resultsKeys: this.analysisResults.results ? Object.keys(this.analysisResults.results) : null,
+            comparisonKeys: this.analysisResults.comparison ? Object.keys(this.analysisResults.comparison) : null
+        });
+
         // Check if this is a comparison result
         if (this.analysisResults.results && this.analysisResults.comparison) {
+            console.log('Populating comparison results');
             this.populateComparisonResults();
         } else {
+            console.log('Populating single engine results');
             this.populateSingleEngineResults();
         }
     }
