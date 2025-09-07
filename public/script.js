@@ -1088,9 +1088,12 @@ class AcquisitionAdvisorApp {
         `;
 
         // Add to the results section
-        const resultsSection = document.querySelector('.results-section');
+        const resultsSection = document.querySelector('.results-container');
         if (resultsSection) {
+            console.log('Appending tabs to results container');
             resultsSection.appendChild(tabsContainer);
+        } else {
+            console.error('Results container not found!');
         }
 
         // Add tab switching functionality
