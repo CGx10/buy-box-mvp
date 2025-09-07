@@ -900,6 +900,16 @@ input[type="radio"], input[type="checkbox"] {
     display: none;
 }
 
+input[type="checkbox"]:disabled + .checkbox-custom {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+input[type="radio"]:disabled + .radio-custom {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .comparison-option {
     background: white;
     padding: 20px;

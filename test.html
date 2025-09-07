@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buybox Generator</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Buybox Generator</h1>
+            <p>Generate your personalized acquisition buybox through AI-powered analysis</p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="phase-indicator">
+                <span class="phase active" id="phase1">Discovery</span>
+                <span class="phase" id="phase2">Analysis</span>
+                <span class="phase" id="phase3">Strategy</span>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Phase 1: Discovery & Data Intake -->
+            <div class="phase-content active" id="discoveryPhase">
+                <form id="discoveryForm">
+                    <!-- Module A: The Operator Profile -->
+                    <section class="module">
+                        <h2>Module A: The Operator Profile</h2>
+                        <p class="module-description">Rate your expertise and provide concrete evidence for each core competency.</p>
+                        
+                        <div class="competency-group">
+                            <div class="competency">
+                                <h3>Sales & Marketing</h3>
+                                <div class="rating-container">
+                                    <label>Expertise Level:</label>
+                                    <div class="rating-scale">
+                                        <input type="range" id="sales_marketing_rating" name="sales_marketing_rating" min="1" max="5" value="3" class="rating-slider">
+                                        <div class="rating-labels">
+                                            <span>1 - Novice</span>
+                                            <span>5 - Expert</span>
+                                        </div>
+                                        <div class="rating-value" id="sales_marketing_value">3</div>
+                                    </div>
+                                </div>
+                                <div class="evidence-container">
+                                    <label for="sales_marketing_evidence">Provide concrete evidence or examples (min. 200 characters):</label>
+                                    <textarea id="sales_marketing_evidence" name="sales_marketing_evidence" placeholder="Describe specific achievements, projects, or experiences that demonstrate your sales and marketing expertise..." required minlength="200"></textarea>
+                                    <div class="char-counter" id="sales_marketing_counter">0/200</div>
+                                </div>
+                            </div>
+
+                            <div class="competency">
+                                <h3>Operations & Systems</h3>
+                                <div class="rating-container">
+                                    <label>Expertise Level:</label>
+                                    <div class="rating-scale">
+                                        <input type="range" id="operations_systems_rating" name="operations_systems_rating" min="1" max="5" value="3" class="rating-slider">
+                                        <div class="rating-labels">
+                                            <span>1 - Novice</span>
+                                            <span>5 - Expert</span>
+                                        </div>
+                                        <div class="rating-value" id="operations_systems_value">3</div>
+                                    </div>
+                                </div>
+                                <div class="evidence-container">
+                                    <label for="operations_systems_evidence">Provide concrete evidence or examples (min. 200 characters):</label>
+                                    <textarea id="operations_systems_evidence" name="operations_systems_evidence" placeholder="Describe specific achievements in process improvement, system implementation, or operational efficiency..." required minlength="200"></textarea>
+                                    <div class="char-counter" id="operations_systems_counter">0/200</div>
+                                </div>
+                            </div>
+
+                            <div class="competency">
+                                <h3>Finance & Analytics</h3>
+                                <div class="rating-container">
+                                    <label>Expertise Level:</label>
+                                    <div class="rating-scale">
+                                        <input type="range" id="finance_analytics_rating" name="finance_analytics_rating" min="1" max="5" value="3" class="rating-slider">
+                                        <div class="rating-labels">
+                                            <span>1 - Novice</span>
+                                            <span>5 - Expert</span>
+                                        </div>
+                                        <div class="rating-value" id="finance_analytics_value">3</div>
+                                    </div>
+                                </div>
+                                <div class="evidence-container">
+                                    <label for="finance_analytics_evidence">Provide concrete evidence or examples (min. 200 characters):</label>
+                                    <textarea id="finance_analytics_evidence" name="finance_analytics_evidence" placeholder="Describe specific financial analysis, budgeting, or data-driven decision making experiences..." required minlength="200"></textarea>
+                                    <div class="char-counter" id="finance_analytics_counter">0/200</div>
+                                </div>
+                            </div>
+
+                            <div class="competency">
+                                <h3>Team & Culture</h3>
+                                <div class="rating-container">
+                                    <label>Expertise Level:</label>
+                                    <div class="rating-scale">
+                                        <input type="range" id="team_culture_rating" name="team_culture_rating" min="1" max="5" value="3" class="rating-slider">
+                                        <div class="rating-labels">
+                                            <span>1 - Novice</span>
+                                            <span>5 - Expert</span>
+                                        </div>
+                                        <div class="rating-value" id="team_culture_value">3</div>
+                                    </div>
+                                </div>
+                                <div class="evidence-container">
+                                    <label for="team_culture_evidence">Provide concrete evidence or examples (min. 200 characters):</label>
+                                    <textarea id="team_culture_evidence" name="team_culture_evidence" placeholder="Describe specific leadership, team building, or culture development experiences..." required minlength="200"></textarea>
+                                    <div class="char-counter" id="team_culture_counter">0/200</div>
+                                </div>
+                            </div>
+
+                            <div class="competency">
+                                <h3>Product & Technology</h3>
+                                <div class="rating-container">
+                                    <label>Expertise Level:</label>
+                                    <div class="rating-scale">
+                                        <input type="range" id="product_technology_rating" name="product_technology_rating" min="1" max="5" value="3" class="rating-slider">
+                                        <div class="rating-labels">
+                                            <span>1 - Novice</span>
+                                            <span>5 - Expert</span>
+                                        </div>
+                                        <div class="rating-value" id="product_technology_value">3</div>
+                                    </div>
+                                </div>
+                                <div class="evidence-container">
+                                    <label for="product_technology_evidence">Provide concrete evidence or examples (min. 200 characters):</label>
+                                    <textarea id="product_technology_evidence" name="product_technology_evidence" placeholder="Describe specific product development, technology implementation, or innovation experiences..." required minlength="200"></textarea>
+                                    <div class="char-counter" id="product_technology_counter">0/200</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Module B: The Industry Profile -->
+                    <section class="module">
+                        <h2>Module B: The Industry Profile</h2>
+                        <p class="module-description">Help us understand your passions and interests.</p>
+                        
+                        <div class="input-group">
+                            <label for="interests_topics">5-10 topics, industries, or trends you follow for fun:</label>
+                            <textarea id="interests_topics" name="interests_topics" placeholder="E.g., fintech, sustainable energy, digital marketing, AI/ML, e-commerce, healthcare innovation..." required></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="recent_books">The last 3 business books or articles you read and what was interesting about them:</label>
+                            <textarea id="recent_books" name="recent_books" placeholder="List the books/articles and explain what insights or concepts resonated with you..." required></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="problem_to_solve">A problem in the world you wish you could solve:</label>
+                            <textarea id="problem_to_solve" name="problem_to_solve" placeholder="Describe a specific problem or challenge that motivates you and why it matters..." required></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="customer_affinity">Who do you prefer working with?</label>
+                            <select id="customer_affinity" name="customer_affinity" required>
+                                <option value="">Select your preference...</option>
+                                <option value="large_corporations">Large Corporations</option>
+                                <option value="small_business_owners">Small Business Owners</option>
+                                <option value="direct_to_consumer">Direct-to-Consumer</option>
+                                <option value="specific_demographics">Specific Demographics</option>
+                            </select>
+                        </div>
+                    </section>
+
+                    <!-- Module C: The Lifestyle & Financial Profile -->
+                    <section class="module">
+                        <h2>Module C: The Lifestyle & Financial Profile</h2>
+                        <p class="module-description">Define your constraints and goals.</p>
+                        
+                        <div class="financial-inputs">
+                            <div class="input-group">
+                                <label for="total_liquid_capital">Total Liquid Capital (USD):</label>
+                                <input type="number" id="total_liquid_capital" name="total_liquid_capital" placeholder="e.g., 100000" required min="0">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="potential_loan_amount">Potential Loan Amount (USD):</label>
+                                <input type="number" id="potential_loan_amount" name="potential_loan_amount" placeholder="e.g., 900000" required min="0">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="min_annual_income">Minimum Annual Income Required (USD, post-debt service):</label>
+                                <input type="number" id="min_annual_income" name="min_annual_income" placeholder="e.g., 150000" required min="0">
+                            </div>
+                        </div>
+
+                        <div class="lifestyle-inputs">
+                            <div class="input-group">
+                                <label for="time_commitment">Time Commitment (hours per week):</label>
+                                <div class="slider-container">
+                                    <input type="range" id="time_commitment" name="time_commitment" min="10" max="80" value="40" class="time-slider">
+                                    <div class="slider-labels">
+                                        <span>10 hrs</span>
+                                        <span>80 hrs</span>
+                                    </div>
+                                    <div class="slider-value" id="time_commitment_value">40 hours/week</div>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="location_preference">Location Preference:</label>
+                                <select id="location_preference" name="location_preference" required>
+                                    <option value="">Select your preference...</option>
+                                    <option value="fully_remote">Fully Remote</option>
+                                    <option value="willing_to_relocate">Willing to Relocate</option>
+                                    <option value="local_only">Local Only</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group" id="location_details" style="display: none;">
+                                <label for="location_regions">Preferred regions/cities:</label>
+                                <input type="text" id="location_regions" name="location_regions" placeholder="e.g., Austin TX, Denver CO, Pacific Northwest">
+                            </div>
+
+                            <div class="input-group">
+                                <label for="risk_tolerance">Risk Tolerance:</label>
+                                <select id="risk_tolerance" name="risk_tolerance" required>
+                                    <option value="">Select your tolerance...</option>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- AI Engine Selection -->
+                    <section class="ai-engine-selection">
+                        <h2>🤖 Choose Your AI Analysis Method</h2>
+                        <p class="selection-description">Select how you want your profile to be analyzed. Each method offers different strengths and capabilities.</p>
+                        
+                        <div class="engine-options">
+                            <div class="engine-grid" id="engineGrid">
+                                <!-- Engine options will be populated by JavaScript -->
+                            </div>
+                            
+                            <div class="comparison-option">
+                                <div class="comparison-toggle">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="enableComparison">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                    <span class="toggle-label">Compare Multiple AI Methods</span>
+                                </div>
+                                <p class="comparison-description">Get insights from multiple AI engines and see how they compare</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary" id="analyzeBtn">
+                            <span id="analyzeButtonText">Analyze My Profile</span>
+                            <span id="selectedEngines"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Phase 2: Analysis (Loading) -->
+            <div class="phase-content" id="analysisPhase">
+                <div class="analysis-container">
+                    <div class="loader"></div>
+                    <h2>Analyzing Your Digital DNA</h2>
+                    <p>Our AI is processing your profile to generate your personalized acquisition strategy...</p>
+                    <div class="analysis-steps">
+                        <div class="step active" id="step1">
+                            <span class="step-number">1</span>
+                            <span class="step-text">Synthesizing Operator Profile</span>
+                        </div>
+                        <div class="step" id="step2">
+                            <span class="step-number">2</span>
+                            <span class="step-text">Mapping Opportunities</span>
+                        </div>
+                        <div class="step" id="step3">
+                            <span class="step-number">3</span>
+                            <span class="step-text">Analyzing Industries</span>
+                        </div>
+                        <div class="step" id="step4">
+                            <span class="step-number">4</span>
+                            <span class="step-text">Calculating Financial Parameters</span>
+                        </div>
+                        <div class="step" id="step5">
+                            <span class="step-number">5</span>
+                            <span class="step-text">Generating Strategy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phase 3: Strategy Results -->
+            <div class="phase-content" id="strategyPhase">
+                <div class="results-container">
+                    <div class="results-header">
+                        <h2>Your Personalized Buybox</h2>
+                        <button class="btn-secondary" id="downloadBtn">Download Report</button>
+                    </div>
+                    
+                    <div class="results-content">
+                        <section class="ai-insights-section">
+                            <h3>🤖 AI Analysis Summary</h3>
+                            <div class="ai-insights-content" id="aiInsightsContent">
+                                <!-- Content will be populated by JavaScript -->
+                            </div>
+                        </section>
+
+                        <section class="thesis-section">
+                            <h3>Your Acquisition Thesis</h3>
+                            <div class="thesis-content" id="thesisContent">
+                                <!-- Content will be populated by JavaScript -->
+                            </div>
+                        </section>
+
+                        <section class="buybox-section">
+                            <h3>Your Personalized Buybox</h3>
+                            <div class="buybox-table-container">
+                                <table class="buybox-table" id="buyboxTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Criterion</th>
+                                            <th>Your Target Profile</th>
+                                            <th>Rationale</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="buyboxTableBody">
+                                        <!-- Content will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section class="transparency-section">
+                            <h3>🔍 AI Transparency & Methodology</h3>
+                            <div class="transparency-toggle">
+                                <button class="btn-secondary" id="toggleTransparency">Show Detailed AI Analysis</button>
+                            </div>
+                            <div class="transparency-content" id="transparencyContent" style="display: none;">
+                                <!-- Content will be populated by JavaScript -->
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="results-actions">
+                        <button class="btn-secondary" id="restartBtn">Start New Analysis</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
