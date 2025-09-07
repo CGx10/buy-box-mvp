@@ -346,20 +346,40 @@ class AcquisitionAdvisorApp {
         const tableBody = document.getElementById('buyboxTableBody');
         tableBody.innerHTML = '';
         
-        this.analysisResults.personalizedBuybox.forEach(row => {
+        if (this.analysisResults.personalizedBuybox && Array.isArray(this.analysisResults.personalizedBuybox)) {
+            this.analysisResults.personalizedBuybox.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="criterion-cell">${row.criterion || 'N/A'}</td>
+                    <td class="target-cell">${row.target || 'N/A'}</td>
+                    <td class="rationale-cell">${row.rationale || 'N/A'}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+        } else {
+            // Show empty state if no buybox data
             const tr = document.createElement('tr');
             tr.innerHTML = `
-                <td class="criterion-cell">${row.criterion}</td>
-                <td class="target-cell">${row.target}</td>
-                <td class="rationale-cell">${row.rationale}</td>
+                <td colspan="3" class="text-center text-gray-500">No buybox data available</td>
             `;
             tableBody.appendChild(tr);
-        });
+        }
     }
 
     populateComparisonResults() {
         const results = this.analysisResults.results;
         const comparison = this.analysisResults.comparison;
+        
+        // Safety checks
+        if (!results || !Array.isArray(results)) {
+            console.error('Invalid results data for comparison');
+            return;
+        }
+        
+        if (!comparison) {
+            console.error('No comparison data available');
+            return;
+        }
         
         // Add comparison summary to AI insights section
         this.populateComparisonSummary(comparison);
@@ -370,6 +390,10 @@ class AcquisitionAdvisorApp {
             const thesisContent = document.getElementById('thesisContent');
             thesisContent.innerHTML = this.formatThesis(primaryResult.acquisitionThesis) + 
                 this.generateComparisonNote(comparison);
+        } else {
+            // Fallback if no primary result
+            const thesisContent = document.getElementById('thesisContent');
+            thesisContent.innerHTML = '<p>No acquisition thesis available from selected engines.</p>';
         }
 
         // Populate comparison table
@@ -436,6 +460,11 @@ class AcquisitionAdvisorApp {
     }
 
     formatThesis(thesis) {
+        // Safety check for undefined or null thesis
+        if (!thesis) {
+            return '<p>No acquisition thesis available.</p>';
+        }
+        
         // Convert markdown-style bold text to HTML
         return thesis.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                     .split('\n\n')
