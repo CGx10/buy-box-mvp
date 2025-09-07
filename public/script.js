@@ -204,6 +204,11 @@ class AcquisitionAdvisorApp {
 
         const formData = this.collectFormData();
         
+        // Debug: Log the form data being sent
+        console.log('Form data being sent:', formData);
+        console.log('Selected engines:', this.selectedEngines);
+        console.log('Comparison mode:', this.comparisonMode);
+        
         // Move to analysis phase
         this.currentPhase = 2;
         this.updateProgress();
@@ -243,12 +248,16 @@ class AcquisitionAdvisorApp {
 
             result = await response.json();
             
+            // Debug: Log the server response
+            console.log('Server response:', result);
+            
             if (result.success) {
                 this.analysisResults = result.data;
                 setTimeout(() => {
                     this.showResults();
                 }, 3000); // Show results after animation completes
             } else {
+                console.error('Analysis failed:', result.error, result.details);
                 throw new Error(result.error || 'Analysis failed');
             }
         } catch (error) {
