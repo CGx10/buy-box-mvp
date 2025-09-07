@@ -45,6 +45,10 @@ class GeminiAnalysisEngine {
         };
     }
 
+    async processUserData(userData) {
+        return this.analyzeUserData(userData);
+    }
+
     async analyzeUserData(userData) {
         if (!this.available) {
             throw new Error('Gemini engine is not available. Please check your API key configuration.');
