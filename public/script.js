@@ -410,8 +410,12 @@ class AcquisitionAdvisorApp {
     }
 
     populateComparisonResults() {
+        console.log('populateComparisonResults called');
         const results = this.analysisResults.results;
         const comparison = this.analysisResults.comparison;
+        
+        console.log('Results data:', results);
+        console.log('Comparison data:', comparison);
         
         // Safety checks
         if (!results || typeof results !== 'object') {
@@ -423,6 +427,8 @@ class AcquisitionAdvisorApp {
             console.error('No comparison data available');
             return;
         }
+        
+        console.log('Safety checks passed, proceeding with comparison population');
         
         // Add comparison summary to AI insights section
         this.populateComparisonSummary(comparison);
@@ -443,7 +449,9 @@ class AcquisitionAdvisorApp {
         this.populateComparisonTable(results, comparison);
         
         // Add engine-specific results tabs
+        console.log('Calling addEngineResultsTabs with results:', results);
         this.addEngineResultsTabs(results);
+        console.log('addEngineResultsTabs completed');
     }
 
     populateAIInsights() {
@@ -1052,6 +1060,9 @@ class AcquisitionAdvisorApp {
     }
 
     addEngineResultsTabs(results) {
+        console.log('addEngineResultsTabs called with results:', results);
+        console.log('Results keys:', Object.keys(results));
+        
         // Create tabs container
         const tabsContainer = document.createElement('div');
         tabsContainer.className = 'engine-results-tabs';
