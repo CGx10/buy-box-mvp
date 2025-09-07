@@ -215,11 +215,18 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
             const parsed = JSON.parse(jsonMatch[0]);
             
             // Validate and structure the response
+            console.log('🔍 GEMINI PARSING DEBUG:');
+            console.log('Parsed response:', parsed);
+            console.log('Operator archetype:', parsed.operatorArchetype);
+            
             return {
                 operatorArchetype: {
+                    title: parsed.operatorArchetype?.type || 'Strategic Builder',
                     type: parsed.operatorArchetype?.type || 'Strategic Builder',
                     confidence: parsed.operatorArchetype?.confidence || 0.8,
-                    reasoning: parsed.operatorArchetype?.reasoning || 'AI analysis based on profile data'
+                    reasoning: parsed.operatorArchetype?.reasoning || 'AI analysis based on profile data',
+                    compositeScore: (parsed.operatorArchetype?.confidence || 0.8) * 5, // Convert to 5-point scale
+                    evidence: parsed.operatorArchetype?.reasoning || 'AI analysis based on profile data'
                 },
                 targetIndustries: parsed.targetIndustries || [
                     {
@@ -240,6 +247,14 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
                         criterion: 'Revenue Range',
                         target: parsed.financialParameters?.revenueRange || '2M-8M',
                         rationale: 'Matches your financial capacity and growth goals'
+                    }
+                ],
+                acquisitionThesis: parsed.acquisitionThesis || 'No acquisition thesis available from Gemini analysis',
+                personalizedBuybox: parsed.personalizedBuybox || [
+                    {
+                        criterion: 'General Business Criteria',
+                        target: 'Technology-focused businesses',
+                        rationale: 'Based on AI analysis of your profile'
                     }
                 ],
                 confidenceScores: {

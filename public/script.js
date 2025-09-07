@@ -1206,11 +1206,14 @@ class AcquisitionAdvisorApp {
                 `).join('')}
             </div>
             <div class="tabs-content">
-                ${Object.keys(results).map((engineName, index) => `
-                    <div class="tab-panel ${index === 0 ? 'active' : ''}" data-engine="${engineName}">
-                        ${this.createEngineResultPanel(results[engineName], engineName)}
-                    </div>
-                `).join('')}
+                ${Object.keys(results).map((engineName, index) => {
+                    console.log(`Generating tab for ${engineName} (index ${index}):`, results[engineName]);
+                    return `
+                        <div class="tab-panel ${index === 0 ? 'active' : ''}" data-engine="${engineName}">
+                            ${this.createEngineResultPanel(results[engineName], engineName)}
+                        </div>
+                    `;
+                }).join('')}
             </div>
         `;
 
@@ -1240,6 +1243,8 @@ class AcquisitionAdvisorApp {
     }
 
     createEngineResultPanel(result, engineName) {
+        console.log(`Creating engine result panel for ${engineName}:`, result);
+        
         if (!result) {
             return '<div class="no-data">No analysis data available for this engine.</div>';
         }
