@@ -753,7 +753,9 @@ class AcquisitionAdvisorApp {
         console.log(`Checkbox for ${engineKey}:`, {
             disabled: checkbox.disabled,
             available: engine.available,
-            value: checkbox.value
+            value: checkbox.value,
+            hasDisabledAttribute: checkbox.hasAttribute('disabled'),
+            outerHTML: checkbox.outerHTML
         });
 
         // Add click handler
@@ -765,8 +767,13 @@ class AcquisitionAdvisorApp {
                     const checkbox = card.querySelector('input[type="checkbox"]');
                     
                     if (this.comparisonMode) {
-                        console.log('Toggling checkbox:', engineKey, 'current state:', checkbox.checked);
-                        checkbox.checked = !checkbox.checked;
+                        console.log('Toggling checkbox:', engineKey, 'current state:', checkbox.checked, 'disabled:', checkbox.disabled);
+                        if (!checkbox.disabled) {
+                            checkbox.checked = !checkbox.checked;
+                            console.log('Checkbox toggled to:', checkbox.checked);
+                        } else {
+                            console.log('Checkbox is disabled, cannot toggle');
+                        }
                         this.updateEngineSelection();
                     } else {
                         console.log('Selecting radio:', engineKey);
