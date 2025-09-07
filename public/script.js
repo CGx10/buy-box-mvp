@@ -686,12 +686,14 @@ class AcquisitionAdvisorApp {
             engineGrid.appendChild(engineCard);
         });
 
-        // Set initial comparison mode state
-        this.comparisonMode = document.getElementById('enableComparison').checked;
-        console.log('Initial comparison mode from toggle:', this.comparisonMode);
-        
-        // Apply initial state to controls
-        this.toggleComparisonMode();
+        // Set initial comparison mode state - use setTimeout to ensure DOM is ready
+        setTimeout(() => {
+            this.comparisonMode = document.getElementById('enableComparison').checked;
+            console.log('Initial comparison mode from toggle:', this.comparisonMode);
+            
+            // Apply initial state to controls
+            this.toggleComparisonMode();
+        }, 100);
         
         // Set default selection
         this.updateEngineSelection();
@@ -739,7 +741,7 @@ class AcquisitionAdvisorApp {
                     Select
                 </label>
                 <label class="engine-checkbox hidden">
-                    <input type="checkbox" value="${engineKey}" ${engine.available ? '' : 'disabled'}>
+                    <input type="checkbox" value="${engineKey}" ${!engine.available ? 'disabled' : ''}>
                     <span class="checkbox-custom"></span>
                     Compare
                 </label>

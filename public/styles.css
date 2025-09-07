@@ -850,8 +850,9 @@ body {
     color: #4a5568;
 }
 
-.engine-checkbox.hidden {
-    display: none;
+.engine-checkbox.hidden,
+.engine-radio.hidden {
+    display: none !important;
 }
 
 .radio-custom, .checkbox-custom {
