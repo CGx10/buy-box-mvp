@@ -86,7 +86,7 @@ app.post('/api/analyze', async (req, res) => {
 // Multi-engine comparison analysis
 app.post('/api/analyze/compare', async (req, res) => {
     try {
-        const { userData, engines = ['traditional', 'gemini'] } = req.body;
+        const { userData, engines = ['gemini'] } = req.body;
         
         // Validate required fields
         const validationResult = engineManager.validateInput(userData);
