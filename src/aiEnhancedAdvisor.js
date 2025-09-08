@@ -461,6 +461,21 @@ class AIEnhancedAcquisitionAdvisor {
             sdeMin = requiredSDE;
         }
 
+        // CRITICAL FIX: Ensure sdeMin is never greater than sdeMax
+        if (sdeMin >= sdeMax) {
+            // If minimum exceeds maximum, adjust the range to be realistic
+            const adjustedMax = sdeMin * 1.5; // 50% buffer above minimum
+            return {
+                maxPurchasePrice: maxPurchasePrice,
+                sdeRange: `$${Math.round(sdeMin).toLocaleString()} - $${Math.round(adjustedMax).toLocaleString()}`,
+                sdeMin: sdeMin,
+                sdeMax: adjustedMax,
+                totalLiquidCapital: totalLiquidCapital,
+                potentialLoanAmount: potentialLoanAmount,
+                warning: "SDE range adjusted due to capital constraints - consider increasing available capital or reducing income requirements"
+            };
+        }
+
         return {
             maxPurchasePrice: maxPurchasePrice,
             sdeRange: `$${Math.round(sdeMin).toLocaleString()} - $${Math.round(sdeMax).toLocaleString()}`,
@@ -475,14 +490,17 @@ class AIEnhancedAcquisitionAdvisor {
 
     calculateConfidenceScores(operatorArchetype, targetIndustries, userData) {
         // Calculate overall confidence in the analysis
-        const archetypeConfidence = operatorArchetype.confidence;
-        const industryConfidence = targetIndustries.reduce((sum, ind) => sum + ind.confidence, 0) / targetIndustries.length;
+        const archetypeConfidence = Math.min(1.0, operatorArchetype.confidence); // Cap at 100%
+        const industryConfidence = Math.min(1.0, targetIndustries.reduce((sum, ind) => sum + ind.confidence, 0) / targetIndustries.length);
         
         // Factor in data quality
-        const dataQuality = this.assessDataQuality(userData);
+        const dataQuality = Math.min(1.0, this.assessDataQuality(userData));
+        
+        // CRITICAL FIX: Cap all confidence scores at 100%
+        const overall = Math.min(1.0, (archetypeConfidence * 0.4 + industryConfidence * 0.4 + dataQuality * 0.2));
         
         return {
-            overall: (archetypeConfidence * 0.4 + industryConfidence * 0.4 + dataQuality * 0.2),
+            overall: overall,
             archetype: archetypeConfidence,
             industry: industryConfidence,
             dataQuality: dataQuality

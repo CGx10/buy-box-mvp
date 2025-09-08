@@ -142,7 +142,13 @@ class MultiEngineManager {
     }
 
     analyzeArchetypeAgreement(results) {
-        const archetypes = Object.values(results).map(r => r.operatorArchetype?.key || r.operatorArchetype?.title);
+        const archetypes = Object.values(results).map(r => {
+            const archetype = r.operatorArchetype;
+            if (!archetype) return 'Not identified';
+            
+            // Check multiple possible fields for archetype name
+            return archetype.key || archetype.title || archetype.name || archetype.type || 'Not identified';
+        });
         const unique = [...new Set(archetypes)];
         
         return {

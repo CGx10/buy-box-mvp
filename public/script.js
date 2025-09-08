@@ -1204,7 +1204,7 @@ class AcquisitionAdvisorApp {
             html += `<h5>${this.getEngineDisplayName(engineName)}</h5>`;
             html += `<p><strong>Processing Time:</strong> ${result.processingTimeMs || 'N/A'}ms</p>`;
             html += `<p><strong>Confidence:</strong> ${result.confidenceScores?.overall ? Math.round(result.confidenceScores.overall * 100) + '%' : 'N/A'}</p>`;
-            html += `<p><strong>Archetype:</strong> ${result.operatorArchetype?.name || 'Not identified'}</p>`;
+            html += `<p><strong>Archetype:</strong> ${result.operatorArchetype?.name || result.operatorArchetype?.title || result.operatorArchetype?.key || 'Not identified'}</p>`;
             html += `<p><strong>Method:</strong> ${engineName === 'traditional' ? 'Algorithmic Multi-Factor Scoring' : 'LLM with Same Methodology'}</p>`;
             
                 // Add Gemini-specific configuration details
