@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const METHODOLOGIES = require('../methodologies');
 
 class GeminiAnalysisEngine {
     constructor() {
@@ -26,6 +27,8 @@ class GeminiAnalysisEngine {
     }
 
     async processUserData(userData) {
+        console.log('Gemini processing user data...');
+        console.log('Methodology selected:', userData.analysis_methodology);
         return await this.analyzeUserData(userData);
     }
 
@@ -68,13 +71,24 @@ class GeminiAnalysisEngine {
     }
 
     buildAnalysisPrompt(userData) {
+        console.log('Building multi-framework analysis prompt');
+        
         return `
-# AI-Powered Acquisition Advisor
+# AI-Powered Acquisition Advisor - Multi-Framework Analysis
 
 ## ROLE & OBJECTIVE
-You are an expert Mergers & Acquisitions (M&A) advisor and business strategist. Your task is to analyze the detailed profile of an acquisition entrepreneur. Based on your expert assessment of their skills, passions, and financial standing, you will generate a hyper-personalized "Acquisition Thesis" and a "Personalized Buybox" report.
+You are an expert Mergers & Acquisitions (M&A) advisor and business strategist. Your task is to analyze the detailed profile of an acquisition entrepreneur using ALL FOUR strategic frameworks simultaneously, then provide a comprehensive summary that highlights both consensus views and nuanced differences.
 
-Your entire analysis must be guided by the "Fit-First" principle: finding the ideal business where this specific entrepreneur's unique strengths can unlock maximum value.
+Your analysis must be guided by the "Fit-First" principle: finding the ideal business where this specific entrepreneur's unique strengths can unlock maximum value.
+
+## 1.1. COMPREHENSIVE ANALYTICAL APPROACH
+You **MUST** conduct your analysis using ALL FOUR strategic frameworks simultaneously, then provide a comprehensive summary that highlights both consensus views and nuanced differences.
+
+**FRAMEWORKS TO APPLY:**
+1. **Traditional M&A Analysis** - Expert M&A Advisory approach
+2. **The Hedgehog Concept** - Jim Collins' three circles framework  
+3. **SWOT Analysis** - Strategic Planning approach
+4. **Entrepreneurial Orientation** - Miller (1983) framework
 
 ## INPUT DATA
 You will be provided with a JSON object containing the entrepreneur's complete profile, structured into three modules:
@@ -110,51 +124,175 @@ You will be provided with a JSON object containing the entrepreneur's complete p
 - Exit Timeline: ${userData.exit_timeline || 'Not provided'}
 - Additional Criteria: ${userData.additional_criteria || 'Not provided'}
 
-## CORE ANALYSIS & STRATEGY (Your Process)
-Using your expertise as an M&A advisor, perform the following analysis:
+## MULTI-FRAMEWORK ANALYSIS REQUIREMENTS
 
-**Step 1: Synthesize the Operator Archetype**
-Holistically evaluate the ratings and, more importantly, the qualitative evidence in Module A. Identify the entrepreneur's single most dominant strength and classify them into one of these archetypes: "The Growth Catalyst" (Sales/Marketing), "The Efficiency Expert" (Ops/Systems), "The Visionary Builder" (Product/Tech), "The People Leader" (Team/Culture), or "The Financial Strategist" (Finance/Analytics). Briefly explain why you chose this archetype, citing specific evidence from their profile.
+### 2.1. FRAMEWORK-SPECIFIC ANALYSES
+For EACH of the four frameworks, provide:
 
-**Step 2: Define the Core Leverage**
-Based on the identified archetype, determine the corresponding business opportunity. For example, if they are "The Growth Catalyst," their leverage lies in acquiring a business with a great product but poor marketing.
+**Traditional M&A Analysis:**
+- Archetype determination based on proven M&A methodologies
+- Focus on operator archetype identification and core leverage definition
+- Professional M&A advisor perspective
 
-**Step 3: Identify Target Industries**
-Analyze the text inputs from Module B (interests, books, problems to solve). Identify 3-5 specific, niche industries or business models that align with their passions and where their operator archetype would be most impactful. Avoid overly broad categories.
+**The Hedgehog Concept:**
+- Analyze the intersection of passion, excellence, and economic engine
+- Identify what drives the economic engine
+- Focus on the three circles: what you're passionate about, what you can be best at, what drives your economic engine
 
-**Step 4: Calculate Financial Parameters**
-Analyze the financial inputs from Module C. Calculate a realistic target Seller Discretionary Earnings (SDE) range. This calculation must account for the entrepreneur's liquid capital (for a ~10% down payment), their loan potential, and ensure the resulting cash flow can cover both their minimum income requirement and the estimated annual debt service on the loan. If the numbers create an impossible range, use your expertise to suggest a more realistic starting point.
+**SWOT Analysis:**
+- Evaluate internal Strengths and Weaknesses
+- Assess external Opportunities and Threats
+- Identify strategic acquisition paths based on SWOT matrix
 
-**Step 5: Determine Geographic Preference**
-From the input data, identify the user's location_preference and location_regions. Formulate a clear statement summarizing this (e.g., 'Willing to relocate to Denver, CO or San Diego, CA,' or 'Remote only').
+**Entrepreneurial Orientation:**
+- Assess innovativeness, proactiveness, and risk-taking tendencies
+- Find business environment that matches entrepreneurial DNA
+- Focus on entrepreneurial characteristics and preferences
+
+### 2.2. CONSENSUS ANALYSIS
+Identify where frameworks agree:
+- Common archetype recommendations
+- Shared acquisition thesis elements
+- Aligned buybox criteria
+- Consistent leverage points
+
+### 2.3. DIVERGENCE ANALYSIS
+Highlight nuanced differences:
+- Different archetype perspectives
+- Varying strategic approaches
+- Complementary insights
+- Framework-specific recommendations
+
+### 2.4. INTEGRATED SYNTHESIS
+Synthesize all frameworks into a comprehensive analysis that:
+- Acknowledges multiple perspectives
+- Provides a balanced strategic approach
+- Highlights both consensus and divergence
+- Enables deeper strategic thinking
 
 ## OUTPUT FORMAT
-Your final output MUST be a single Markdown-formatted report containing the following two sections.
+Your final output MUST be a single Markdown-formatted report containing the following sections, in this exact order:
 
-**Part 1: Your Acquisition Thesis**
-A concise, expert narrative following this template:
-"Based on my analysis of your profile, your clear operator archetype is **{Operator Archetype}**. Your greatest strength lies in {description of top competency, citing evidence}. The ideal business for you is one that has achieved product-market fit but is struggling with {corresponding weakness from your leverage analysis}. You are uniquely positioned to unlock value here. Your search should be focused on niche industries such as **{Target Industries}**, which align perfectly with your stated interests in {mention specific interests}."
+**Part 1: Executive Summary & Strategic Insights**
+A high-level overview that synthesizes and compares the findings from the four separate analyses below. This summary must explain WHY the different methodologies produce different results and highlight areas of consensus and divergence to provide strategic perspective.
 
-**Part 2: Your Personalized Buybox**
-A Markdown table summarizing your findings. The "Rationale" column should be insightful and directly tie back to the user's data.
+Template: "Our comprehensive analysis, viewing your profile through four distinct strategic lenses, reveals several key insights. While each framework offers a unique perspective, a clear consensus emerges around your core strengths in {common themes, e.g., revenue generation and operational leadership}. 
+
+**Archetype Analysis:** Two primary archetypes were identified, showcasing your dual potential. The divergence reflects each methodology's analytical focus:
+- The Hedgehog and EO frameworks emphasize your passion-driven, growth-oriented approach, classifying you as 'The Growth Catalyst.' These frameworks prioritize your innovative thinking and risk tolerance, naturally leading to higher-growth, lower-SDE targets ($100k-$500k) with significant upside potential.
+- In contrast, the Traditional M&A and SWOT frameworks focus on your proven operational and systems expertise, identifying you as 'The Efficiency Expert.' These frameworks prioritize your track record of improving existing businesses, leading to larger, more established targets ($250k-$1M SDE) where operational improvements can unlock immediate value.
+
+**Financial Analysis:** The different SDE ranges reflect each strategy's risk-return profile. Growth Catalyst targets offer lower initial investment but require higher risk tolerance and growth execution. Efficiency Expert targets offer more predictable returns through operational improvements but require larger capital deployment.
+
+**Strategic Implications:** This duality does not represent a contradiction, but a significant strategic advantage. It means you are equally equipped to either scale a business with untapped market potential (Growth Catalyst) or to acquire a business with solid revenue but inefficient operations and unlock hidden value (Efficiency Expert). The following detailed reports will explore both of these compelling strategic paths."
+
+**Part 2: Detailed Framework Reports**
+Present the complete, separate analysis for each of the four frameworks. Each analysis must be presented in its own clean, "white-box" style with professional formatting.
+
+---
+
+## Traditional M&A Expert Analysis
+
+*Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.*
+
+**Your Acquisition Thesis**
+Leverage your {Archetype} strengths to {Thesis based on this framework}. Focus on businesses where your operational expertise and financial acumen can unlock immediate value through process improvement and margin optimization.
+
+**Your Personalized Buybox**
 
 | Criterion | Your Target Profile | Rationale |
 |-----------|-------------------|----------|
-| Industries | {Target Industries} | Aligns with your stated passions for {mention specific interests}. |
-| Business Model | Recurring Revenue (Service Contracts, Subscriptions > 60%) | Provides stability and aligns with your stated risk tolerance of {risk_tolerance}. |
-| Size (SDE) | {Calculated SDE Range} | A realistic range based on your capital and income needs, ensuring the acquisition is both feasible and profitable for you. |
-| Profit Margin | > 20% Net Margin | A key indicator of a healthy, fundamentally sound business with operational efficiency. |
-| Geography | {Geographic Preference} | Matches your specified lifestyle requirements. |
-| Owner Role | Owner is not the primary operator/technician. | Ensures you are buying a scalable system that can grow beyond a single person's efforts. |
-| YOUR LEVERAGE | {Core Leverage}: Look for specific indicators like low web traffic, undeveloped SOPs, or outdated technology. | Your skills as a {Operator Archetype} are the key to unlocking immediate post-acquisition growth. |
-| Red Flags | High customer concentration (>20%), declining revenue, owner-dependent operations. | Avoids businesses with existential risks that do not align with your core strengths. |
+| Industries | {Target Industries} | {Rationale based on this framework} |
+| Business Model | {Business Model} | {Rationale based on this framework} |
+| Size (SDE) | {SDE Range} | {Rationale based on this framework} |
+| Profit Margin | {Margin Target} | {Rationale based on this framework} |
+| Geography | {Geographic Preference} | {Rationale based on this framework} |
+| YOUR LEVERAGE | {Core Leverage}: Look for specific indicators... | Your skills as a {Archetype} are the key to unlocking value. |
+| Red Flags | {Red Flags} | {Rationale based on this framework} |
 
-Focus on providing actionable, specific recommendations based on the entrepreneur's unique profile and goals. Use your expertise as an M&A advisor to deliver insights that go beyond simple data analysis.
+---
+
+## The Hedgehog Concept Analysis
+
+*Jim Collins' three circles framework: passion, excellence, and economic engine alignment.*
+
+**Your Acquisition Thesis**
+Focus on acquiring businesses in {passion areas} where your {excellence areas} can drive {economic engine focus}. This framework ensures alignment between what you love, what you're best at, and what drives your economic success.
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | {Target Industries} | {Rationale based on this framework} |
+| Business Model | {Business Model} | {Rationale based on this framework} |
+| Size (SDE) | {SDE Range} | {Rationale based on this framework} |
+| Profit Margin | {Margin Target} | {Rationale based on this framework} |
+| Geography | {Geographic Preference} | {Rationale based on this framework} |
+| YOUR LEVERAGE | {Core Leverage}: Look for specific indicators... | Your skills as a {Archetype} are the key to unlocking value. |
+| Red Flags | {Red Flags} | {Rationale based on this framework} |
+
+---
+
+## SWOT Analysis
+
+*Strategic planning framework evaluating internal strengths/weaknesses against external opportunities/threats.*
+
+**Your Acquisition Thesis**
+Capitalize on your {key strengths} to acquire businesses in {opportunity areas} while mitigating {key weaknesses} through {strategic approach}. This framework leverages your internal capabilities against external market opportunities.
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | {Target Industries} | {Rationale based on this framework} |
+| Business Model | {Business Model} | {Rationale based on this framework} |
+| Size (SDE) | {SDE Range} | {Rationale based on this framework} |
+| Profit Margin | {Margin Target} | {Rationale based on this framework} |
+| Geography | {Geographic Preference} | {Rationale based on this framework} |
+| YOUR LEVERAGE | {Core Leverage}: Look for specific indicators... | Your skills as a {Archetype} are the key to unlocking value. |
+| Red Flags | {Red Flags} | {Rationale based on this framework} |
+
+---
+
+## Entrepreneurial Orientation (EO) Analysis
+
+*Miller (1983) framework assessing innovativeness, proactiveness, and risk-taking to match entrepreneurial DNA.*
+
+**Your Acquisition Thesis**
+Seek opportunities that match your {entrepreneurial characteristics} in {target sectors}. Your {risk tolerance} and {proactive nature} are best suited for {business types} where innovation and market timing are critical success factors.
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | {Target Industries} | {Rationale based on this framework} |
+| Business Model | {Business Model} | {Rationale based on this framework} |
+| Size (SDE) | {SDE Range} | {Rationale based on this framework} |
+| Profit Margin | {Margin Target} | {Rationale based on this framework} |
+| Geography | {Geographic Preference} | {Rationale based on this framework} |
+| YOUR LEVERAGE | {Core Leverage}: Look for specific indicators... | Your skills as a {Archetype} are the key to unlocking value. |
+| Red Flags | {Red Flags} | {Rationale based on this framework} |
+
+---
+
+## Part 3: Final Strategic Considerations
+
+A final summary that synthesizes the key leverage points and red flags identified across all four frameworks.
+
+**Template:**
+Synthesizing the analyses, two primary leverage points emerge: 1) your ability to drive revenue growth in businesses with underdeveloped marketing, and 2) your capacity to dramatically improve efficiency in operationally weak companies. Conversely, the key red flags to watch for are businesses with high customer concentration or outdated, inflexible technology, as these could neutralize your core strengths.
 
 ## AI TRANSPARENCY & METHODOLOGY
-After your analysis, provide a detailed explanation of your methodology:
+This analysis was conducted using a comprehensive multi-framework approach, applying Traditional M&A Analysis, The Hedgehog Concept, SWOT Analysis, and Entrepreneurial Orientation simultaneously. This methodology provides a 360-degree view of the entrepreneur's profile, highlighting both consensus insights and nuanced differences to enable deeper strategic thinking and more informed acquisition decisions.
 
-**Analysis Methodology:**
+**Multi-Framework Benefits:**
+- **Comprehensive Coverage**: Each framework provides a different analytical lens
+- **Consensus Validation**: Where frameworks agree, confidence is higher
+- **Nuanced Insights**: Where frameworks diverge, multiple strategic options emerge
+- **Strategic Depth**: Forces deeper thinking about acquisition strategy
+- **Risk Mitigation**: Multiple perspectives reduce blind spots
+
+**Additional Analysis Details:**
 - Explain how you determined the operator archetype (which competencies were weighted most heavily)
 - Describe your approach to identifying target industries (how you matched interests with market opportunities)
 - Detail your financial parameter calculations (how you arrived at the SDE range)
@@ -189,12 +327,12 @@ After your analysis, provide a detailed explanation of your methodology:
                 evidence: 'AI analysis based on profile data'
             };
 
-            // Extract acquisition thesis
-            const thesisStart = lines.findIndex(line => line.includes('Your Acquisition Thesis') || line.includes('Part 1:'));
-            if (thesisStart !== -1) {
-                const thesisEnd = lines.findIndex((line, index) => index > thesisStart && (line.includes('Part 2:') || line.includes('Your Personalized Buybox')));
-                if (thesisEnd !== -1) {
-                    acquisitionThesis = lines.slice(thesisStart + 1, thesisEnd).join('\n').trim();
+            // Extract executive summary (now Part 1: Executive Summary & Strategic Insights)
+            const summaryStart = lines.findIndex(line => line.includes('Executive Summary & Strategic Insights') || line.includes('Part 1:'));
+            if (summaryStart !== -1) {
+                const summaryEnd = lines.findIndex((line, index) => index > summaryStart && (line.includes('Part 2:') || line.includes('Detailed Framework Reports')));
+                if (summaryEnd !== -1) {
+                    acquisitionThesis = lines.slice(summaryStart + 1, summaryEnd).join('\n').trim();
                 }
             }
 
@@ -219,10 +357,17 @@ After your analysis, provide a detailed explanation of your methodology:
 
             // Extract AI Transparency & Methodology section
             let aiTransparency = '';
-            const transparencyStart = lines.findIndex(line => line.includes('**Analysis Methodology:**') || line.includes('Analysis Methodology:'));
+            const transparencyStart = lines.findIndex(line => 
+                line.includes('AI TRANSPARENCY') || 
+                line.includes('**Analysis Methodology:**') || 
+                line.includes('Analysis Methodology:')
+            );
             if (transparencyStart !== -1) {
                 // Take everything from the transparency start to the end of the response
                 aiTransparency = lines.slice(transparencyStart).join('\n').trim();
+            } else {
+                // Fallback: use multi-framework transparency text
+                aiTransparency = "This analysis was conducted using a comprehensive multi-framework approach, applying Traditional M&A Analysis, The Hedgehog Concept, SWOT Analysis, and Entrepreneurial Orientation simultaneously. This methodology provides a 360-degree view of the entrepreneur's profile, highlighting both consensus insights and nuanced differences to enable deeper strategic thinking and more informed acquisition decisions.";
             }
 
             // Extract archetype from thesis
@@ -284,6 +429,7 @@ After your analysis, provide a detailed explanation of your methodology:
                     financial: 0.8
                 },
                 aiTransparency: aiTransparency || 'Transparency data not available',
+                analysis_methodology: userData.analysis_methodology || 'hedgehog_concept',
                 aiEngine: 'Google Gemini',
                 analysisTimestamp: new Date().toISOString(),
                 rawResponse: responseText,

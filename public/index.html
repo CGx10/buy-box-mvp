@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buybox Generator</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -251,6 +251,31 @@
                         </div>
                     </section>
 
+                    <!-- Multi-Framework Analysis Notice -->
+                    <section class="multi-framework-notice">
+                        <h2>🔬 Comprehensive Multi-Framework Analysis</h2>
+                        <p class="multi-framework-description">Your analysis will be conducted using all four strategic frameworks simultaneously, providing a 360-degree view of your acquisition profile with consensus insights and nuanced differences.</p>
+                        
+                        <div class="framework-preview">
+                            <div class="framework-item">
+                                <span class="framework-icon">🎯</span>
+                                <span class="framework-name">Traditional M&A Analysis</span>
+                            </div>
+                            <div class="framework-item">
+                                <span class="framework-icon">🦔</span>
+                                <span class="framework-name">The Hedgehog Concept</span>
+                            </div>
+                            <div class="framework-item">
+                                <span class="framework-icon">📈</span>
+                                <span class="framework-name">SWOT Analysis</span>
+                            </div>
+                            <div class="framework-item">
+                                <span class="framework-icon">🚀</span>
+                                <span class="framework-name">Entrepreneurial Orientation</span>
+                            </div>
+                        </div>
+                    </section>
+
                     <div class="form-actions">
                         <div class="form-utility-buttons">
                             <button type="button" class="btn-secondary" id="saveFormBtn">
@@ -305,10 +330,7 @@
                 <div class="results-container">
                     <div class="results-header">
                         <h2>Your Personalized Buybox</h2>
-                        <div class="download-options">
-                            <button class="btn-secondary" id="downloadBtn" disabled>📄 Download Markdown</button>
-                            <button class="btn-primary" id="downloadPDFBtn" disabled>📋 Download PDF</button>
-                        </div>
+                        <button class="btn-secondary" id="downloadBtn">Download Report</button>
                     </div>
                     
                     <div class="results-content">
@@ -326,7 +348,7 @@
                             </div>
                         </section>
 
-                        <section class="buybox-section">
+                        <section class="buybox-section" id="buyboxSection">
                             <h3>Your Personalized Buybox</h3>
                             <div class="buybox-table-container">
                                 <table class="buybox-table" id="buyboxTable">
@@ -363,8 +385,6 @@
         </main>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="script.js"></script>
+    <script src="script.js?v=18"></script>
 </body>
 </html>

@@ -1,5 +1,7 @@
 class AcquisitionAdvisorApp {
     constructor() {
+        console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
+        console.log('🔥 CACHE BUSTING TEST - VERSION 2.0 - MULTI-FRAMEWORK TABLES READY!');
         this.currentPhase = 1;
         this.analysisResults = null;
         this.availableEngines = {};
@@ -51,15 +53,21 @@ class AcquisitionAdvisorApp {
         this.setupSaveLoadButtons();
 
         // Action buttons
-        document.getElementById('downloadBtn').addEventListener('click', this.downloadReport.bind(this));
-        document.getElementById('downloadPDFBtn').addEventListener('click', this.downloadPDF.bind(this));
-        document.getElementById('restartBtn').addEventListener('click', this.restart.bind(this));
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadPDFBtn = document.getElementById('downloadPDFBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        
+        if (downloadBtn) downloadBtn.addEventListener('click', this.downloadReport.bind(this));
+        if (downloadPDFBtn) downloadPDFBtn.addEventListener('click', this.downloadPDF.bind(this));
+        if (restartBtn) restartBtn.addEventListener('click', this.restart.bind(this));
         
         // Transparency toggle
-        document.getElementById('toggleTransparency').addEventListener('click', this.toggleTransparency.bind(this));
+        const toggleTransparency = document.getElementById('toggleTransparency');
+        if (toggleTransparency) toggleTransparency.addEventListener('click', this.toggleTransparency.bind(this));
         
         // Engine comparison toggle
-        document.getElementById('enableComparison').addEventListener('change', this.toggleComparisonMode.bind(this));
+        const enableComparison = document.getElementById('enableComparison');
+        if (enableComparison) enableComparison.addEventListener('change', this.toggleComparisonMode.bind(this));
     }
 
     setupRatingSliders() {
@@ -316,6 +324,9 @@ class AcquisitionAdvisorApp {
         formData.location_regions = document.getElementById('location_regions').value;
         formData.risk_tolerance = document.getElementById('risk_tolerance').value;
 
+        // Multi-framework analysis - no methodology selection needed
+        formData.analysis_methodology = 'multi_framework';
+
         return formData;
     }
 
@@ -350,10 +361,8 @@ class AcquisitionAdvisorApp {
 
     enableDownloadButtons() {
         const downloadBtn = document.getElementById('downloadBtn');
-        const downloadPDFBtn = document.getElementById('downloadPDFBtn');
         
         if (downloadBtn) downloadBtn.disabled = false;
-        if (downloadPDFBtn) downloadPDFBtn.disabled = false;
     }
 
     populateResults() {
@@ -397,7 +406,87 @@ class AcquisitionAdvisorApp {
         const thesisContent = document.getElementById('thesisContent');
         thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
 
-        // Populate buybox table
+        // Check if this is multi-framework analysis
+        console.log('🔍 DEBUG: analysis_methodology =', this.analysisResults.analysis_methodology);
+        console.log('🔍 DEBUG: analysisResults keys =', Object.keys(this.analysisResults));
+        
+        if (this.analysisResults.analysis_methodology === 'multi_framework') {
+            console.log('🎯 DEBUG: Calling populateMultiFrameworkResults');
+            this.populateMultiFrameworkResults();
+        } else {
+            console.log('🎯 DEBUG: Calling populateSingleFrameworkResults');
+            this.populateSingleFrameworkResults();
+        }
+    }
+
+    populateMultiFrameworkResults() {
+        // Clear the existing buybox section
+        const buyboxSection = document.getElementById('buyboxSection');
+        buyboxSection.innerHTML = '';
+
+        // Parse the raw response to extract framework-specific sections
+        const rawResponse = this.analysisResults.rawResponse || '';
+        const frameworks = this.parseMultiFrameworkResponse(rawResponse);
+        
+        console.log('Parsed frameworks:', frameworks);
+        frameworks.forEach((framework, index) => {
+            console.log(`Framework ${index}:`, framework.title, 'Rows:', framework.buyboxRows.length);
+        });
+
+        // Create the multi-framework display with clean white box styling
+        console.log('🔍 DEBUG: Creating framework cards, count:', frameworks.length);
+        console.log('🔍 DEBUG: buyboxSection element:', buyboxSection);
+        
+        frameworks.forEach((framework, index) => {
+            console.log(`🔍 DEBUG: Creating framework ${index}:`, framework.title);
+            console.log(`🔍 DEBUG: Framework ${index} rows:`, framework.buyboxRows.length);
+            
+            const frameworkDiv = document.createElement('div');
+            frameworkDiv.className = 'framework-card';
+            
+            frameworkDiv.innerHTML = `
+                <h2 class="framework-header">${framework.title}</h2>
+                
+                <div class="methodology-overview">
+                    ${framework.methodologyOverview}
+                </div>
+                
+                <div class="acquisition-thesis">
+                    <h3>Your Acquisition Thesis</h3>
+                    <p>${framework.acquisitionThesis}</p>
+                </div>
+                
+                <h3 class="buybox-title">${framework.buyboxTitle}</h3>
+                
+                <table class="framework-buybox-table">
+                    <thead>
+                        <tr>
+                            <th>Criterion</th>
+                            <th>Your Target Profile</th>
+                            <th>Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${framework.buyboxRows.map(row => `
+                            <tr>
+                                <td class="criterion-column">${row.criterion}</td>
+                                <td class="target-profile-column">${row.target}</td>
+                                <td class="rationale-column">${row.rationale}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            console.log(`🔍 DEBUG: Appending framework ${index} to DOM`);
+            buyboxSection.appendChild(frameworkDiv);
+        });
+        
+        console.log('🔍 DEBUG: Final buyboxSection children count:', buyboxSection.children.length);
+    }
+
+    populateSingleFrameworkResults() {
+        // Populate buybox table for single framework
         const tableBody = document.getElementById('buyboxTableBody');
         tableBody.innerHTML = '';
         
@@ -419,6 +508,149 @@ class AcquisitionAdvisorApp {
             `;
             tableBody.appendChild(tr);
         }
+    }
+
+    parseMultiFrameworkResponse(rawResponse) {
+        const frameworks = [];
+        
+        // Split by framework sections using regex
+        const frameworkSections = rawResponse.split(/\*\*Part 2: Detailed Framework Reports\*\*/)[1];
+        if (!frameworkSections) return frameworks;
+        
+        console.log('DEBUG: Framework sections length:', frameworkSections.length);
+        console.log('DEBUG: Framework sections first 500 chars:', frameworkSections.substring(0, 500));
+        
+        // Split by framework headers - but include the header in the content
+        const frameworkMatches = frameworkSections.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
+        
+        console.log('DEBUG: Framework matches length:', frameworkMatches.length);
+        
+        for (let i = 1; i < frameworkMatches.length; i += 2) {
+            const frameworkName = frameworkMatches[i].replace(/## /g, '').trim();
+            const frameworkContent = frameworkMatches[i + 1];
+            
+            console.log(`DEBUG: Processing ${frameworkName}, content length:`, frameworkContent ? frameworkContent.length : 0);
+            
+            if (!frameworkContent) continue;
+            
+            const framework = this.parseFrameworkContent(frameworkName, frameworkContent);
+            if (framework) {
+                frameworks.push(framework);
+            }
+        }
+        
+        return frameworks;
+    }
+    
+    parseFrameworkContent(frameworkName, content) {
+        const lines = content.split('\n');
+        
+        console.log(`DEBUG: ${frameworkName} - Content length:`, content.length);
+        console.log(`DEBUG: ${frameworkName} - First 300 chars:`, content.substring(0, 300));
+        
+        let framework = {
+            title: frameworkName,
+            methodologyOverview: '',
+            acquisitionThesis: '',
+            buyboxTitle: `Your Personalized Buybox`,
+            buyboxRows: []
+        };
+        
+        // Extract methodology overview (simplified format)
+        const methodologyMatch = content.match(/\*([^*]+)\*/);
+        if (methodologyMatch) {
+            framework.methodologyOverview = methodologyMatch[1].trim();
+        }
+        
+        // Extract acquisition thesis (new format)
+        const thesisMatch = content.match(/\*\*Your Acquisition Thesis\*\*\s*\n([^*]+?)(?=\*\*Your Personalized Buybox\*\*|$)/s);
+        if (thesisMatch) {
+            framework.acquisitionThesis = thesisMatch[1].trim();
+        }
+        
+        // Extract table rows - look for the table after the buybox header
+        const buyboxHeaderRegex = /\*\*Your Personalized Buybox\*\*\s*\n\s*\n/;
+        let buyboxHeaderMatch = content.match(buyboxHeaderRegex);
+        
+        console.log(`DEBUG: ${frameworkName} - Using fixed regex:`, buyboxHeaderMatch ? 'Found' : 'Not Found');
+        
+        console.log(`DEBUG: ${frameworkName} - buyboxHeaderMatch:`, buyboxHeaderMatch ? 'Found' : 'Not Found');
+        console.log(`DEBUG: ${frameworkName} - Looking for pattern:`, buyboxHeaderRegex);
+        console.log(`DEBUG: ${frameworkName} - Content contains 'Your Buybox':`, content.includes('Your Buybox'));
+        
+        // Debug: Show the actual content around "Your Buybox"
+        const buyboxIndex = content.indexOf('Your Buybox');
+        if (buyboxIndex !== -1) {
+            const start = Math.max(0, buyboxIndex - 50);
+            const end = Math.min(content.length, buyboxIndex + 100);
+            console.log(`DEBUG: ${frameworkName} - Content around 'Your Buybox':`, content.substring(start, end));
+        }
+
+        if (buyboxHeaderMatch) {
+            const tableStart = buyboxHeaderMatch.index + buyboxHeaderMatch[0].length;
+            const remainingContent = content.substring(tableStart);
+            
+            // Find the end of the table (before the next --- or **)
+            const tableEndRegex = /\n\n---|\n\n\*\*/;
+            const tableEndMatch = remainingContent.match(tableEndRegex);
+            const tableEnd = tableEndMatch ? tableEndMatch.index : remainingContent.length;
+            const tableContent = remainingContent.substring(0, tableEnd);
+            
+            console.log(`DEBUG: ${frameworkName} - tableStart:`, tableStart);
+            console.log(`DEBUG: ${frameworkName} - tableEndMatch:`, tableEndMatch ? 'Found' : 'Not Found');
+            console.log(`DEBUG: ${frameworkName} - tableEnd:`, tableEnd);
+            console.log(`DEBUG: ${frameworkName} - Extracted table content (first 200 chars):`, tableContent.substring(0, 200) + '...');
+            
+            framework.buyboxRows = this.parseTableRows(tableContent);
+            console.log(`DEBUG: Parsed ${framework.buyboxRows.length} rows for ${frameworkName}`);
+        } else {
+            console.log(`DEBUG: No buybox header match found for ${frameworkName}`);
+        }
+        
+        return framework;
+    }
+    
+    parseTableRows(tableContent) {
+        const rows = [];
+        const lines = tableContent.split('\n');
+        
+        let currentRow = null;
+        
+        for (const line of lines) {
+            const trimmedLine = line.trim();
+            
+            // Skip empty lines, separator lines, and header lines
+            if (!trimmedLine || trimmedLine.includes('---') || trimmedLine.includes('Criterion')) {
+                continue;
+            }
+            
+            // Check if this is a table row
+            if (trimmedLine.includes('|')) {
+                const cells = trimmedLine.split('|').map(cell => cell.trim()).filter(cell => cell);
+                if (cells.length >= 3) {
+                    // Save previous row if it exists
+                    if (currentRow) {
+                        rows.push(currentRow);
+                    }
+                    // Start new row
+                    currentRow = {
+                        criterion: cells[0],
+                        target: cells[1],
+                        rationale: cells[2]
+                    };
+                }
+            } else if (currentRow && trimmedLine.length > 0) {
+                // This is a continuation line - append to rationale
+                currentRow.rationale += ' ' + trimmedLine;
+            }
+        }
+        
+        // Add the last row if it exists
+        if (currentRow) {
+            rows.push(currentRow);
+        }
+        
+        return rows;
     }
 
     populateComparisonResults() {
@@ -924,7 +1156,8 @@ class AcquisitionAdvisorApp {
 
         // Set initial comparison mode state - use setTimeout to ensure DOM is ready
         setTimeout(() => {
-            this.comparisonMode = document.getElementById('enableComparison').checked;
+            const enableComparison = document.getElementById('enableComparison');
+            this.comparisonMode = enableComparison ? enableComparison.checked : false;
             console.log('Initial comparison mode from toggle:', this.comparisonMode);
             
             // Apply initial state to controls
@@ -1042,7 +1275,8 @@ class AcquisitionAdvisorApp {
     }
 
     toggleComparisonMode() {
-        this.comparisonMode = document.getElementById('enableComparison').checked;
+        const enableComparison = document.getElementById('enableComparison');
+        this.comparisonMode = enableComparison ? enableComparison.checked : false;
         console.log('Comparison mode toggled:', this.comparisonMode);
         
         // Show/hide appropriate controls
@@ -1619,13 +1853,19 @@ class AcquisitionAdvisorApp {
         const fields = [
             'interests_topics', 'recent_books', 'problem_to_solve', 'customer_affinity',
             'total_liquid_capital', 'potential_loan_amount', 'min_annual_income',
-            'time_commitment', 'location_preference', 'location_regions', 'risk_tolerance'
+            'time_commitment', 'location_preference', 'location_regions', 'risk_tolerance',
+            'analysis_methodology'
         ];
 
         fields.forEach(field => {
-            const element = document.getElementById(field);
-            if (element && formData[field] !== undefined) {
-                element.value = formData[field];
+            if (field === 'analysis_methodology') {
+                // Multi-framework analysis - no methodology selection to restore
+                // Skip this field as it's automatically set to 'multi_framework'
+            } else {
+                const element = document.getElementById(field);
+                if (element && formData[field] !== undefined) {
+                    element.value = formData[field];
+                }
             }
         });
 

@@ -30,7 +30,8 @@
     "time_commitment": 60,
     "location_preference": "willing_to_relocate",
     "location_regions": "Denver CO, San Diego CA, San Francisco CA, Miami FL",
-    "risk_tolerance": "high"
+    "risk_tolerance": "high",
+    "analysis_methodology": "multi_framework"
   },
   "selectedEngines": ["traditional", "gemini"],
   "comparisonMode": true,

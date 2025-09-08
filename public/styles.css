@@ -1079,36 +1079,219 @@ input:checked + .toggle-slider:before {
     100% { box-shadow: 0 0 0 0 rgba(240, 147, 251, 0); }
 }
 
-/* Methodology Grid */
-.methodology-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 1rem;
+/* Multi-Framework Analysis Notice Styles */
+.multi-framework-notice {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
 }
 
-.methodology-card {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 8px;
-    border-left: 4px solid #007bff;
+.multi-framework-notice h2 {
+    color: white;
+    margin-bottom: 10px;
+    font-size: 1.8rem;
+    font-weight: 600;
 }
 
-.methodology-card h5 {
-    margin: 0 0 1rem 0;
-    color: #333;
+.multi-framework-description {
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 25px;
     font-size: 1.1rem;
+    line-height: 1.6;
 }
 
-.methodology-card ul {
-    margin: 0.5rem 0;
-    padding-left: 1.2rem;
+.framework-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
-.methodology-card li {
-    margin: 0.3rem 0;
-    font-size: 0.9rem;
-    line-height: 1.4;
+.framework-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.framework-item:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+.framework-icon {
+    font-size: 1.5rem;
+}
+
+.framework-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+/* Multi-Framework Clean White Box Styles */
+.framework-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 30px;
+    margin: 30px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+}
+
+.framework-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.framework-header {
+    color: #1a202c;
+    font-size: 1.8em;
+    font-weight: 700;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #4299e1;
+    padding-bottom: 15px;
+    text-align: left;
+}
+
+.methodology-overview {
+    background: #f7fafc;
+    padding: 15px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    font-style: italic;
+    color: #4a5568;
+    border-left: 4px solid #4299e1;
+    font-size: 0.95em;
+}
+
+.acquisition-thesis {
+    background: #f0fff4;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 25px 0;
+    border-left: 4px solid #48bb78;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.acquisition-thesis h3 {
+    color: #2d3748;
+    font-size: 1.2em;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+.acquisition-thesis p {
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.buybox-title {
+    color: #2d3748;
+    font-size: 1.3em;
+    font-weight: 700;
+    margin: 30px 0 20px 0;
+    text-align: left;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.framework-buybox-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e0e0e0;
+}
+
+.framework-buybox-table th {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    color: white;
+    padding: 18px 20px;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1.1em;
+    letter-spacing: 0.5px;
+}
+
+.framework-buybox-table td {
+    padding: 18px 20px;
+    border-bottom: 1px solid #ecf0f1;
+    vertical-align: top;
+    line-height: 1.5;
+}
+
+.framework-buybox-table tr:nth-child(even) {
+    background: #f8f9fa;
+}
+
+.framework-buybox-table tr:nth-child(odd) {
+    background: white;
+}
+
+.framework-buybox-table tr:hover {
+    background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
+    transition: background-color 0.3s ease;
+    transform: scale(1.01);
+}
+
+.criterion-column {
+    font-weight: bold;
+    color: #2c3e50;
+    width: 20%;
+    background: linear-gradient(135deg, #ecf0f1 0%, #d5dbdb 100%);
+    border-right: 2px solid #bdc3c7;
+}
+
+.target-profile-column {
+    width: 30%;
+    color: #34495e;
+    font-weight: 500;
+}
+
+.rationale-column {
+    width: 50%;
+    color: #7f8c8d;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+/* Add spacing between framework cards */
+.framework-card + .framework-card {
+    margin-top: 30px;
+}
+
+/* Responsive design for tables */
+@media (max-width: 768px) {
+    .framework-buybox-table {
+        font-size: 0.9em;
+    }
+    
+    .framework-buybox-table th,
+    .framework-buybox-table td {
+        padding: 12px 15px;
+    }
+    
+    .framework-header {
+        font-size: 1.4em;
+    }
+    
+    .buybox-title {
+        font-size: 1.2em;
+        padding: 12px 15px;
+    }
 }
 
 /* Engine Configuration */
