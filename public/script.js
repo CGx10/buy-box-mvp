@@ -512,16 +512,31 @@ class AcquisitionAdvisorApp {
 
     parseMultiFrameworkResponse(rawResponse) {
         const frameworks = [];
+
+        // Debug: Log the raw response to see what we're actually getting
+        console.log("DEBUG: Raw response length:", rawResponse.length);
+        console.log("DEBUG: Raw response first 1000 chars:", rawResponse.substring(0, 1000));
+        console.log("DEBUG: Raw response contains 'Part 2':", rawResponse.includes('Part 2'));
+        console.log("DEBUG: Raw response contains 'Detailed Framework Reports':", rawResponse.includes('Detailed Framework Reports'));
         
-        // Split by framework sections using regex
-        const frameworkSections = rawResponse.split(/\*\*Part 2: Detailed Framework Reports\*\*/)[1];
-        if (!frameworkSections) return frameworks;
-        
-        console.log('DEBUG: Framework sections length:', frameworkSections.length);
-        console.log('DEBUG: Framework sections first 500 chars:', frameworkSections.substring(0, 500));
-        
-        // Split by framework headers - but include the header in the content
-        const frameworkMatches = frameworkSections.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
+        // Debug: Look for all headers in the response
+        const headerMatches = rawResponse.match(/^#{1,6} .*$/gm);
+        console.log("DEBUG: All headers found:", headerMatches);
+
+        // 1. The LLM is generating frameworks directly without a "Part 2" header
+        // Let's split by the first framework header instead
+        const sections = rawResponse.split(/## Traditional M&A Expert Analysis/);
+        if (sections.length < 2) {
+            console.error("DEBUG: '## Traditional M&A Expert Analysis' header not found. Parsing failed.");
+            console.error("DEBUG: Available sections:", sections.length);
+            console.error("DEBUG: First section preview:", sections[0] ? sections[0].substring(0, 200) : 'null');
+            return frameworks;
+        }
+        // Add the header back to the content
+        const reportsBlock = '## Traditional M&A Expert Analysis' + sections[1];
+
+        // 2. Split by framework headers - but include the header in the content
+        const frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
         
         console.log('DEBUG: Framework matches length:', frameworkMatches.length);
         
@@ -538,7 +553,8 @@ class AcquisitionAdvisorApp {
                 frameworks.push(framework);
             }
         }
-        
+
+        console.log(`DEBUG: Final parsed frameworks array:`, frameworks);
         return frameworks;
     }
     
@@ -562,14 +578,19 @@ class AcquisitionAdvisorApp {
             framework.methodologyOverview = methodologyMatch[1].trim();
         }
         
-        // Extract acquisition thesis (new format)
-        const thesisMatch = content.match(/\*\*Your Acquisition Thesis\*\*\s*\n([^*]+?)(?=\*\*Your Personalized Buybox\*\*|$)/s);
+        // Extract acquisition thesis using reliable markers
+        const thesisMatch = content.match(/<thesis_start>\s*\n(.+?)\s*\n<thesis_end>/s);
         if (thesisMatch) {
             framework.acquisitionThesis = thesisMatch[1].trim();
+            console.log(`DEBUG: ${frameworkName} - Found acquisition thesis (markers):`, framework.acquisitionThesis.substring(0, 100) + '...');
+        } else {
+            console.log(`DEBUG: ${frameworkName} - No thesis markers found`);
+            console.log(`DEBUG: ${frameworkName} - Content contains '<thesis_start>':`, content.includes('<thesis_start>'));
+            console.log(`DEBUG: ${frameworkName} - Content contains '<thesis_end>':`, content.includes('<thesis_end>'));
         }
         
-        // Extract table rows - look for the table after the buybox header
-        const buyboxHeaderRegex = /\*\*Your Personalized Buybox\*\*\s*\n\s*\n/;
+        // Extract table rows - look for the table after the buybox header (handle both with and without colons)
+        const buyboxHeaderRegex = /\*\*Your Personalized Buybox\*\*:?\s*\n/;
         let buyboxHeaderMatch = content.match(buyboxHeaderRegex);
         
         console.log(`DEBUG: ${frameworkName} - Using fixed regex:`, buyboxHeaderMatch ? 'Found' : 'Not Found');
@@ -585,6 +606,10 @@ class AcquisitionAdvisorApp {
             const end = Math.min(content.length, buyboxIndex + 100);
             console.log(`DEBUG: ${frameworkName} - Content around 'Your Buybox':`, content.substring(start, end));
         }
+        
+        // Debug: Show the full content for this framework
+        console.log(`DEBUG: ${frameworkName} - Full content length:`, content.length);
+        console.log(`DEBUG: ${frameworkName} - Full content:`, content);
 
         if (buyboxHeaderMatch) {
             const tableStart = buyboxHeaderMatch.index + buyboxHeaderMatch[0].length;

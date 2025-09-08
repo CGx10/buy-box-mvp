@@ -1618,6 +1618,31 @@ input:checked + .toggle-slider:before {
     color: #4a5568;
 }
 
+.thesis-content h4 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.thesis-content h4:first-child {
+    margin-top: 0;
+}
+
+.thesis-content p {
+    margin-bottom: 1rem;
+}
+
+.thesis-content ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.thesis-content li {
+    margin-bottom: 0.5rem;
+}
+
 .thesis-content strong {
     color: #667eea;
     font-weight: 600;

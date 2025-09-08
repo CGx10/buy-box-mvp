@@ -173,14 +173,16 @@ Synthesize all frameworks into a comprehensive analysis that:
 ## OUTPUT FORMAT
 Your final output MUST be a single Markdown-formatted report containing the following sections, in this exact order:
 
-**Part 1: Executive Summary & Strategic Insights**
-A high-level overview that synthesizes and compares the findings from the four separate analyses below. This summary must explain WHY the different methodologies produce different results and highlight areas of consensus and divergence to provide strategic perspective.
+**Part 1: Multi-Framework Analysis Overview**
+A comprehensive summary that synthesizes and compares the findings from the four separate analyses below. This overview explains WHY the different methodologies produce different results and highlights areas of consensus and divergence to provide strategic perspective.
 
-Template: "Our comprehensive analysis, viewing your profile through four distinct strategic lenses, reveals several key insights. While each framework offers a unique perspective, a clear consensus emerges around your core strengths in {common themes, e.g., revenue generation and operational leadership}. 
+Template: "Our comprehensive analysis, viewing your profile through four distinct strategic lenses, reveals several key insights. While each framework offers a unique perspective, a clear consensus emerges around your core strengths in {common themes, e.g., revenue generation and operational leadership}.
 
 **Archetype Analysis:** Two primary archetypes were identified, showcasing your dual potential. The divergence reflects each methodology's analytical focus:
-- The Hedgehog and EO frameworks emphasize your passion-driven, growth-oriented approach, classifying you as 'The Growth Catalyst.' These frameworks prioritize your innovative thinking and risk tolerance, naturally leading to higher-growth, lower-SDE targets ($100k-$500k) with significant upside potential.
-- In contrast, the Traditional M&A and SWOT frameworks focus on your proven operational and systems expertise, identifying you as 'The Efficiency Expert.' These frameworks prioritize your track record of improving existing businesses, leading to larger, more established targets ($250k-$1M SDE) where operational improvements can unlock immediate value.
+
+* **The Growth Catalyst:** Identified by the Hedgehog and EO frameworks, this archetype emphasizes your passion-driven, growth-oriented approach. These frameworks prioritize your innovative thinking and risk tolerance, naturally leading to higher-growth, lower-SDE targets ($100k-$500k) with significant upside potential.
+
+* **The Efficiency Expert:** Identified by the Traditional M&A and SWOT frameworks, this archetype focuses on your proven operational and systems expertise. These frameworks prioritize your track record of improving existing businesses, leading to larger, more established targets ($250k-$1M SDE) where operational improvements can unlock immediate value.
 
 **Financial Analysis:** The different SDE ranges reflect each strategy's risk-return profile. Growth Catalyst targets offer lower initial investment but require higher risk tolerance and growth execution. Efficiency Expert targets offer more predictable returns through operational improvements but require larger capital deployment.
 
@@ -189,6 +191,8 @@ Template: "Our comprehensive analysis, viewing your profile through four distinc
 **Part 2: Detailed Framework Reports**
 Present the complete, separate analysis for each of the four frameworks. Each analysis must be presented in its own clean, "white-box" style with professional formatting.
 
+**CRITICAL INSTRUCTION:** For each report, you must conduct the analysis as if it were the ONLY framework being used. The financial parameters, industries, and other criteria must be derived solely from the logic of that specific framework, ensuring four distinct and specific recommendations. Do not blend insights across frameworks - each analysis must be independent and true to that methodology's unique perspective.
+
 ---
 
 ## Traditional M&A Expert Analysis
@@ -196,7 +200,11 @@ Present the complete, separate analysis for each of the four frameworks. Each an
 *Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.*
 
 **Your Acquisition Thesis**
+<thesis_start>
 Leverage your {Archetype} strengths to {Thesis based on this framework}. Focus on businesses where your operational expertise and financial acumen can unlock immediate value through process improvement and margin optimization.
+<thesis_end>
+
+**IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
 
 **Your Personalized Buybox**
 
@@ -217,7 +225,11 @@ Leverage your {Archetype} strengths to {Thesis based on this framework}. Focus o
 *Jim Collins' three circles framework: passion, excellence, and economic engine alignment.*
 
 **Your Acquisition Thesis**
+<thesis_start>
 Focus on acquiring businesses in {passion areas} where your {excellence areas} can drive {economic engine focus}. This framework ensures alignment between what you love, what you're best at, and what drives your economic success.
+<thesis_end>
+
+**IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
 
 **Your Personalized Buybox**
 
@@ -238,7 +250,11 @@ Focus on acquiring businesses in {passion areas} where your {excellence areas} c
 *Strategic planning framework evaluating internal strengths/weaknesses against external opportunities/threats.*
 
 **Your Acquisition Thesis**
+<thesis_start>
 Capitalize on your {key strengths} to acquire businesses in {opportunity areas} while mitigating {key weaknesses} through {strategic approach}. This framework leverages your internal capabilities against external market opportunities.
+<thesis_end>
+
+**IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
 
 **Your Personalized Buybox**
 
@@ -259,7 +275,11 @@ Capitalize on your {key strengths} to acquire businesses in {opportunity areas} 
 *Miller (1983) framework assessing innovativeness, proactiveness, and risk-taking to match entrepreneurial DNA.*
 
 **Your Acquisition Thesis**
+<thesis_start>
 Seek opportunities that match your {entrepreneurial characteristics} in {target sectors}. Your {risk tolerance} and {proactive nature} are best suited for {business types} where innovation and market timing are critical success factors.
+<thesis_end>
+
+**IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
 
 **Your Personalized Buybox**
 
