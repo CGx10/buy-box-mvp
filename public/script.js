@@ -1261,11 +1261,12 @@ class AcquisitionAdvisorApp {
         if (engineKeys.length === 0) return null;
         
         // Prefer traditional or hybrid engines, then highest confidence
-        const priorities = ['hybrid', 'traditional', 'openai', 'claude', 'ollama'];
+        const priorities = ['hybrid', 'traditional', 'gemini', 'openai', 'claude', 'ollama'];
         for (const engine of priorities) {
             if (results[engine]) return results[engine];
         }
         
+        // Fallback to any available engine
         return results[engineKeys[0]];
     }
 

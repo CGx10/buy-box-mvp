@@ -534,7 +534,7 @@ class AIEnhancedAcquisitionAdvisor {
         const industriesText = targetIndustries.map(ind => ind.industry).join(', ') || 'businesses that align with your interests';
         const confidenceLevel = confidenceScores.overall > 0.8 ? 'high' : confidenceScores.overall > 0.6 ? 'medium' : 'moderate';
 
-        return `Based on our AI analysis with ${confidenceLevel} confidence (${Math.round(confidenceScores.overall * 100)}%), you are a **${operatorArchetype.title}**. Your greatest strength lies in ${topCompetencyDescription}, as evidenced by your ${operatorArchetype.compositeScore.toFixed(1)}/5.0 composite expertise score.
+        return `Based on our AI analysis with ${confidenceLevel} confidence (${Math.round(confidenceScores.overall * 100)}%), you are a **${operatorArchetype.title}**. Your greatest strength lies in ${topCompetencyDescription}, as evidenced by your ${(operatorArchetype.compositeScore || 0).toFixed(1)}/5.0 composite expertise score.
 
 The ideal business for you is one that has already achieved product-market fit but has stagnated due to ${leverageThesis.toLowerCase()}. Our AI identified ${targetIndustries.length} priority industries where your skills would create maximum value: ${industriesText}. These sectors show strong alignment with your demonstrated interests and expertise (industry confidence: ${Math.round(confidenceScores.industry * 100)}%).
 
@@ -565,7 +565,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
 
     generateEnhancedPersonalizedBuybox({ targetIndustries, leverageThesis, operatorArchetype, financialAnalysis, confidenceScores, userData }) {
         const industriesText = targetIndustries.map(ind => `${ind.industry} (${Math.round(ind.confidence * 100)}% match)`).join(', ');
-        const multipleRange = `${(financialAnalysis.industryMultiple * 0.8).toFixed(1)}x - ${(financialAnalysis.industryMultiple * 1.2).toFixed(1)}x`;
+        const multipleRange = `${((financialAnalysis.industryMultiple || 3.0) * 0.8).toFixed(1)}x - ${((financialAnalysis.industryMultiple || 3.0) * 1.2).toFixed(1)}x`;
         
         return [
             {
@@ -581,7 +581,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
             {
                 criterion: 'Size (SDE)',
                 target: financialAnalysis.sdeRange,
-                rationale: `Calculated using industry-weighted multiple of ${financialAnalysis.industryMultiple.toFixed(1)}x based on your $${financialAnalysis.totalLiquidCapital.toLocaleString()} capital.`
+                rationale: `Calculated using industry-weighted multiple of ${(financialAnalysis.industryMultiple || 3.0).toFixed(1)}x based on your $${(financialAnalysis.totalLiquidCapital || 0).toLocaleString()} capital.`
             },
             {
                 criterion: 'Valuation Multiple',
@@ -635,7 +635,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
     generateAIInsights(operatorArchetype, targetIndustries, confidenceScores) {
         return {
             keyStrengths: [
-                `${operatorArchetype.title} archetype with ${operatorArchetype.compositeScore.toFixed(1)}/5.0 composite score`,
+                `${operatorArchetype.title} archetype with ${(operatorArchetype.compositeScore || 0).toFixed(1)}/5.0 composite score`,
                 `Strong industry alignment across ${targetIndustries.length} sectors`,
                 `${Math.round(confidenceScores.overall * 100)}% overall analysis confidence`
             ],
