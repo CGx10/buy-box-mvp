@@ -389,7 +389,7 @@ class AcquisitionAdvisorApp {
         }
 
         // Populate transparency report if available
-        if (this.analysisResults.transparencyReport) {
+        if (this.analysisResults.transparencyReport || this.analysisResults.aiTransparency) {
             this.populateTransparencyReport();
         }
 
@@ -770,33 +770,39 @@ class AcquisitionAdvisorApp {
     }
 
     populateTransparencyReport() {
-        const report = this.analysisResults.transparencyReport;
+        const report = this.analysisResults.transparencyReport || this.analysisResults.aiTransparency;
         if (!report) return;
 
         let html = '<div class="transparency-sections">';
         
-        // Executive Summary
-        html += '<div class="transparency-section-item">';
-        html += '<h4>📊 Executive Summary</h4>';
-        html += '<div class="summary-grid">';
-        html += `<div class="summary-card">`;
-        html += `<h5>Primary Archetype</h5>`;
-        html += `<p><strong>${report.executiveSummary.primaryArchetype.type}</strong></p>`;
-        html += `<p>Confidence: ${report.executiveSummary.primaryArchetype.confidence}</p>`;
-        html += `<p>Composite Score: ${report.executiveSummary.primaryArchetype.compositeScore}</p>`;
-        html += `</div>`;
-        html += `<div class="summary-card">`;
-        html += `<h5>Algorithm Consensus</h5>`;
-        html += `<p>Agreement: ${report.executiveSummary.algorithmConsensus.agreementLevel}</p>`;
-        html += `<p>Primary Drivers: ${report.executiveSummary.algorithmConsensus.primaryDrivers.join(', ')}</p>`;
-        html += `</div>`;
-        html += `<div class="summary-card">`;
-        html += `<h5>Data Reliability</h5>`;
-        html += `<p>Overall: ${report.executiveSummary.dataReliability.overall}</p>`;
-        html += `</div>`;
-        html += '</div></div>';
-        
-        // Algorithm Breakdown
+        // Check if this is the new Gemini format (string) or old format (object)
+        if (typeof report === 'string') {
+            // New Gemini format - display the raw transparency text directly
+            html += `<div class="transparency-content-simple">${report}</div>`;
+        } else {
+            // Old format - display structured data
+            // Executive Summary
+            html += '<div class="transparency-section-item">';
+            html += '<h4>📊 Executive Summary</h4>';
+            html += '<div class="summary-grid">';
+            html += `<div class="summary-card">`;
+            html += `<h5>Primary Archetype</h5>`;
+            html += `<p><strong>${report.executiveSummary.primaryArchetype.type}</strong></p>`;
+            html += `<p>Confidence: ${report.executiveSummary.primaryArchetype.confidence}</p>`;
+            html += `<p>Composite Score: ${report.executiveSummary.primaryArchetype.compositeScore}</p>`;
+            html += `</div>`;
+            html += `<div class="summary-card">`;
+            html += `<h5>Algorithm Consensus</h5>`;
+            html += `<p>Agreement: ${report.executiveSummary.algorithmConsensus.agreementLevel}</p>`;
+            html += `<p>Primary Drivers: ${report.executiveSummary.algorithmConsensus.primaryDrivers.join(', ')}</p>`;
+            html += `</div>`;
+            html += `<div class="summary-card">`;
+            html += `<h5>Data Reliability</h5>`;
+            html += `<p>Overall: ${report.executiveSummary.dataReliability.overall}</p>`;
+            html += `</div>`;
+            html += '</div></div>';
+            
+            // Algorithm Breakdown
         html += '<div class="transparency-section-item">';
         html += '<h4>🔬 Algorithm Breakdown</h4>';
         html += '<div class="algorithm-details">';
@@ -857,6 +863,20 @@ class AcquisitionAdvisorApp {
         html += '</div></div>';
         
         html += '</div>';
+        }
+        
+        // Add Gemini Debug Information for single engine results
+        if (this.analysisResults.aiEngine === 'Google Gemini' && this.analysisResults.promptUsed) {
+            html += '<div class="gemini-debug-simple">';
+            html += '<h4>🔍 Gemini Debug Information</h4>';
+            html += '<div class="debug-meta">';
+            html += '<span><strong>Model:</strong> gemini-1.5-flash</span>';
+            html += '<span><strong>Processing Time:</strong> ' + (this.analysisResults.processingTimeMs || 'N/A') + 'ms</span>';
+            html += '</div>';
+            html += '<h5>📝 Actual AI Prompt Sent to Gemini:</h5>';
+            html += `<pre class="prompt-code">${this.analysisResults.promptUsed}</pre>`;
+            html += '</div>';
+        }
         
         document.getElementById('transparencyContent').innerHTML = html;
     }
@@ -1240,9 +1260,7 @@ class AcquisitionAdvisorApp {
                 if (geminiResult && geminiResult.promptUsed) {
                     html += '<div class="prompt-section">';
                     html += '<h5>📝 Actual AI Prompt Sent to Gemini:</h5>';
-                    html += '<div class="prompt-content">';
-                    html += `<pre><code>${geminiResult.promptUsed}</code></pre>`;
-                    html += '</div>';
+                    html += `<pre style="white-space: pre-wrap; font-family: monospace; font-size: 12px; background: #2d3748; color: #e2e8f0; padding: 20px; border-radius: 8px; border: 1px solid #4a5568; max-height: 600px; overflow-y: auto; line-height: 1.4;">${geminiResult.promptUsed}</pre>`;
                     html += '</div>';
                 } else {
                     html += '<p><em>Check browser console for detailed prompt and response debugging information.</em></p>';

@@ -97,7 +97,7 @@ You will be provided with a JSON object containing the entrepreneur's complete p
 - Potential Loan Amount: $${userData.potential_loan_amount || 'Not provided'}
 - Risk Tolerance: ${userData.risk_tolerance || 'Not provided'}
 - Time Commitment: ${userData.time_commitment || 'Not provided'}
-- Geographic Preferences: ${userData.geographic_preferences || 'Not provided'}
+- Geographic Preferences: ${userData.location_preference || 'Not provided'} ${userData.location_regions ? `(${userData.location_regions})` : ''}
 - Deal Size Range: ${userData.deal_size_range || 'Not provided'}
 - Revenue Range: ${userData.revenue_range || 'Not provided'}
 - EBITDA Range: ${userData.ebitda_range || 'Not provided'}
@@ -125,6 +125,9 @@ Analyze the text inputs from Module B (interests, books, problems to solve). Ide
 **Step 4: Calculate Financial Parameters**
 Analyze the financial inputs from Module C. Calculate a realistic target Seller Discretionary Earnings (SDE) range. This calculation must account for the entrepreneur's liquid capital (for a ~10% down payment), their loan potential, and ensure the resulting cash flow can cover both their minimum income requirement and the estimated annual debt service on the loan. If the numbers create an impossible range, use your expertise to suggest a more realistic starting point.
 
+**Step 5: Determine Geographic Preference**
+From the input data, identify the user's location_preference and location_regions. Formulate a clear statement summarizing this (e.g., 'Willing to relocate to Denver, CO or San Diego, CA,' or 'Remote only').
+
 ## OUTPUT FORMAT
 Your final output MUST be a single Markdown-formatted report containing the following two sections.
 
@@ -141,12 +144,32 @@ A Markdown table summarizing your findings. The "Rationale" column should be ins
 | Business Model | Recurring Revenue (Service Contracts, Subscriptions > 60%) | Provides stability and aligns with your stated risk tolerance of {risk_tolerance}. |
 | Size (SDE) | {Calculated SDE Range} | A realistic range based on your capital and income needs, ensuring the acquisition is both feasible and profitable for you. |
 | Profit Margin | > 20% Net Margin | A key indicator of a healthy, fundamentally sound business with operational efficiency. |
-| Geography | {location_preference} | Matches your specified lifestyle requirements. |
+| Geography | {Geographic Preference} | Matches your specified lifestyle requirements. |
 | Owner Role | Owner is not the primary operator/technician. | Ensures you are buying a scalable system that can grow beyond a single person's efforts. |
 | YOUR LEVERAGE | {Core Leverage}: Look for specific indicators like low web traffic, undeveloped SOPs, or outdated technology. | Your skills as a {Operator Archetype} are the key to unlocking immediate post-acquisition growth. |
 | Red Flags | High customer concentration (>20%), declining revenue, owner-dependent operations. | Avoids businesses with existential risks that do not align with your core strengths. |
 
 Focus on providing actionable, specific recommendations based on the entrepreneur's unique profile and goals. Use your expertise as an M&A advisor to deliver insights that go beyond simple data analysis.
+
+## AI TRANSPARENCY & METHODOLOGY
+After your analysis, provide a detailed explanation of your methodology:
+
+**Analysis Methodology:**
+- Explain how you determined the operator archetype (which competencies were weighted most heavily)
+- Describe your approach to identifying target industries (how you matched interests with market opportunities)
+- Detail your financial parameter calculations (how you arrived at the SDE range)
+- Explain your geographic preference analysis (how you interpreted location data)
+
+**Confidence Assessment:**
+- Rate your confidence in the archetype determination (0-1 scale)
+- Rate your confidence in the industry recommendations (0-1 scale)  
+- Rate your confidence in the financial parameters (0-1 scale)
+- Rate your overall confidence in the analysis (0-1 scale)
+
+**Data Sources & Limitations:**
+- Note which data points were most influential in your analysis
+- Identify any missing information that would improve the analysis
+- Explain any assumptions you made during the analysis
         `.trim();
     }
 
@@ -192,6 +215,14 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
                         }
                     }
                 }
+            }
+
+            // Extract AI Transparency & Methodology section
+            let aiTransparency = '';
+            const transparencyStart = lines.findIndex(line => line.includes('**Analysis Methodology:**') || line.includes('Analysis Methodology:'));
+            if (transparencyStart !== -1) {
+                // Take everything from the transparency start to the end of the response
+                aiTransparency = lines.slice(transparencyStart).join('\n').trim();
             }
 
             // Extract archetype from thesis
@@ -252,6 +283,7 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
                     industries: 0.85,
                     financial: 0.8
                 },
+                aiTransparency: aiTransparency || 'Transparency data not available',
                 aiEngine: 'Google Gemini',
                 analysisTimestamp: new Date().toISOString(),
                 rawResponse: responseText,
@@ -297,6 +329,7 @@ Focus on providing actionable, specific recommendations based on the entrepreneu
                     industries: 0.7,
                     financial: 0.7
                 },
+                aiTransparency: 'Transparency data not available due to parsing error',
                 aiEngine: 'Google Gemini',
                 analysisTimestamp: new Date().toISOString(),
                 rawResponse: responseText,
