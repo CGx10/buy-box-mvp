@@ -57,7 +57,7 @@ class AcquisitionAdvisorApp {
         const downloadPDFBtn = document.getElementById('downloadPDFBtn');
         const restartBtn = document.getElementById('restartBtn');
         
-        if (downloadBtn) downloadBtn.addEventListener('click', this.downloadReport.bind(this));
+        if (downloadBtn) downloadBtn.addEventListener('click', this.downloadPDF.bind(this));
         if (downloadPDFBtn) downloadPDFBtn.addEventListener('click', this.downloadPDF.bind(this));
         if (restartBtn) restartBtn.addEventListener('click', this.restart.bind(this));
         
@@ -433,16 +433,41 @@ class AcquisitionAdvisorApp {
             console.log(`Framework ${index}:`, framework.title, 'Rows:', framework.buyboxRows.length);
         });
 
-        // Create the multi-framework display with clean white box styling
+        // Create the required structure for PDF generation with proper IDs
         console.log('🔍 DEBUG: Creating framework cards, count:', frameworks.length);
         console.log('🔍 DEBUG: buyboxSection element:', buyboxSection);
         
+        // Create analysis summary section
+        const analysisSummary = document.createElement('div');
+        analysisSummary.id = 'analysis-summary';
+        analysisSummary.innerHTML = `
+            <h2>Multi-Framework Analysis Overview</h2>
+            <p>${this.analysisResults.acquisitionThesis || 'No overview available'}</p>
+        `;
+        
+        // Create strategic snapshot section
+        const strategicSnapshot = document.createElement('div');
+        strategicSnapshot.id = 'strategic-snapshot';
+        strategicSnapshot.innerHTML = `
+            <h2>Strategic Snapshot</h2>
+            <p><strong>Analysis Methodology:</strong> ${this.analysisResults.analysis_methodology || 'Multi-Framework Analysis'}</p>
+            <p><strong>AI Engine:</strong> ${this.analysisResults.aiEngine || 'Not specified'}</p>
+            <p><strong>Confidence Score:</strong> ${this.analysisResults.confidenceScores?.overall || 'Not available'}</p>
+        `;
+        
+        // Create framework reports container
+        const frameworkReports = document.createElement('div');
+        frameworkReports.id = 'framework-reports';
+        frameworkReports.innerHTML = '<h2>Detailed Framework Reports</h2>';
+        
+        // Create framework cards
         frameworks.forEach((framework, index) => {
             console.log(`🔍 DEBUG: Creating framework ${index}:`, framework.title);
             console.log(`🔍 DEBUG: Framework ${index} rows:`, framework.buyboxRows.length);
             
             const frameworkDiv = document.createElement('div');
-            frameworkDiv.className = 'framework-card';
+            frameworkDiv.className = 'framework-card framework-container';
+            frameworkDiv.id = `framework-section-${index}`;
             
             frameworkDiv.innerHTML = `
                 <h2 class="framework-header">${framework.title}</h2>
@@ -456,7 +481,7 @@ class AcquisitionAdvisorApp {
                     <p>${framework.acquisitionThesis}</p>
                 </div>
                 
-                <h3 class="buybox-title">${framework.buyboxTitle}</h3>
+                <h3 class="buybox-title">Your Personalized Buybox</h3>
                 
                 <table class="framework-buybox-table">
                     <thead>
@@ -479,8 +504,13 @@ class AcquisitionAdvisorApp {
             `;
             
             console.log(`🔍 DEBUG: Appending framework ${index} to DOM`);
-            buyboxSection.appendChild(frameworkDiv);
+            frameworkReports.appendChild(frameworkDiv);
         });
+        
+        // Add all sections to the main container
+        buyboxSection.appendChild(analysisSummary);
+        buyboxSection.appendChild(strategicSnapshot);
+        buyboxSection.appendChild(frameworkReports);
         
         console.log('🔍 DEBUG: Final buyboxSection children count:', buyboxSection.children.length);
     }
@@ -523,26 +553,51 @@ class AcquisitionAdvisorApp {
         const headerMatches = rawResponse.match(/^#{1,6} .*$/gm);
         console.log("DEBUG: All headers found:", headerMatches);
 
-        // 1. The LLM is generating frameworks directly without a "Part 2" header
-        // Let's split by the first framework header instead
-        const sections = rawResponse.split(/## Traditional M&A Expert Analysis/);
-        if (sections.length < 2) {
-            console.error("DEBUG: '## Traditional M&A Expert Analysis' header not found. Parsing failed.");
-            console.error("DEBUG: Available sections:", sections.length);
-            console.error("DEBUG: First section preview:", sections[0] ? sections[0].substring(0, 200) : 'null');
+        // Check for different header formats
+        const hasNewFormat = rawResponse.includes('### --- Traditional M&A Expert Analysis ---');
+        const hasOldFormat = rawResponse.includes('## Traditional M&A Expert Analysis');
+        
+        console.log('DEBUG: Has new format (### ---):', hasNewFormat);
+        console.log('DEBUG: Has old format (##):', hasOldFormat);
+        
+        let reportsBlock = '';
+        let frameworkMatches = [];
+        
+        if (hasNewFormat) {
+            // New format: ### --- Framework Name ---
+            const sections = rawResponse.split(/### --- Traditional M&A Expert Analysis ---/);
+            if (sections.length < 2) {
+                console.error("DEBUG: '### --- Traditional M&A Expert Analysis ---' header not found. Parsing failed.");
+                return frameworks;
+            }
+            reportsBlock = '### --- Traditional M&A Expert Analysis ---' + sections[1];
+            frameworkMatches = reportsBlock.split(/(### --- (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis) ---)/);
+        } else if (hasOldFormat) {
+            // Old format: ## Framework Name
+            const sections = rawResponse.split(/## Traditional M&A Expert Analysis/);
+            if (sections.length < 2) {
+                console.error("DEBUG: '## Traditional M&A Expert Analysis' header not found. Parsing failed.");
+                return frameworks;
+            }
+            reportsBlock = '## Traditional M&A Expert Analysis' + sections[1];
+            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
+        } else {
+            console.error("DEBUG: No recognized framework headers found. Parsing failed.");
             return frameworks;
         }
-        // Add the header back to the content
-        const reportsBlock = '## Traditional M&A Expert Analysis' + sections[1];
-
-        // 2. Split by framework headers - but include the header in the content
-        const frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
         
         console.log('DEBUG: Framework matches length:', frameworkMatches.length);
         
         for (let i = 1; i < frameworkMatches.length; i += 2) {
-            const frameworkName = frameworkMatches[i].replace(/## /g, '').trim();
+            let frameworkName = frameworkMatches[i];
             const frameworkContent = frameworkMatches[i + 1];
+            
+            // Clean up framework name based on format
+            if (hasNewFormat) {
+                frameworkName = frameworkName.replace(/### --- /g, '').replace(/ ---/g, '').trim();
+            } else {
+                frameworkName = frameworkName.replace(/## /g, '').trim();
+            }
             
             console.log(`DEBUG: Processing ${frameworkName}, content length:`, frameworkContent ? frameworkContent.length : 0);
             
@@ -841,118 +896,610 @@ class AcquisitionAdvisorApp {
     async downloadPDF() {
         if (!this.analysisResults) return;
 
+        console.log("DEBUG: Starting definitive PDF generation with Smart Page Breaking...");
+        
         try {
             // Show loading state
-            const pdfBtn = document.getElementById('downloadPDFBtn');
-            const originalText = pdfBtn.textContent;
-            pdfBtn.textContent = '🔄 Generating PDF...';
-            pdfBtn.disabled = true;
+            const downloadBtn = document.getElementById('downloadBtn');
+            const originalText = downloadBtn.textContent;
+            downloadBtn.textContent = '🔄 Generating PDF...';
+            downloadBtn.disabled = true;
 
-            // Get the results container
-            const resultsContainer = document.querySelector('.results-container');
-            if (!resultsContainer) {
-                throw new Error('Results container not found');
-            }
+            const pdf = new jspdf.jsPDF({
+                orientation: 'portrait',
+                unit: 'pt',
+                format: 'a4'
+            });
 
-            // Create a temporary container for PDF generation
-            const tempContainer = document.createElement('div');
-            tempContainer.style.position = 'absolute';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.top = '0';
-            tempContainer.style.width = '800px';
-            tempContainer.style.backgroundColor = 'white';
-            tempContainer.style.padding = '40px';
-            tempContainer.style.fontFamily = 'Arial, sans-serif';
-            tempContainer.style.fontSize = '14px';
-            tempContainer.style.lineHeight = '1.6';
-            tempContainer.style.color = '#333';
+            // Get all sections that need to be rendered
+            const elementsToRender = document.querySelectorAll('#analysis-summary, #strategic-snapshot, #framework-reports .framework-container');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+            const pageMargin = 40;
+            const contentWidth = pdfWidth - (pageMargin * 2);
+            const contentHeight = pdfHeight - (pageMargin * 2);
 
-            // Clone the results content
-            const clonedContent = resultsContainer.cloneNode(true);
-            
-            // Remove the download buttons from the clone
-            const downloadOptions = clonedContent.querySelector('.download-options');
-            if (downloadOptions) {
-                downloadOptions.remove();
-            }
-
-            // Add PDF-specific styling
-            clonedContent.style.width = '100%';
-            clonedContent.style.margin = '0';
-            clonedContent.style.padding = '0';
-            
-            // Apply PDF-friendly styles to all elements
-            const styleElements = clonedContent.querySelectorAll('*');
-            styleElements.forEach(el => {
-                el.style.boxShadow = 'none';
-                el.style.border = el.style.border || '1px solid #ddd';
-                if (el.tagName === 'BUTTON') {
-                    el.style.display = 'none';
+            for (let i = 0; i < elementsToRender.length; i++) {
+                const originalElement = elementsToRender[i];
+                
+                // Add a new page for all sections except the first one.
+                if (i > 0) {
+                    pdf.addPage();
                 }
-            });
 
-            tempContainer.appendChild(clonedContent);
-            document.body.appendChild(tempContainer);
+                // --- ISOLATE AND CLONE ---
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.width = contentWidth + 'pt';
+                tempContainer.style.backgroundColor = 'white';
+                tempContainer.style.padding = '10px'; // Add some padding for rendering
+                tempContainer.style.fontFamily = 'Helvetica, Arial, sans-serif';
 
-            // Generate PDF using html2canvas and jsPDF
-            const canvas = await html2canvas(tempContainer, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff',
-                width: 800,
-                height: tempContainer.scrollHeight
-            });
+                const clonedElement = originalElement.cloneNode(true);
+                
+                // **IMPROVEMENT 1: Better Typography for Summary**
+                if(originalElement.id === 'analysis-summary') {
+                    const style = document.createElement('style');
+                    style.innerHTML = `
+                        #analysis-summary p { 
+                            font-size: 10pt; 
+                            line-height: 1.4; 
+                        }
+                         #analysis-summary strong {
+                            font-size: 10.5pt;
+                         }
+                    `;
+                    tempContainer.appendChild(style);
+                }
+                 // Reduce table font size for all frameworks
+                const tableStyle = document.createElement('style');
+                tableStyle.innerHTML = `
+                    table { font-size: 9pt; }
+                    th, td { padding: 4px; }
+                `;
+                tempContainer.appendChild(tableStyle);
 
-            // Clean up temporary container
-            document.body.removeChild(tempContainer);
+                tempContainer.appendChild(clonedElement);
+                document.body.appendChild(tempContainer);
+                
+                const canvas = await html2canvas(tempContainer, {
+                    scale: 2,
+                    useCORS: true,
+                    logging: true,
+                    backgroundColor: '#ffffff'
+                });
+                
+                document.body.removeChild(tempContainer);
 
-            // Create PDF
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgData = canvas.toDataURL('image/png');
-            
-            const imgWidth = 210; // A4 width in mm
-            const pageHeight = 295; // A4 height in mm
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
+                const imgData = canvas.toDataURL('image/png');
+                const canvasWidth = canvas.width;
+                const canvasHeight = canvas.height;
+                const ratio = canvasWidth / canvasHeight;
+                const imgWidth = contentWidth;
+                const imgHeight = imgWidth / ratio;
 
-            let position = 0;
+                // **IMPROVEMENT 2: Smart Page Breaking**
+                let position = 0;
+                if (imgHeight > contentHeight) {
+                    let pageCount = Math.ceil(imgHeight / contentHeight);
+                    for (let j = 0; j < pageCount; j++) {
+                        if (j > 0) {
+                           pdf.addPage();
+                        }
+                        let sourceY = position;
+                        let sourceHeight = Math.min(contentHeight, imgHeight - sourceY);
+                        
+                        // Convert content height to canvas pixel height
+                        let canvasSourceY = sourceY * (canvasHeight / imgHeight);
+                        let canvasSourceHeight = sourceHeight * (canvasHeight / imgHeight);
 
-            // Add first page
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
+                        const pageCanvas = document.createElement('canvas');
+                        pageCanvas.width = canvasWidth;
+                        pageCanvas.height = canvasSourceHeight;
+                        const pageCtx = pageCanvas.getContext('2d');
+                        
+                        const img = new Image();
+                        img.src = imgData;
+                        await new Promise(resolve => img.onload = resolve);
 
-            // Add additional pages if needed
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
+                        pageCtx.drawImage(img, 0, canvasSourceY, canvasWidth, canvasSourceHeight, 0, 0, canvasWidth, canvasSourceHeight);
+                        const pageImgData = pageCanvas.toDataURL('image/png');
+
+                        pdf.addImage(pageImgData, 'PNG', pageMargin, pageMargin, imgWidth, sourceHeight);
+                        position += sourceHeight;
+                    }
+                } else {
+                     pdf.addImage(imgData, 'PNG', pageMargin, pageMargin, imgWidth, imgHeight);
+                }
             }
 
-            // Add header
-            pdf.setFontSize(20);
-            pdf.setFont('helvetica', 'bold');
-            pdf.text('Buybox Generator Report', 20, 20);
-            
-            // Add timestamp
-            pdf.setFontSize(10);
-            pdf.setFont('helvetica', 'normal');
-            pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 30);
+            // Save the completed PDF
+            pdf.save('Buybox-Generator-Report-Definitive.pdf');
+            console.log("DEBUG: Definitive PDF generation with Smart Page Breaking complete.");
 
-            // Download the PDF
-            pdf.save('buybox-generator-report.pdf');
+            // Reset button state
+            downloadBtn.textContent = originalText;
+            downloadBtn.disabled = false;
 
         } catch (error) {
             console.error('Error generating PDF:', error);
             alert('Error generating PDF. Please try again or use the Markdown download instead.');
-        } finally {
             // Reset button state
-            const pdfBtn = document.getElementById('downloadPDFBtn');
-            pdfBtn.textContent = '📋 Download PDF';
-            pdfBtn.disabled = false;
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.textContent = 'Download Report';
+            downloadBtn.disabled = false;
         }
+    }
+
+    buildPDFContentWithStyles() {
+        const results = this.analysisResults;
+        const frameworks = this.parsedFrameworks || [];
+
+        // Get the embedded styles which are crucial for formatting
+        const pdfStyles = this.getPDFStyles();
+
+        let content = `
+            <div class="pdf-header">
+                <h1>Buybox Generator Report</h1>
+                <p class="pdf-subtitle">Multi-Framework Acquisition Analysis</p>
+                <p class="pdf-date">Generated on: ${new Date().toLocaleDateString()}</p>
+            </div>
+
+            <div class="pdf-section">
+                <h2>🤖 AI Analysis Summary</h2>
+                <div class="pdf-content">
+                    <p><strong>Analysis Methodology:</strong> ${results.analysis_methodology || 'Multi-Framework Analysis'}</p>
+                    <p><strong>AI Engine:</strong> ${results.aiEngine || 'Not specified'}</p>
+                    <p><strong>Confidence Score:</strong> ${results.confidenceScores?.overall || 'Not available'}</p>
+                </div>
+            </div>
+
+            <div class="pdf-section">
+                <h2>Multi-Framework Analysis Overview</h2>
+                <div class="pdf-content">
+                    <p>${results.acquisitionThesis || 'No overview available'}</p>
+                </div>
+            </div>
+        `;
+
+        // Add each framework analysis
+        frameworks.forEach((framework, index) => {
+            content += `
+                <div class="pdf-framework-section">
+                    <h2 class="pdf-framework-title">${framework.title}</h2>
+                    <p class="pdf-methodology">${framework.methodologyOverview}</p>
+                    
+                    <h3>Your Acquisition Thesis</h3>
+                    <div class="pdf-thesis">
+                        <p>${framework.acquisitionThesis || 'No thesis available'}</p>
+                    </div>
+                    
+                    <h3>Your Personalized Buybox</h3>
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th>Criterion</th>
+                                <th>Your Target Profile</th>
+                                <th>Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${framework.buyboxRows.map(row => `
+                                <tr>
+                                    <td class="pdf-criterion">${row.criterion}</td>
+                                    <td class="pdf-target">${row.target}</td>
+                                    <td class="pdf-rationale">${row.rationale}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        });
+
+        // Add AI Transparency section if available
+        if (results.aiTransparency) {
+            content += `
+                <div class="pdf-section">
+                    <h2>🔍 AI Transparency & Methodology</h2>
+                    <div class="pdf-content">
+                        <p>${results.aiTransparency}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Combine styles and content into a single HTML document string
+        return `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Buybox Report</title>
+                <style>${pdfStyles}</style>
+            </head>
+            <body>
+                <div class="pdf-container">
+                    ${content}
+                </div>
+            </body>
+            </html>
+        `;
+    }
+
+    buildPDFContent() {
+        console.log('📄 Building PDF content with enhanced formatting...');
+        const results = this.analysisResults;
+        const frameworks = this.parsedFrameworks || [];
+
+        let content = `
+            <div class="pdf-header">
+                <h1>Buybox Generator Report</h1>
+                <p class="pdf-subtitle">Multi-Framework Acquisition Analysis</p>
+                <p class="pdf-date">Generated on: ${new Date().toLocaleDateString()}</p>
+            </div>
+
+            <div class="pdf-section">
+                <h2>🤖 AI Analysis Summary</h2>
+                <div class="pdf-content">
+                    <p><strong>Analysis Methodology:</strong> ${results.analysis_methodology || 'Multi-Framework Analysis'}</p>
+                    <p><strong>AI Engine:</strong> ${results.aiEngine || 'Not specified'}</p>
+                    <p><strong>Confidence Score:</strong> ${results.confidenceScores?.overall || 'Not available'}</p>
+                </div>
+            </div>
+
+            <div class="pdf-section">
+                <h2>Multi-Framework Analysis Overview</h2>
+                <div class="pdf-content">
+                    <p>${results.acquisitionThesis || 'No overview available'}</p>
+                </div>
+            </div>
+        `;
+
+        // Add each framework analysis
+        frameworks.forEach((framework, index) => {
+            content += `
+                <div class="pdf-framework-section">
+                    <h2 class="pdf-framework-title">${framework.title}</h2>
+                    <p class="pdf-methodology">${framework.methodologyOverview}</p>
+                    
+                    <h3>Your Acquisition Thesis</h3>
+                    <div class="pdf-thesis">
+                        <p>${framework.acquisitionThesis || 'No thesis available'}</p>
+                    </div>
+                    
+                    <h3>Your Personalized Buybox</h3>
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th>Criterion</th>
+                                <th>Your Target Profile</th>
+                                <th>Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${framework.buyboxRows.map(row => `
+                                <tr>
+                                    <td class="pdf-criterion">${row.criterion}</td>
+                                    <td class="pdf-target">${row.target}</td>
+                                    <td class="pdf-rationale">${row.rationale}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        });
+
+        // Add AI Transparency section if available
+        if (results.aiTransparency) {
+            content += `
+                <div class="pdf-section">
+                    <h2>🔍 AI Transparency & Methodology</h2>
+                    <div class="pdf-content">
+                        <p>${results.aiTransparency}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        return content;
+    }
+
+    getPDFStyles() {
+        return `
+            body {
+                font-family: 'Inter', sans-serif;
+                color: #333;
+                background-color: #fff;
+                margin: 0;
+                padding: 0;
+            }
+            .pdf-container {
+                padding: 40pt;
+                width: 100%;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .pdf-header {
+                text-align: center;
+                border-bottom: 2px solid #2c3e50;
+                padding-bottom: 20pt;
+                margin-bottom: 30pt;
+            }
+            .pdf-header h1 {
+                font-size: 28pt;
+                margin: 0 0 10pt 0;
+                color: #2c3e50;
+                font-weight: bold;
+            }
+            .pdf-subtitle {
+                font-size: 16pt;
+                color: #7f8c8d;
+                margin: 0 0 5pt 0;
+                font-weight: 500;
+            }
+            .pdf-date {
+                font-size: 12pt;
+                color: #95a5a6;
+                margin: 0;
+            }
+            .pdf-section {
+                margin-bottom: 30pt;
+                page-break-inside: avoid;
+            }
+            .pdf-section h2 {
+                font-size: 20pt;
+                color: #2c3e50;
+                margin: 0 0 15pt 0;
+                padding-bottom: 8pt;
+                border-bottom: 2px solid #3498db;
+                font-weight: bold;
+            }
+            .pdf-content {
+                margin-bottom: 20pt;
+                font-size: 12pt;
+                line-height: 1.6;
+            }
+            .pdf-content p {
+                margin: 0 0 10pt 0;
+            }
+            .pdf-framework-section {
+                background-color: #ffffff;
+                border: 2px solid #e1e8ed;
+                border-radius: 8pt;
+                padding: 20pt;
+                margin-bottom: 25pt;
+                page-break-inside: avoid;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .pdf-framework-title {
+                font-size: 18pt;
+                color: #2c3e50;
+                margin: 0 0 10pt 0;
+                font-weight: bold;
+                border-bottom: 1px solid #bdc3c7;
+                padding-bottom: 8pt;
+            }
+            .pdf-methodology {
+                font-style: italic;
+                color: #7f8c8d;
+                margin: 0 0 15pt 0;
+                font-size: 11pt;
+                background-color: #f8f9fa;
+                padding: 8pt;
+                border-radius: 4pt;
+            }
+            .pdf-framework-section h3 {
+                font-size: 14pt;
+                color: #34495e;
+                margin: 20pt 0 10pt 0;
+                font-weight: bold;
+            }
+            .pdf-thesis {
+                background-color: #f8f9fa;
+                padding: 15pt;
+                border-left: 4px solid #3498db;
+                margin-bottom: 15pt;
+                border-radius: 4pt;
+                font-size: 11pt;
+                line-height: 1.5;
+            }
+            .pdf-thesis p {
+                margin: 0;
+            }
+            .pdf-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 10pt;
+                background-color: white;
+                font-size: 10pt;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            .pdf-table th {
+                background-color: #34495e;
+                color: white;
+                padding: 10pt 8pt;
+                text-align: left;
+                font-weight: bold;
+                font-size: 10pt;
+                border: 1px solid #2c3e50;
+            }
+            .pdf-table td {
+                padding: 8pt;
+                border: 1px solid #ddd;
+                font-size: 9pt;
+                vertical-align: top;
+                line-height: 1.4;
+            }
+            .pdf-table tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+            .pdf-criterion {
+                font-weight: bold;
+                width: 20%;
+                background-color: #ecf0f1;
+            }
+            .pdf-target {
+                width: 35%;
+            }
+            .pdf-rationale {
+                width: 45%;
+            }
+        `;
+    }
+
+    applyPDFStyling(container) {
+        // Add comprehensive PDF styling
+        console.log('🎨 Applying enhanced PDF styling...');
+        const style = document.createElement('style');
+        style.textContent = `
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+                background: white;
+            }
+            .pdf-header {
+                text-align: center;
+                margin-bottom: 40px;
+                padding-bottom: 20px;
+                border-bottom: 3px solid #2c3e50;
+                page-break-after: avoid;
+            }
+            .pdf-header h1 {
+                font-size: 32px;
+                margin: 0 0 10px 0;
+                color: #2c3e50;
+                font-weight: bold;
+            }
+            .pdf-subtitle {
+                font-size: 18px;
+                color: #7f8c8d;
+                margin: 0 0 5px 0;
+                font-weight: 500;
+            }
+            .pdf-date {
+                font-size: 14px;
+                color: #95a5a6;
+                margin: 0;
+            }
+            .pdf-section {
+                margin-bottom: 40px;
+                page-break-inside: avoid;
+                clear: both;
+            }
+            .pdf-section h2 {
+                font-size: 24px;
+                color: #2c3e50;
+                margin: 0 0 20px 0;
+                padding-bottom: 8px;
+                border-bottom: 2px solid #3498db;
+                font-weight: bold;
+            }
+            .pdf-content {
+                margin-bottom: 20px;
+                font-size: 14px;
+                line-height: 1.7;
+            }
+            .pdf-content p {
+                margin: 0 0 15px 0;
+            }
+            .pdf-framework-section {
+                margin-bottom: 50px;
+                padding: 25px;
+                border: 2px solid #e1e8ed;
+                border-radius: 10px;
+                background-color: #ffffff;
+                page-break-inside: avoid;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .pdf-framework-title {
+                font-size: 22px;
+                color: #2c3e50;
+                margin: 0 0 15px 0;
+                font-weight: bold;
+                border-bottom: 1px solid #bdc3c7;
+                padding-bottom: 10px;
+            }
+            .pdf-methodology {
+                font-style: italic;
+                color: #7f8c8d;
+                margin: 0 0 20px 0;
+                font-size: 14px;
+                background-color: #f8f9fa;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            .pdf-framework-section h3 {
+                font-size: 18px;
+                color: #34495e;
+                margin: 25px 0 15px 0;
+                font-weight: bold;
+            }
+            .pdf-thesis {
+                background-color: #f8f9fa;
+                padding: 20px;
+                border-left: 5px solid #3498db;
+                margin-bottom: 20px;
+                border-radius: 5px;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            .pdf-thesis p {
+                margin: 0;
+            }
+            .pdf-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+                background-color: white;
+                font-size: 13px;
+                box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            }
+            .pdf-table th {
+                background-color: #34495e;
+                color: white;
+                padding: 15px 12px;
+                text-align: left;
+                font-weight: bold;
+                font-size: 14px;
+                border: 1px solid #2c3e50;
+            }
+            .pdf-table td {
+                padding: 12px;
+                border: 1px solid #ddd;
+                font-size: 13px;
+                vertical-align: top;
+                line-height: 1.5;
+            }
+            .pdf-table tr:nth-child(even) {
+                background-color: #f8f9fa;
+            }
+            .pdf-table tr:hover {
+                background-color: #e8f4f8;
+            }
+            .pdf-criterion {
+                font-weight: bold;
+                width: 20%;
+                background-color: #ecf0f1;
+            }
+            .pdf-target {
+                width: 35%;
+            }
+            .pdf-rationale {
+                width: 45%;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        `;
+        container.appendChild(style);
     }
 
     generateMarkdownReport() {
