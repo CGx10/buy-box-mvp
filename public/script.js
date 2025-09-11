@@ -481,7 +481,7 @@ class AcquisitionAdvisorApp {
                 // Parse the archetype sections - look for the actual text in the response
                 const efficiencyExpertMatch = part1Content.match(/\*\*The Efficiency Expert \(The Value Unlocker\):\*\*([\s\S]*?)(?=\*\*The Growth Catalyst|$)/);
                 const growthCatalystMatch = part1Content.match(/\*\*The Growth Catalyst \(The Scaler\):\*\*([\s\S]*?)(?=\*\*How to Use This Report|$)/);
-                const howToUseMatch = part1Content.match(/\*\*How to Use This Report to Create Your Unified Buybox\*\*([\s\S]*?)(?=\*\*Strategic Implications|$)/);
+                const howToUseMatch = part1Content.match(/\*\*How to Use This Report[^*]*\*\*([\s\S]*?)(?=\*\*Strategic Implications|$)/);
                 const strategicImplicationsMatch = part1Content.match(/\*\*Strategic Implications\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
                 
                 console.log('DEBUG: Efficiency Expert match:', efficiencyExpertMatch ? 'Found' : 'Not found');
