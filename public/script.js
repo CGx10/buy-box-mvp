@@ -510,7 +510,7 @@ class AcquisitionAdvisorApp {
                         </div>
                         
                         <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
-                            <p style="margin: 0 0 10px 0;"><strong style="color: #60a5fa;">The Growth Catalyst (The Scaler)</strong>: ${growthCatalystText}</p>
+                            <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst (The Scaler)</strong>: ${growthCatalystText}</p>
                         </div>
                         
                         <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Strategic Implications</h3>
