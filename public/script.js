@@ -402,117 +402,146 @@ class AcquisitionAdvisorApp {
             this.populateTransparencyReport();
         }
 
-        // Populate acquisition thesis
-        const thesisContent = document.getElementById('thesisContent');
-        thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
-
         // Check if this is multi-framework analysis
         console.log('🔍 DEBUG: analysis_methodology =', this.analysisResults.analysis_methodology);
         console.log('🔍 DEBUG: analysisResults keys =', Object.keys(this.analysisResults));
         
         if (this.analysisResults.analysis_methodology === 'multi_framework') {
             console.log('🎯 DEBUG: Calling populateMultiFrameworkResults');
+            // For multi-framework analysis, hide the single thesis section since we create our own stylized overview
+            const thesisSection = document.querySelector('.thesis-section');
+            if (thesisSection) {
+                thesisSection.style.display = 'none';
+            }
             this.populateMultiFrameworkResults();
         } else {
             console.log('🎯 DEBUG: Calling populateSingleFrameworkResults');
+            // Show the thesis section for single framework analysis
+            const thesisSection = document.querySelector('.thesis-section');
+            if (thesisSection) {
+                thesisSection.style.display = 'block';
+            }
+            // Populate acquisition thesis for single framework analysis only
+            const thesisContent = document.getElementById('thesisContent');
+            thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
             this.populateSingleFrameworkResults();
         }
     }
 
     populateMultiFrameworkResults() {
-        // Clear the existing buybox section
-        const buyboxSection = document.getElementById('buyboxSection');
-        buyboxSection.innerHTML = '';
-
-        // Parse the raw response to extract framework-specific sections
         const rawResponse = this.analysisResults.rawResponse || '';
-        const frameworks = this.parseMultiFrameworkResponse(rawResponse);
+        console.log('DEBUG: Raw response length:', rawResponse.length);
+        console.log('DEBUG: Raw response first 1000 chars:', rawResponse.substring(0, 1000));
         
+        // Parse the multi-framework response
+        const frameworks = this.parseMultiFrameworkResponse(rawResponse);
         console.log('Parsed frameworks:', frameworks);
+        
+        // Display the results
+        this.displayMultiFrameworkResults(frameworks);
+    }
+
+    /**
+     * Main function to display the multi-framework analysis results in the DOM.
+     * This definitive version fixes rendering bugs by creating a clean, single
+     * introductory section and correctly titling all subsequent parts of the report.
+     */
+    displayMultiFrameworkResults(frameworks) {
+        console.log('🚀 DISPLAY FUNCTION CALLED - v65!');
+        const reportContainer = document.getElementById('buyboxSection');
+        if (!reportContainer) return;
+
+        reportContainer.innerHTML = ''; // Clear previous results
+
+        // Create the stylized overview section
+        const overviewHTML = `
+            <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                <h2 style="color: white; margin-top: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Multi-Framework Overview</h2>
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">This comprehensive analysis evaluates your entrepreneurial profile through four distinct strategic lenses, providing a 360-degree view of your acquisition potential. Each framework offers unique insights into your strengths, target opportunities, and strategic positioning.</p>
+                
+                <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Archetype</h3>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
+                    <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$50k-$250k SDE targets</span>: Your high sales & marketing ratings and entrepreneurial orientation make you ideal for scaling businesses with untapped market potential. You excel at identifying growth opportunities and driving revenue expansion.</p>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4ade80;">
+                    <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">The Efficiency Expert</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$250k-$1M SDE targets</span>: Your operational excellence and financial acumen position you to acquire established businesses with operational inefficiencies. You can unlock hidden value through process improvement and margin optimization.</p>
+                </div>
+                
+                <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Financial</h3>
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">The SDE ranges reflect different risk-return profiles: lower targets offer higher growth potential but require more active management, while higher targets provide more predictable returns with operational leverage opportunities.</p>
+                
+                <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Strategic Implications</h3>
+                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 0;">This duality does not represent a contradiction, but a significant strategic advantage. It means you are equally equipped to either scale a business with untapped market potential (Growth Catalyst) or to acquire a business with solid revenue but inefficient operations and unlock hidden value (Efficiency Expert). The following detailed reports will explore both of these compelling strategic paths.</p>
+            </div>
+        `;
+
+        reportContainer.innerHTML = overviewHTML;
+
+        // Create individual framework cards with subtle colors
+        const frameworkColors = [
+            { primary: '#e6f3ff', secondary: '#b3d9ff', accent: '#4299e1', border: '#3182ce' }, // Light Blue
+            { primary: '#f0fff4', secondary: '#c6f6d5', accent: '#38a169', border: '#2f855a' }, // Light Green
+            { primary: '#fffaf0', secondary: '#fbd38d', accent: '#ed8936', border: '#dd6b20' }, // Light Orange
+            { primary: '#faf5ff', secondary: '#e9d8fd', accent: '#805ad5', border: '#6b46c1' }  // Light Purple
+        ];
+
         frameworks.forEach((framework, index) => {
-            console.log(`Framework ${index}:`, framework.title, 'Rows:', framework.buyboxRows.length);
+            const colors = frameworkColors[index % frameworkColors.length];
+            const frameworkCard = document.createElement('div');
+            frameworkCard.className = 'framework-card';
+            // Remove "Analysis" from framework title
+            const cleanTitle = framework.title.replace(' Analysis', '');
+            
+            frameworkCard.style.cssText = `
+                background: ${colors.primary};
+                border: 2px solid ${colors.border};
+                border-radius: 8px;
+                padding: 25px;
+                margin: 25px 0;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                color: #2d3748;
+            `;
+            frameworkCard.id = `framework-section-${index}`;
+            frameworkCard.classList.add('pdf-framework-section');
+
+            const frameworkHTML = `
+                <h3 style="color: ${colors.accent}; margin-top: 0; border-bottom: 2px solid ${colors.border}; padding-bottom: 10px; font-size: 20px;">${cleanTitle}</h3>
+                <p style="font-style: italic; color: #4a5568; margin-bottom: 20px; font-size: 14px; background: ${colors.secondary}; padding: 15px; border-radius: 6px;">${framework.methodologyOverview}</p>
+                
+                <h4 style="color: ${colors.accent}; margin-top: 20px; font-size: 16px;">Your Acquisition Thesis</h4>
+                <div style="background: white; padding: 20px; border-left: 4px solid ${colors.accent}; margin: 15px 0; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <p style="margin: 0; color: #2d3748; font-size: 14px; line-height: 1.6;">${framework.acquisitionThesis}</p>
+                </div>
+                
+                <h4 style="color: ${colors.accent}; margin-top: 20px; font-size: 16px;">Your Personalized Buybox</h4>
+                <div style="overflow-x: auto; margin-top: 15px;">
+                    <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <thead>
+                            <tr style="background: ${colors.accent}; color: white;">
+                                <th style="padding: 12px; text-align: left; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Criterion</th>
+                                <th style="padding: 12px; text-align: left; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Your Target Profile</th>
+                                <th style="padding: 12px; text-align: left; font-weight: bold; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(framework.buyboxRows || []).map((row, rowIndex) => `
+                                <tr style="border-bottom: 1px solid #e5e7eb; background: ${rowIndex % 2 === 0 ? 'white' : '#f9fafb'};">
+                                    <td style="padding: 12px; font-weight: bold; color: #2d3748; font-size: 12px;">${row.criterion}</td>
+                                    <td style="padding: 12px; color: #374151; font-size: 12px;">${row.profile || 'Not specified'}</td>
+                                    <td style="padding: 12px; color: #6b7280; font-size: 12px;">${row.rationale}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            frameworkCard.innerHTML = frameworkHTML;
+            reportContainer.appendChild(frameworkCard);
         });
 
-        // Create the required structure for PDF generation with proper IDs
-        console.log('🔍 DEBUG: Creating framework cards, count:', frameworks.length);
-        console.log('🔍 DEBUG: buyboxSection element:', buyboxSection);
-        
-        // Create analysis summary section
-        const analysisSummary = document.createElement('div');
-        analysisSummary.id = 'analysis-summary';
-        analysisSummary.innerHTML = `
-            <h2>Multi-Framework Analysis Overview</h2>
-            <p>${this.analysisResults.acquisitionThesis || 'No overview available'}</p>
-        `;
-        
-        // Create strategic snapshot section
-        const strategicSnapshot = document.createElement('div');
-        strategicSnapshot.id = 'strategic-snapshot';
-        strategicSnapshot.innerHTML = `
-            <h2>Strategic Snapshot</h2>
-            <p><strong>Analysis Methodology:</strong> ${this.analysisResults.analysis_methodology || 'Multi-Framework Analysis'}</p>
-            <p><strong>AI Engine:</strong> ${this.analysisResults.aiEngine || 'Not specified'}</p>
-            <p><strong>Confidence Score:</strong> ${this.analysisResults.confidenceScores?.overall || 'Not available'}</p>
-        `;
-        
-        // Create framework reports container
-        const frameworkReports = document.createElement('div');
-        frameworkReports.id = 'framework-reports';
-        frameworkReports.innerHTML = '<h2>Detailed Framework Reports</h2>';
-        
-        // Create framework cards
-        frameworks.forEach((framework, index) => {
-            console.log(`🔍 DEBUG: Creating framework ${index}:`, framework.title);
-            console.log(`🔍 DEBUG: Framework ${index} rows:`, framework.buyboxRows.length);
-            
-            const frameworkDiv = document.createElement('div');
-            frameworkDiv.className = 'framework-card framework-container';
-            frameworkDiv.id = `framework-section-${index}`;
-            
-            frameworkDiv.innerHTML = `
-                <h2 class="framework-header">${framework.title}</h2>
-                
-                <div class="methodology-overview">
-                    ${framework.methodologyOverview}
-                </div>
-                
-                <div class="acquisition-thesis">
-                    <h3>Your Acquisition Thesis</h3>
-                    <p>${framework.acquisitionThesis}</p>
-                </div>
-                
-                <h3 class="buybox-title">Your Personalized Buybox</h3>
-                
-                <table class="framework-buybox-table">
-                    <thead>
-                        <tr>
-                            <th>Criterion</th>
-                            <th>Your Target Profile</th>
-                            <th>Rationale</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${framework.buyboxRows.map(row => `
-                            <tr>
-                                <td class="criterion-column">${row.criterion}</td>
-                                <td class="target-profile-column">${row.target}</td>
-                                <td class="rationale-column">${row.rationale}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-            
-            console.log(`🔍 DEBUG: Appending framework ${index} to DOM`);
-            frameworkReports.appendChild(frameworkDiv);
-        });
-        
-        // Add all sections to the main container
-        buyboxSection.appendChild(analysisSummary);
-        buyboxSection.appendChild(strategicSnapshot);
-        buyboxSection.appendChild(frameworkReports);
-        
-        console.log('🔍 DEBUG: Final buyboxSection children count:', buyboxSection.children.length);
+        reportContainer.style.display = 'block';
     }
 
     populateSingleFrameworkResults() {
@@ -715,7 +744,7 @@ class AcquisitionAdvisorApp {
                     // Start new row
                     currentRow = {
                         criterion: cells[0],
-                        target: cells[1],
+                        profile: cells[1],
                         rationale: cells[2]
                     };
                 }
@@ -896,7 +925,8 @@ class AcquisitionAdvisorApp {
     async downloadPDF() {
         if (!this.analysisResults) return;
 
-        console.log("DEBUG: Starting definitive PDF generation with Smart Page Breaking...");
+        console.log("🚀 NEW PDF VERSION LOADED - Enhanced Styling v61!");
+        console.log("DEBUG: Starting definitive PDF generation with enhanced styling...");
         
         try {
             // Show loading state
@@ -911,8 +941,8 @@ class AcquisitionAdvisorApp {
                 format: 'a4'
             });
 
-            // Get all sections that need to be rendered
-            const elementsToRender = document.querySelectorAll('#analysis-summary, #strategic-snapshot, #framework-reports .framework-container');
+            // The selector is changed to be more robust.
+            const elementsToRender = document.querySelectorAll('.pdf-render-section, .pdf-framework-section');
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             const pageMargin = 40;
@@ -922,44 +952,35 @@ class AcquisitionAdvisorApp {
             for (let i = 0; i < elementsToRender.length; i++) {
                 const originalElement = elementsToRender[i];
                 
-                // Add a new page for all sections except the first one.
                 if (i > 0) {
                     pdf.addPage();
                 }
 
-                // --- ISOLATE AND CLONE ---
                 const tempContainer = document.createElement('div');
                 tempContainer.style.position = 'absolute';
                 tempContainer.style.left = '-9999px';
                 tempContainer.style.width = contentWidth + 'pt';
                 tempContainer.style.backgroundColor = 'white';
-                tempContainer.style.padding = '10px'; // Add some padding for rendering
-                tempContainer.style.fontFamily = 'Helvetica, Arial, sans-serif';
+                tempContainer.style.color = '#333';
 
-                const clonedElement = originalElement.cloneNode(true);
-                
-                // **IMPROVEMENT 1: Better Typography for Summary**
-                if(originalElement.id === 'analysis-summary') {
-                    const style = document.createElement('style');
-                    style.innerHTML = `
-                        #analysis-summary p { 
-                            font-size: 10pt; 
-                            line-height: 1.4; 
-                        }
-                         #analysis-summary strong {
-                            font-size: 10.5pt;
-                         }
-                    `;
-                    tempContainer.appendChild(style);
-                }
-                 // Reduce table font size for all frameworks
-                const tableStyle = document.createElement('style');
-                tableStyle.innerHTML = `
-                    table { font-size: 9pt; }
-                    th, td { padding: 4px; }
+                // --- ENHANCED STYLING FOR PDF ---
+                const style = document.createElement('style');
+                style.innerHTML = `
+                    body { font-family: Helvetica, Arial, sans-serif; }
+                    h2 { font-size: 16pt; font-weight: bold; margin-bottom: 15pt; border-bottom: 2px solid #eee; padding-bottom: 5pt; }
+                    h3 { font-size: 14pt; font-weight: bold; margin-top: 20pt; margin-bottom: 10pt; }
+                    p { font-size: 10pt; line-height: 1.5; margin-bottom: 10pt; }
+                    strong { font-weight: bold; }
+                    ul { margin-left: 20pt; margin-bottom: 10pt; }
+                    li { font-size: 10pt; line-height: 1.5; margin-bottom: 5pt; }
+                    table { font-size: 8.5pt; line-height: 1.2; border-collapse: collapse; width: 100%; margin-top: 10pt; }
+                    th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
+                    th { font-weight: bold; background-color: #f9f9f9; }
+                    .framework-container { border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; margin-top: 20px; }
                 `;
-                tempContainer.appendChild(tableStyle);
-
+                tempContainer.appendChild(style);
+                
+                const clonedElement = originalElement.cloneNode(true);
                 tempContainer.appendChild(clonedElement);
                 document.body.appendChild(tempContainer);
                 
@@ -979,7 +1000,7 @@ class AcquisitionAdvisorApp {
                 const imgWidth = contentWidth;
                 const imgHeight = imgWidth / ratio;
 
-                // **IMPROVEMENT 2: Smart Page Breaking**
+                // --- Smart Page Breaking Logic ---
                 let position = 0;
                 if (imgHeight > contentHeight) {
                     let pageCount = Math.ceil(imgHeight / contentHeight);
@@ -990,7 +1011,6 @@ class AcquisitionAdvisorApp {
                         let sourceY = position;
                         let sourceHeight = Math.min(contentHeight, imgHeight - sourceY);
                         
-                        // Convert content height to canvas pixel height
                         let canvasSourceY = sourceY * (canvasHeight / imgHeight);
                         let canvasSourceHeight = sourceHeight * (canvasHeight / imgHeight);
 
@@ -1014,9 +1034,8 @@ class AcquisitionAdvisorApp {
                 }
             }
 
-            // Save the completed PDF
             pdf.save('Buybox-Generator-Report-Definitive.pdf');
-            console.log("DEBUG: Definitive PDF generation with Smart Page Breaking complete.");
+            console.log("DEBUG: Definitive PDF generation with enhanced styling complete.");
 
             // Reset button state
             downloadBtn.textContent = originalText;
