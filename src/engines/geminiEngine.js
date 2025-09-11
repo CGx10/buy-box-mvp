@@ -71,7 +71,7 @@ class GeminiAnalysisEngine {
     }
 
     buildAnalysisPrompt(userData) {
-        console.log('Building multi-framework analysis prompt');
+        console.log('🚀🚀🚀 BUILDING NEW PROMPT TEMPLATE v2.0 - EXECUTIVE SUMMARY STRUCTURE 🚀🚀🚀');
         
         return `
 # AI-Powered Acquisition Advisor - Multi-Framework Analysis
@@ -173,22 +173,32 @@ Synthesize all frameworks into a comprehensive analysis that:
 ## OUTPUT FORMAT
 Your final output MUST be a single Markdown-formatted report containing the following sections, in this exact order:
 
-**Part 1: Multi-Framework Analysis Overview**
-A comprehensive summary that synthesizes and compares the findings from the four separate analyses below. This overview explains WHY the different methodologies produce different results and highlights areas of consensus and divergence to provide strategic perspective.
+**Part 1: Executive Summary & Strategic Insights**
+A high-level overview that synthesizes and compares the findings from the four separate analyses below. This summary must explain the reasons for any consensus or divergence.
 
-Template: "Our comprehensive analysis, viewing your profile through four distinct strategic lenses, reveals several key insights. While each framework offers a unique perspective, a clear consensus emerges around your core strengths in {common themes, e.g., revenue generation and operational leadership}.
+Template: "Our comprehensive analysis reveals two distinct and powerful strategic paths for your acquisition journey, each defined by a clear operator archetype. Understanding these two paths is the key to focusing your search and maximizing your chances of success.
 
-**Archetype Analysis:** Two primary archetypes were identified, showcasing your dual potential. The divergence reflects each methodology's analytical focus:
+**Understanding Your Archetypes**
 
-* **The Growth Catalyst:** Identified by the Hedgehog and EO frameworks, this archetype emphasizes your passion-driven, growth-oriented approach. These frameworks prioritize your innovative thinking and risk tolerance, naturally leading to higher-growth, lower-SDE targets ($100k-$500k) with significant upside potential.
+**The Efficiency Expert (The Value Unlocker):** The goal of the Efficiency Expert is to find established businesses with strong revenue but inefficient operations and make them better. They unlock hidden value by analyzing systems, cutting waste, improving processes, and optimizing financial structures. This archetype is identified by frameworks like Traditional M&A and SWOT, which prioritize your proven, existing skills and experience in operations and finance.
 
-* **The Efficiency Expert:** Identified by the Traditional M&A and SWOT frameworks, this archetype focuses on your proven operational and systems expertise. These frameworks prioritize your track record of improving existing businesses, leading to larger, more established targets ($250k-$1M SDE) where operational improvements can unlock immediate value.
+**The Growth Catalyst (The Scaler):** The goal of the Growth Catalyst is to find businesses with great products but underdeveloped market reach and ignite their growth. They create value by leveraging sales and marketing expertise, building strategic partnerships, and proactively entering new markets. This archetype is identified by frameworks like the Hedgehog Concept and EO, which focus on your passions, proactive nature, and track record of building ventures.
 
-**Financial Analysis:** The different SDE ranges reflect each strategy's risk-return profile. Growth Catalyst targets offer lower initial investment but require higher risk tolerance and growth execution. Efficiency Expert targets offer more predictable returns through operational improvements but require larger capital deployment.
+**Strategic Implications**
 
-**Strategic Implications:** This duality does not represent a contradiction, but a significant strategic advantage. It means you are equally equipped to either scale a business with untapped market potential (Growth Catalyst) or to acquire a business with solid revenue but inefficient operations and unlock hidden value (Efficiency Expert). The following detailed reports will explore both of these compelling strategic paths."
+This duality is a significant advantage. It means you have two viable options: pursue an Efficiency Play (higher initial SDE, more predictable returns) or a Growth Play (lower initial SDE, higher potential upside). The snapshot below summarizes the key financial differences, and the detailed reports that follow will explore each compelling path."
 
-**Part 2: Detailed Framework Reports**
+**Part 2: Strategic Snapshot**
+A summary table that presents the key outputs from each of the four frameworks for easy comparison.
+
+| Analysis Framework | Operator Archetype | Size (SDE) Range | Primary Strategic Focus |
+|-------------------|-------------------|------------------|------------------------|
+| Traditional M&A | Efficiency Expert | $250k - $1M | Unlocking value in established businesses through operational improvements. |
+| The Hedgehog Concept | Growth Catalyst | $100k - $500k | Aligning passion and skill to scale a business with high growth potential. |
+| SWOT Analysis | Efficiency Expert | $200k - $750k | Leveraging operational strengths to capitalize on market opportunities. |
+| Entrepreneurial Orientation | Growth Catalyst | $50k - $250k | Applying innovation and risk-taking to disrupt a market or create new value. |
+
+**Part 3: Detailed Framework Reports**
 Present the complete, separate analysis for each of the four frameworks. Each analysis must be presented in its own clean, "white-box" style with professional formatting.
 
 **CRITICAL INSTRUCTION:** For each report, you must conduct the analysis as if it were the ONLY framework being used. The financial parameters, industries, and other criteria must be derived solely from the logic of that specific framework, ensuring four distinct and specific recommendations. Do not blend insights across frameworks - each analysis must be independent and true to that methodology's unique perspective.
@@ -295,22 +305,15 @@ Seek opportunities that match your {entrepreneurial characteristics} in {target 
 
 ---
 
-## Part 3: Final Strategic Considerations
+## Part 4: Final Strategic Considerations
 
 A final summary that synthesizes the key leverage points and red flags identified across all four frameworks.
 
 **Template:**
 Synthesizing the analyses, two primary leverage points emerge: 1) your ability to drive revenue growth in businesses with underdeveloped marketing, and 2) your capacity to dramatically improve efficiency in operationally weak companies. Conversely, the key red flags to watch for are businesses with high customer concentration or outdated, inflexible technology, as these could neutralize your core strengths.
 
-## AI TRANSPARENCY & METHODOLOGY
-This analysis was conducted using a comprehensive multi-framework approach, applying Traditional M&A Analysis, The Hedgehog Concept, SWOT Analysis, and Entrepreneurial Orientation simultaneously. This methodology provides a 360-degree view of the entrepreneur's profile, highlighting both consensus insights and nuanced differences to enable deeper strategic thinking and more informed acquisition decisions.
-
-**Multi-Framework Benefits:**
-- **Comprehensive Coverage**: Each framework provides a different analytical lens
-- **Consensus Validation**: Where frameworks agree, confidence is higher
-- **Nuanced Insights**: Where frameworks diverge, multiple strategic options emerge
-- **Strategic Depth**: Forces deeper thinking about acquisition strategy
-- **Risk Mitigation**: Multiple perspectives reduce blind spots
+## Part 5: AI TRANSPARENCY & METHODOLOGY
+This analysis was conducted using a comprehensive multi-framework AI approach. Four distinct analytical models (Traditional M&A, Hedgehog Concept, SWOT Analysis, and Entrepreneurial Orientation) were applied simultaneously to your profile. This methodology provides a 360-degree strategic view, highlighting both points of consensus and nuanced differences to enable deeper, more informed acquisition decisions. The benefit of this approach is that it reduces analytical blind spots and reveals multiple viable paths to success.
 
 **Additional Analysis Details:**
 - Explain how you determined the operator archetype (which competencies were weighted most heavily)

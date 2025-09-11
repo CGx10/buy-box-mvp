@@ -447,36 +447,103 @@ class AcquisitionAdvisorApp {
      * introductory section and correctly titling all subsequent parts of the report.
      */
     displayMultiFrameworkResults(frameworks) {
-        console.log('🚀 DISPLAY FUNCTION CALLED - v65!');
+        console.log('🚀 DISPLAY FUNCTION CALLED - v66!');
         const reportContainer = document.getElementById('buyboxSection');
         if (!reportContainer) return;
 
         reportContainer.innerHTML = ''; // Clear previous results
 
-        // Create the stylized overview section
-        const overviewHTML = `
-            <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
-                <h2 style="color: white; margin-top: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Multi-Framework Overview</h2>
-                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">This comprehensive analysis evaluates your entrepreneurial profile through four distinct strategic lenses, providing a 360-degree view of your acquisition potential. Each framework offers unique insights into your strengths, target opportunities, and strategic positioning.</p>
+        // Parse the new Part 1: Executive Summary & Strategic Insights from the raw response
+        const rawResponse = this.analysisResults.rawResponse || '';
+        let overviewHTML = '';
+        
+        if (rawResponse.includes('**Part 1: Executive Summary & Strategic Insights**')) {
+            // Extract the new Part 1 content
+            const part1Match = rawResponse.match(/\*\*Part 1: Executive Summary & Strategic Insights\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
+            if (part1Match) {
+                const part1Content = part1Match[1].trim();
+                console.log('DEBUG: Part 1 content extracted:', part1Content.substring(0, 500));
                 
-                <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Archetype</h3>
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
-                    <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$50k-$250k SDE targets</span>: Your high sales & marketing ratings and entrepreneurial orientation make you ideal for scaling businesses with untapped market potential. You excel at identifying growth opportunities and driving revenue expansion.</p>
+                // Parse the archetype sections - look for the actual text in the response
+                const efficiencyExpertMatch = part1Content.match(/\*\*The Efficiency Expert \(The Value Unlocker\):\*\*([\s\S]*?)(?=\*\*The Growth Catalyst|$)/);
+                const growthCatalystMatch = part1Content.match(/\*\*The Growth Catalyst \(The Scaler\):\*\*([\s\S]*?)(?=\*\*Strategic Implications|$)/);
+                const strategicImplicationsMatch = part1Content.match(/\*\*Strategic Implications\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
+                
+                console.log('DEBUG: Efficiency Expert match:', efficiencyExpertMatch ? 'Found' : 'Not found');
+                console.log('DEBUG: Growth Catalyst match:', growthCatalystMatch ? 'Found' : 'Not found');
+                console.log('DEBUG: Strategic Implications match:', strategicImplicationsMatch ? 'Found' : 'Not found');
+                
+                const efficiencyExpertText = efficiencyExpertMatch ? efficiencyExpertMatch[1].trim() : 'The Efficiency Expert focuses on finding established businesses with strong revenue but inefficient operations and making them better.';
+                const growthCatalystText = growthCatalystMatch ? growthCatalystMatch[1].trim() : 'The Growth Catalyst focuses on finding businesses with great products but underdeveloped market reach and igniting their growth.';
+                const strategicImplicationsText = strategicImplicationsMatch ? strategicImplicationsMatch[1].trim() : 'This duality is a significant advantage, meaning you have two viable strategic paths for your acquisition journey.';
+                
+                console.log('DEBUG: Efficiency Expert text:', efficiencyExpertText.substring(0, 100));
+                console.log('DEBUG: Growth Catalyst text:', growthCatalystText.substring(0, 100));
+                console.log('DEBUG: Strategic Implications text:', strategicImplicationsText.substring(0, 100));
+                
+                overviewHTML = `
+                    <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                        <h2 style="color: white; margin-top: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Multi-Framework Overview</h2>
+                        <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">This comprehensive analysis evaluates your entrepreneurial profile through four distinct strategic lenses, providing a 360-degree view of your acquisition potential. Each framework offers unique insights into your strengths, target opportunities, and strategic positioning.</p>
+                        
+                        <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Understanding Your Archetypes</h3>
+                        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4ade80;">
+                            <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">The Efficiency Expert (The Value Unlocker)</strong>: ${efficiencyExpertText}</p>
+                        </div>
+                        
+                        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
+                            <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst (The Scaler)</strong>: ${growthCatalystText}</p>
+                        </div>
+                        
+                        <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Strategic Implications</h3>
+                        <p style="font-size: 16px; line-height: 1.6; margin-bottom: 0;">${strategicImplicationsText}</p>
+                    </div>
+                `;
+                console.log('DEBUG: New format HTML generated successfully');
+            }
+        }
+        
+        // Fallback to old format if new format not found
+        if (!overviewHTML) {
+            overviewHTML = `
+                <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                    <h2 style="color: white; margin-top: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Multi-Framework Overview</h2>
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">This comprehensive analysis evaluates your entrepreneurial profile through four distinct strategic lenses, providing a 360-degree view of your acquisition potential. Each framework offers unique insights into your strengths, target opportunities, and strategic positioning.</p>
+                    
+                    <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Archetype</h3>
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
+                        <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$50k-$250k SDE targets</span>: Your high sales & marketing ratings and entrepreneurial orientation make you ideal for scaling businesses with untapped market potential. You excel at identifying growth opportunities and driving revenue expansion.</p>
+                    </div>
+                    
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4ade80;">
+                        <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">The Efficiency Expert</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$250k-$1M SDE targets</span>: Your operational excellence and financial acumen position you to acquire established businesses with operational inefficiencies. You can unlock hidden value through process improvement and margin optimization.</p>
+                    </div>
+                    
+                    <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Financial</h3>
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">The SDE ranges reflect different risk-return profiles: lower targets offer higher growth potential but require more active management, while higher targets provide more predictable returns with operational leverage opportunities.</p>
+                    
+                    <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Strategic Implications</h3>
+                    <p style="font-size: 16px; line-height: 1.6; margin-bottom: 0;">This duality does not represent a contradiction, but a significant strategic advantage. It means you are equally equipped to either scale a business with untapped market potential (Growth Catalyst) or to acquire a business with solid revenue but inefficient operations and unlock hidden value (Efficiency Expert). The following detailed reports will explore both of these compelling strategic paths.</p>
                 </div>
-                
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4ade80;">
-                    <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">The Efficiency Expert</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$250k-$1M SDE targets</span>: Your operational excellence and financial acumen position you to acquire established businesses with operational inefficiencies. You can unlock hidden value through process improvement and margin optimization.</p>
-                </div>
-                
-                <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Financial</h3>
-                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">The SDE ranges reflect different risk-return profiles: lower targets offer higher growth potential but require more active management, while higher targets provide more predictable returns with operational leverage opportunities.</p>
-                
-                <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Strategic Implications</h3>
-                <p style="font-size: 16px; line-height: 1.6; margin-bottom: 0;">This duality does not represent a contradiction, but a significant strategic advantage. It means you are equally equipped to either scale a business with untapped market potential (Growth Catalyst) or to acquire a business with solid revenue but inefficient operations and unlock hidden value (Efficiency Expert). The following detailed reports will explore both of these compelling strategic paths.</p>
-            </div>
-        `;
+            `;
+        }
 
-        reportContainer.innerHTML = overviewHTML;
+        // Insert the overview at the top
+        if (overviewHTML) {
+            console.log('DEBUG: Inserting overview HTML, length:', overviewHTML.length);
+            reportContainer.insertAdjacentHTML('afterbegin', overviewHTML);
+            console.log('DEBUG: Overview HTML inserted successfully');
+            
+            // Confirm the overview element is in the DOM
+            const overviewElement = reportContainer.querySelector('#analysis-summary');
+            if (overviewElement) {
+                console.log('DEBUG: Overview element successfully inserted into DOM');
+            } else {
+                console.log('DEBUG: Overview element NOT found in DOM');
+            }
+        } else {
+            console.log('DEBUG: No overview HTML to insert');
+        }
 
         // Create individual framework cards with subtle colors
         const frameworkColors = [
@@ -486,7 +553,9 @@ class AcquisitionAdvisorApp {
             { primary: '#faf5ff', secondary: '#e9d8fd', accent: '#805ad5', border: '#6b46c1' }  // Light Purple
         ];
 
+        console.log('DEBUG: Starting to create framework cards, count:', frameworks.length);
         frameworks.forEach((framework, index) => {
+            console.log(`DEBUG: Creating framework card ${index + 1}/${frameworks.length}: ${framework.title}`);
             const colors = frameworkColors[index % frameworkColors.length];
             const frameworkCard = document.createElement('div');
             frameworkCard.className = 'framework-card';
@@ -539,6 +608,7 @@ class AcquisitionAdvisorApp {
 
             frameworkCard.innerHTML = frameworkHTML;
             reportContainer.appendChild(frameworkCard);
+            console.log(`DEBUG: Framework card ${index + 1} appended successfully`);
         });
 
         reportContainer.style.display = 'block';
@@ -585,9 +655,11 @@ class AcquisitionAdvisorApp {
         // Check for different header formats
         const hasNewFormat = rawResponse.includes('### --- Traditional M&A Expert Analysis ---');
         const hasOldFormat = rawResponse.includes('## Traditional M&A Expert Analysis');
+        const hasPart2Format = rawResponse.includes('**Part 2: Detailed Framework Reports**');
         
         console.log('DEBUG: Has new format (### ---):', hasNewFormat);
         console.log('DEBUG: Has old format (##):', hasOldFormat);
+        console.log('DEBUG: Has Part 2 format:', hasPart2Format);
         
         let reportsBlock = '';
         let frameworkMatches = [];
@@ -601,6 +673,15 @@ class AcquisitionAdvisorApp {
             }
             reportsBlock = '### --- Traditional M&A Expert Analysis ---' + sections[1];
             frameworkMatches = reportsBlock.split(/(### --- (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis) ---)/);
+        } else if (hasPart2Format) {
+            // New Part 2 format: **Part 2: Detailed Framework Reports**
+            const sections = rawResponse.split(/\*\*Part 2: Detailed Framework Reports\*\*/);
+            if (sections.length < 2) {
+                console.error("DEBUG: 'Part 2: Detailed Framework Reports' header not found. Parsing failed.");
+                return frameworks;
+            }
+            reportsBlock = sections[1];
+            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
         } else if (hasOldFormat) {
             // Old format: ## Framework Name
             const sections = rawResponse.split(/## Traditional M&A Expert Analysis/);
