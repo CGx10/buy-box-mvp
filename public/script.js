@@ -309,6 +309,11 @@ class AcquisitionAdvisorApp {
             };
         });
 
+        // Personal Motivation & Vision (Module A.5)
+        formData.top_motivators = document.getElementById('top_motivators').value;
+        formData.ideal_work_life_balance = document.getElementById('ideal_work_life_balance').value;
+        formData.values_alignment = document.getElementById('values_alignment').value;
+
         // Industry profile
         formData.interests_topics = document.getElementById('interests_topics').value;
         formData.recent_books = document.getElementById('recent_books').value;
@@ -323,6 +328,15 @@ class AcquisitionAdvisorApp {
         formData.location_preference = document.getElementById('location_preference').value;
         formData.location_regions = document.getElementById('location_regions').value;
         formData.risk_tolerance = document.getElementById('risk_tolerance').value;
+
+        // Specific Deal Criteria
+        formData.target_revenue_range = document.getElementById('target_revenue_range').value;
+        formData.target_ebitda_margin = document.getElementById('target_ebitda_margin').value;
+        formData.preferred_valuation_range = document.getElementById('preferred_valuation_range').value;
+
+        // Operational & Role Preferences
+        formData.ownership_style = document.getElementById('ownership_style').value;
+        formData.management_team_importance = document.getElementById('management_team_importance').value;
 
         // Multi-framework analysis - no methodology selection needed
         formData.analysis_methodology = 'multi_framework';
@@ -2523,9 +2537,18 @@ class AcquisitionAdvisorApp {
 
         // Populate other form fields
         const fields = [
+            // Personal Motivation & Vision (Module A.5)
+            'top_motivators', 'ideal_work_life_balance', 'values_alignment',
+            // Industry profile
             'interests_topics', 'recent_books', 'problem_to_solve', 'customer_affinity',
+            // Financial and lifestyle
             'total_liquid_capital', 'potential_loan_amount', 'min_annual_income',
             'time_commitment', 'location_preference', 'location_regions', 'risk_tolerance',
+            // Specific Deal Criteria
+            'target_revenue_range', 'target_ebitda_margin', 'preferred_valuation_range',
+            // Operational & Role Preferences
+            'ownership_style', 'management_team_importance',
+            // Analysis methodology
             'analysis_methodology'
         ];
 
