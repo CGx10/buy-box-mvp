@@ -71,7 +71,7 @@ class GeminiAnalysisEngine {
     }
 
     buildAnalysisPrompt(userData) {
-        console.log('🚀🚀🚀 BUILDING ENHANCED PROMPT TEMPLATE v3.0 - HOLISTIC QUESTIONNAIRE INTEGRATION 🚀🚀🚀');
+        console.log('🚀🚀🚀 BUILDING ENHANCED PROMPT TEMPLATE v4.0 - EXPLICIT DATA INTEGRATION INSTRUCTIONS 🚀🚀🚀');
         
         return `
 # AI-Powered Acquisition Advisor - Multi-Framework Analysis
@@ -143,22 +143,13 @@ You will be provided with a JSON object containing the entrepreneur's complete p
 ## MULTI-FRAMEWORK ANALYSIS REQUIREMENTS
 
 ### 2.1. ENHANCED DATA INTEGRATION
-**CRITICAL:** You now have access to significantly richer data that enables more precise and actionable analysis. Use this enhanced data to:
+**CRITICAL INSTRUCTION:** You MUST explicitly incorporate the new, richer data from the questionnaire into your analysis for each framework. Do not simply list the data; explain how it influences your conclusions.
 
-**Personal Motivation & Vision Integration:**
-- Use the top motivators to refine archetype determination and strategic focus
-- Apply work-life balance preferences to inform business model and operational intensity recommendations
-- Consider values alignment when recommending industries and business types
+**Personal Motivations (Motivators, Work-Life Balance, Values):** Use this data to add color and depth to the Acquisition Thesis. For example, if a user is motivated by "legacy," frame the thesis around building a long-term, sustainable business. If they value "work-life balance," ensure the recommended "Owner Role" is not a 24/7 operator position.
 
-**Specific Deal Criteria Integration:**
-- Use the target revenue range, EBITDA margin, and valuation preferences to create more precise financial parameters
-- These traditional M&A metrics should inform SDE ranges, profit margin targets, and acquisition thesis
-- Ensure recommendations align with stated financial criteria while maintaining framework-specific logic
+**Specific Deal Criteria (Revenue, EBITDA, Valuation):** Use this data to create a more precise and credible Personalized Buybox. The SDE, Revenue, and Margin recommendations must directly reflect these user-provided constraints.
 
-**Operational & Role Preferences Integration:**
-- Use ownership style preferences to inform business model and management team requirements
-- Apply management team importance to red flags and acquisition criteria
-- Consider these preferences when determining operational leverage and strategic focus
+**Operational & Role Preferences (Ownership Style, Management Team):** Use this data to refine the "YOUR LEVERAGE" and "Red Flags" sections. A user who prefers an "absentee" role will see a business without a strong management team as a major "Red Flag."
 
 ### 2.2. FRAMEWORK-SPECIFIC ANALYSES
 For EACH of the four frameworks, provide:
@@ -243,9 +234,15 @@ Present the complete, separate analysis for each of the four frameworks. Each an
 
 *Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.*
 
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use the user's **top motivators** to frame the acquisition thesis (e.g., "financial freedom" = focus on cash-generating businesses)
+- Apply **target revenue range and EBITDA margin** to set precise financial parameters in the buybox
+- Consider **ownership style preferences** when defining the owner role and management requirements
+- Use **values alignment** to filter out incompatible industries or business types
+
 **Your Acquisition Thesis**
 <thesis_start>
-Leverage your {Archetype} strengths to {Thesis based on this framework}. Focus on businesses where your operational expertise and financial acumen can unlock immediate value through process improvement and margin optimization.
+Leverage your {Archetype} strengths to {Thesis based on this framework AND user's motivators}. Focus on businesses where your operational expertise and financial acumen can unlock immediate value through process improvement and margin optimization, while aligning with your stated values and work-life balance preferences.
 <thesis_end>
 
 **IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
@@ -268,9 +265,15 @@ Leverage your {Archetype} strengths to {Thesis based on this framework}. Focus o
 
 *Jim Collins' three circles framework: passion, excellence, and economic engine alignment.*
 
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use **top motivators** to define what drives the economic engine (e.g., "legacy building" = long-term sustainable growth)
+- Apply **work-life balance preferences** to determine the intensity of the owner role and business model
+- Consider **values alignment** when identifying passion areas and industries
+- Use **target revenue range** to set realistic growth expectations and SDE targets
+
 **Your Acquisition Thesis**
 <thesis_start>
-Focus on acquiring businesses in {passion areas} where your {excellence areas} can drive {economic engine focus}. This framework ensures alignment between what you love, what you're best at, and what drives your economic success.
+Focus on acquiring businesses in {passion areas} where your {excellence areas} can drive {economic engine focus}, while respecting your work-life balance preferences and values alignment. This framework ensures alignment between what you love, what you're best at, and what drives your economic success.
 <thesis_end>
 
 **IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
@@ -293,9 +296,15 @@ Focus on acquiring businesses in {passion areas} where your {excellence areas} c
 
 *Strategic planning framework evaluating internal strengths/weaknesses against external opportunities/threats.*
 
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use **top motivators** to define what constitutes a "strength" and what opportunities to prioritize
+- Apply **ownership style preferences** to identify weaknesses (e.g., "hands-on" preference = weakness in absentee management)
+- Consider **management team importance** when evaluating threats and mitigation strategies
+- Use **target EBITDA margin and valuation preferences** to set financial opportunity criteria
+
 **Your Acquisition Thesis**
 <thesis_start>
-Capitalize on your {key strengths} to acquire businesses in {opportunity areas} while mitigating {key weaknesses} through {strategic approach}. This framework leverages your internal capabilities against external market opportunities.
+Capitalize on your {key strengths} to acquire businesses in {opportunity areas} while mitigating {key weaknesses} through {strategic approach}, all while aligning with your motivators and work-life balance preferences. This framework leverages your internal capabilities against external market opportunities.
 <thesis_end>
 
 **IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
@@ -318,9 +327,15 @@ Capitalize on your {key strengths} to acquire businesses in {opportunity areas} 
 
 *Miller (1983) framework assessing innovativeness, proactiveness, and risk-taking to match entrepreneurial DNA.*
 
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use **top motivators** to define what drives entrepreneurial behavior (e.g., "innovation" = focus on disruptive opportunities)
+- Apply **work-life balance preferences** to determine the intensity of entrepreneurial involvement
+- Consider **values alignment** when identifying target sectors and business types
+- Use **target revenue range and valuation preferences** to set realistic entrepreneurial growth expectations
+
 **Your Acquisition Thesis**
 <thesis_start>
-Seek opportunities that match your {entrepreneurial characteristics} in {target sectors}. Your {risk tolerance} and {proactive nature} are best suited for {business types} where innovation and market timing are critical success factors.
+Seek opportunities that match your {entrepreneurial characteristics} in {target sectors}, while respecting your work-life balance preferences and values alignment. Your {risk tolerance} and {proactive nature} are best suited for {business types} where innovation and market timing are critical success factors.
 <thesis_end>
 
 **IMPORTANT: You MUST include the <thesis_start> and <thesis_end> markers around the acquisition thesis content for each framework. Do not remove these markers from your output.**
