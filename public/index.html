@@ -136,6 +136,33 @@
                         </div>
                     </section>
 
+                    <!-- Module A.5: Personal Motivation & Vision -->
+                    <section class="module">
+                        <h2>Module A.5: Personal Motivation & Vision</h2>
+                        <p class="module-description">Help us understand the deeper drivers behind your entrepreneurial journey.</p>
+                        
+                        <div class="input-group">
+                            <label for="top_motivators">What are your top three motivators for pursuing business ownership?</label>
+                            <textarea id="top_motivators" name="top_motivators" placeholder="E.g., financial freedom, building a legacy, pursuing a passion, creating impact, work-life balance..." required></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="ideal_work_life_balance">Describe your ideal work-life balance (hours per week, flexibility, travel):</label>
+                            <textarea id="ideal_work_life_balance" name="ideal_work_life_balance" placeholder="E.g., 40 hours/week with flexible schedule, minimal travel, or 60 hours/week with quarterly travel..." required></textarea>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="values_alignment">How important is it for your business to align with your personal values?</label>
+                            <select id="values_alignment" name="values_alignment" required>
+                                <option value="">Select importance level...</option>
+                                <option value="critical">Critical - Must align perfectly</option>
+                                <option value="important">Important - Should align well</option>
+                                <option value="moderate">Moderate - Some alignment preferred</option>
+                                <option value="minimal">Minimal - Not a primary concern</option>
+                            </select>
+                        </div>
+                    </section>
+
                     <!-- Module B: The Industry Profile -->
                     <section class="module">
                         <h2>Module B: The Industry Profile</h2>
@@ -190,6 +217,47 @@
                             </div>
                         </div>
 
+                        <div class="deal-criteria-inputs">
+                            <h3>Specific Deal Criteria</h3>
+                            <div class="input-group">
+                                <label for="target_revenue_range">What is your target revenue range for a potential acquisition?</label>
+                                <select id="target_revenue_range" name="target_revenue_range" required>
+                                    <option value="">Select revenue range...</option>
+                                    <option value="under_500k">Under $500K</option>
+                                    <option value="500k_1m">$500K - $1M</option>
+                                    <option value="1m_2m">$1M - $2M</option>
+                                    <option value="2m_5m">$2M - $5M</option>
+                                    <option value="5m_10m">$5M - $10M</option>
+                                    <option value="over_10m">Over $10M</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="target_ebitda_margin">What EBITDA margin are you looking for?</label>
+                                <select id="target_ebitda_margin" name="target_ebitda_margin" required>
+                                    <option value="">Select EBITDA margin...</option>
+                                    <option value="under_10">Under 10%</option>
+                                    <option value="10_15">10% - 15%</option>
+                                    <option value="15_20">15% - 20%</option>
+                                    <option value="20_25">20% - 25%</option>
+                                    <option value="over_25">Over 25%</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="preferred_valuation_range">What is your preferred valuation range (EV/EBITDA multiple)?</label>
+                                <select id="preferred_valuation_range" name="preferred_valuation_range" required>
+                                    <option value="">Select valuation range...</option>
+                                    <option value="under_3x">Under 3x</option>
+                                    <option value="3_4x">3x - 4x</option>
+                                    <option value="4_5x">4x - 5x</option>
+                                    <option value="5_6x">5x - 6x</option>
+                                    <option value="6_8x">6x - 8x</option>
+                                    <option value="over_8x">Over 8x</option>
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="lifestyle-inputs">
                             <div class="input-group">
                                 <label for="time_commitment">Time Commitment (hours per week):</label>
@@ -225,6 +293,30 @@
                                     <option value="low">Low</option>
                                     <option value="medium">Medium</option>
                                     <option value="high">High</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="operational-preferences-inputs">
+                            <h3>Operational & Role Preferences</h3>
+                            <div class="input-group">
+                                <label for="ownership_style">Do you prefer a hands-on or more absentee ownership style?</label>
+                                <select id="ownership_style" name="ownership_style" required>
+                                    <option value="">Select ownership style...</option>
+                                    <option value="hands_on">Hands-on - Actively involved in daily operations</option>
+                                    <option value="semi_hands_on">Semi hands-on - Strategic oversight with some operational involvement</option>
+                                    <option value="absentee">Absentee - Strategic oversight only, minimal daily involvement</option>
+                                </select>
+                            </div>
+
+                            <div class="input-group">
+                                <label for="management_team_importance">How important is a strong management team to you?</label>
+                                <select id="management_team_importance" name="management_team_importance" required>
+                                    <option value="">Select importance level...</option>
+                                    <option value="critical">Critical - Must have strong existing team</option>
+                                    <option value="important">Important - Prefer strong team but can build one</option>
+                                    <option value="moderate">Moderate - Some team strength preferred</option>
+                                    <option value="minimal">Minimal - Can work with any team situation</option>
                                 </select>
                             </div>
                         </div>
@@ -390,6 +482,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="script.js?v=84"></script>
+        <script src="script.js?v=85"></script>
 </body>
 </html>

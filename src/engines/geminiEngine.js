@@ -71,7 +71,7 @@ class GeminiAnalysisEngine {
     }
 
     buildAnalysisPrompt(userData) {
-        console.log('🚀🚀🚀 BUILDING NEW PROMPT TEMPLATE v2.0 - EXECUTIVE SUMMARY STRUCTURE 🚀🚀🚀');
+        console.log('🚀🚀🚀 BUILDING ENHANCED PROMPT TEMPLATE v3.0 - HOLISTIC QUESTIONNAIRE INTEGRATION 🚀🚀🚀');
         
         return `
 # AI-Powered Acquisition Advisor - Multi-Framework Analysis
@@ -100,6 +100,11 @@ You will be provided with a JSON object containing the entrepreneur's complete p
 - Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
 - Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
 
+**Module A.5: Personal Motivation & Vision (Core drivers and lifestyle preferences)**
+- Top Motivators: ${userData.top_motivators || 'Not provided'}
+- Ideal Work-Life Balance: ${userData.ideal_work_life_balance || 'Not provided'}
+- Values Alignment Importance: ${userData.values_alignment || 'Not provided'}
+
 **Module B: The Industry Profile (Interests, reading habits, problems to solve, customer affinity)**
 - Interests & Topics: ${userData.interests_topics || 'Not provided'}
 - Recent Books: ${userData.recent_books || 'Not provided'}
@@ -112,6 +117,17 @@ You will be provided with a JSON object containing the entrepreneur's complete p
 - Risk Tolerance: ${userData.risk_tolerance || 'Not provided'}
 - Time Commitment: ${userData.time_commitment || 'Not provided'}
 - Geographic Preferences: ${userData.location_preference || 'Not provided'} ${userData.location_regions ? `(${userData.location_regions})` : ''}
+
+**Specific Deal Criteria (Traditional M&A Parameters)**
+- Target Revenue Range: ${userData.target_revenue_range || 'Not provided'}
+- Target EBITDA Margin: ${userData.target_ebitda_margin || 'Not provided'}
+- Preferred Valuation Range (EV/EBITDA): ${userData.preferred_valuation_range || 'Not provided'}
+
+**Operational & Role Preferences**
+- Ownership Style: ${userData.ownership_style || 'Not provided'}
+- Management Team Importance: ${userData.management_team_importance || 'Not provided'}
+
+**Additional Traditional M&A Data (if available)**
 - Deal Size Range: ${userData.deal_size_range || 'Not provided'}
 - Revenue Range: ${userData.revenue_range || 'Not provided'}
 - EBITDA Range: ${userData.ebitda_range || 'Not provided'}
@@ -126,7 +142,25 @@ You will be provided with a JSON object containing the entrepreneur's complete p
 
 ## MULTI-FRAMEWORK ANALYSIS REQUIREMENTS
 
-### 2.1. FRAMEWORK-SPECIFIC ANALYSES
+### 2.1. ENHANCED DATA INTEGRATION
+**CRITICAL:** You now have access to significantly richer data that enables more precise and actionable analysis. Use this enhanced data to:
+
+**Personal Motivation & Vision Integration:**
+- Use the top motivators to refine archetype determination and strategic focus
+- Apply work-life balance preferences to inform business model and operational intensity recommendations
+- Consider values alignment when recommending industries and business types
+
+**Specific Deal Criteria Integration:**
+- Use the target revenue range, EBITDA margin, and valuation preferences to create more precise financial parameters
+- These traditional M&A metrics should inform SDE ranges, profit margin targets, and acquisition thesis
+- Ensure recommendations align with stated financial criteria while maintaining framework-specific logic
+
+**Operational & Role Preferences Integration:**
+- Use ownership style preferences to inform business model and management team requirements
+- Apply management team importance to red flags and acquisition criteria
+- Consider these preferences when determining operational leverage and strategic focus
+
+### 2.2. FRAMEWORK-SPECIFIC ANALYSES
 For EACH of the four frameworks, provide:
 
 **Traditional M&A Analysis:**
