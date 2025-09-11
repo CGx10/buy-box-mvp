@@ -518,7 +518,7 @@ class AcquisitionAdvisorApp {
                         
                         <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">How to Use This Report to Create Your Unified Buybox</h3>
                         <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #60a5fa;">
-                            <div style="font-size: 16px; line-height: 1.6;">${howToUseText}</div>
+                            <div style="font-size: 16px; line-height: 1.6;">${formatHowToUseText(howToUseText)}</div>
                         </div>
                     </div>
                 `;
@@ -2641,6 +2641,31 @@ class AcquisitionAdvisorApp {
             }, 300);
         }, 3000);
     }
+}
+
+// Helper function to format "How to Use This Report" text with bullet points
+function formatHowToUseText(text) {
+    if (!text) return '';
+    
+    // Split by double asterisks and process each part
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    let formatted = '';
+    
+    for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+            // Even indices are regular text
+            formatted += parts[i];
+        } else {
+            // Odd indices are bold text that should become bullet points
+            const boldText = parts[i].trim();
+            if (boldText) {
+                formatted += `<div style="margin: 8px 0;"><strong style="color: #60a5fa;">• ${boldText}</strong></div>`;
+            }
+        }
+    }
+    
+    // Also handle any remaining line breaks
+    return formatted.replace(/\n/g, '<br>');
 }
 
 // Initialize the app when the DOM is loaded
