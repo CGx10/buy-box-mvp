@@ -496,6 +496,7 @@ class AcquisitionAdvisorApp {
                 
                 console.log('DEBUG: Efficiency Expert text:', efficiencyExpertText.substring(0, 100));
                 console.log('DEBUG: Growth Catalyst text:', growthCatalystText.substring(0, 100));
+                console.log('DEBUG: How to Use text:', howToUseText.substring(0, 100));
                 console.log('DEBUG: Strategic Implications text:', strategicImplicationsText.substring(0, 100));
                 
                 overviewHTML = `
