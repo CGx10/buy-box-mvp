@@ -14,6 +14,7 @@ class AcquisitionAdvisorApp {
     async init() {
         this.setupEventListeners();
         this.setupFormValidation();
+        this.setupLinkedInUpload();
         this.updateProgress();
         await this.loadAvailableEngines();
         this.setupEngineSelection();
@@ -2634,6 +2635,155 @@ class AcquisitionAdvisorApp {
             }, 300);
         }, 3000);
     }
+
+    /**
+     * Uses pdf.js to extract all text from a PDF file.
+     */
+    async extractTextFromPdf(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+        let fullText = '';
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const textContent = await page.getTextContent();
+            const pageText = textContent.items.map(item => item.str).join(' ');
+            fullText += pageText + '\n\n';
+        }
+        return fullText;
+    }
+
+    /**
+     * Sends the extracted PDF text to the Gemini API for analysis.
+     */
+    async callGeminiForExtraction(rawPdfText) {
+        try {
+            const response = await fetch('/api/extract-linkedin-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pdfText: rawPdfText })
+            });
+
+            if (!response.ok) {
+                throw new Error(`API call failed with status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            return result.extractedData;
+        } catch (error) {
+            console.error('Error calling Gemini API:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Populates the questionnaire form fields with the extracted data.
+     */
+    populateFormFromLinkedIn(data) {
+        if (!data) return;
+
+        // Populate evidence fields
+        if (data.sales_marketing_evidence) {
+            document.getElementById('sales_marketing_evidence').value = data.sales_marketing_evidence;
+        }
+        if (data.operations_systems_evidence) {
+            document.getElementById('operations_systems_evidence').value = data.operations_systems_evidence;
+        }
+        if (data.finance_analytics_evidence) {
+            document.getElementById('finance_analytics_evidence').value = data.finance_analytics_evidence;
+        }
+        if (data.team_culture_evidence) {
+            document.getElementById('team_culture_evidence').value = data.team_culture_evidence;
+        }
+        if (data.product_technology_evidence) {
+            document.getElementById('product_technology_evidence').value = data.product_technology_evidence;
+        }
+        if (data.interests_topics) {
+            document.getElementById('interests_topics').value = data.interests_topics;
+        }
+
+        // Show success message
+        this.showNotification('Profile data imported successfully! Please review and adjust the ratings as needed.', 'success');
+    }
+
+    /**
+     * Sets up the LinkedIn PDF upload functionality
+     */
+    setupLinkedInUpload() {
+        const dropZone = document.getElementById('linkedin-drop-zone');
+        const fileInput = document.getElementById('linkedin-pdf-upload');
+        const loadingDiv = document.getElementById('linkedin-loading');
+        const statusDiv = document.getElementById('linkedin-status');
+
+        if (!dropZone || !fileInput) return;
+
+        // Drag and drop event listeners
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#3b82f6';
+            dropZone.style.backgroundColor = '#eff6ff';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#94a3b8';
+            dropZone.style.backgroundColor = 'transparent';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#94a3b8';
+            dropZone.style.backgroundColor = 'transparent';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type === 'application/pdf') {
+                this.handleLinkedInUpload(files[0]);
+            }
+        });
+
+        // File input change listener
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                this.handleLinkedInUpload(e.target.files[0]);
+            }
+        });
+    }
+
+    /**
+     * Handles the LinkedIn PDF upload process
+     */
+    async handleLinkedInUpload(file) {
+        const loadingDiv = document.getElementById('linkedin-loading');
+        const statusDiv = document.getElementById('linkedin-status');
+
+        try {
+            // Show loading state
+            loadingDiv.style.display = 'block';
+            statusDiv.textContent = 'Reading your PDF...';
+
+            // Extract text from PDF
+            const rawText = await this.extractTextFromPdf(file);
+            statusDiv.textContent = 'Analyzing your profile with AI...';
+            
+            // Call Gemini API for extraction
+            const extractedData = await this.callGeminiForExtraction(rawText);
+            
+            // Populate the form
+            this.populateFormFromLinkedIn(extractedData);
+            
+            statusDiv.textContent = 'Profile imported successfully!';
+            statusDiv.style.color = '#10b981';
+
+        } catch (error) {
+            console.error('Error processing LinkedIn PDF:', error);
+            statusDiv.textContent = 'Error processing PDF. Please try again.';
+            statusDiv.style.color = '#ef4444';
+        } finally {
+            loadingDiv.style.display = 'none';
+        }
+    }
 }
 
 // Helper function to format "How to Use This Report" text with bullet points
@@ -2665,3 +2815,6 @@ function formatHowToUseText(text) {
 document.addEventListener('DOMContentLoaded', () => {
     new AcquisitionAdvisorApp();
 });
+
+// Setup pdf.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js`;

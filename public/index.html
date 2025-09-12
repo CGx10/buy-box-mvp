@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Buybox Generator</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
@@ -32,6 +35,28 @@
                     <section class="module">
                         <h2>Module A: The Operator Profile</h2>
                         <p class="module-description">Rate your expertise and provide concrete evidence for each core competency.</p>
+                        
+                        <!-- LinkedIn PDF Import Section -->
+                        <div class="linkedin-import-section" style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: center;">
+                            <h4 style="color: #1e293b; margin-bottom: 10px; font-size: 18px;">🚀 Quick Start: Import from LinkedIn</h4>
+                            <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">Upload your LinkedIn profile PDF to automatically pre-populate this section</p>
+                            
+                            <div class="file-upload-area" style="border: 2px dashed #94a3b8; border-radius: 8px; padding: 20px; margin-bottom: 15px; transition: all 0.3s ease;" id="linkedin-drop-zone">
+                                <input type="file" id="linkedin-pdf-upload" accept=".pdf" style="display: none;">
+                                <label for="linkedin-pdf-upload" style="cursor: pointer; display: block;">
+                                    <div style="font-size: 24px; margin-bottom: 10px;">📄</div>
+                                    <div style="color: #3b82f6; font-weight: 600; margin-bottom: 5px;">Click to upload or drag & drop</div>
+                                    <div style="color: #64748b; font-size: 12px;">LinkedIn Profile PDF</div>
+                                </label>
+                            </div>
+                            
+                            <div id="linkedin-loading" style="display: none; margin: 10px 0;">
+                                <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #e5e7eb; border-top: 2px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <span style="margin-left: 10px; color: #64748b;">Processing your profile...</span>
+                            </div>
+                            
+                            <div id="linkedin-status" style="margin-top: 10px; font-size: 14px;"></div>
+                        </div>
                         
                         <div class="competency-group">
                             <div class="competency">
@@ -482,6 +507,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="script.js?v=99"></script>
+    <!-- pdf.js library from Mozilla -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+        <script src="script.js?v=102"></script>
 </body>
 </html>

@@ -591,6 +591,34 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
             }
         };
     }
+
+    /**
+     * Extracts LinkedIn profile data using Gemini
+     */
+    async extractLinkedInData(systemPrompt, userPrompt) {
+        if (!this.available) {
+            throw new Error('Gemini engine not available');
+        }
+
+        try {
+            const prompt = `${systemPrompt}\n\n${userPrompt}`;
+            const result = await this.model.generateContent(prompt);
+
+            const response = await result.response;
+            const text = response.text();
+            
+            // Parse the JSON response
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+                return JSON.parse(jsonMatch[0]);
+            } else {
+                throw new Error('No valid JSON found in response');
+            }
+        } catch (error) {
+            console.error('Error extracting LinkedIn data:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = GeminiAnalysisEngine;
