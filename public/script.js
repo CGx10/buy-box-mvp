@@ -1,7 +1,7 @@
 class AcquisitionAdvisorApp {
     constructor() {
         console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
-        console.log('🔥 CACHE BUSTING TEST - VERSION 114 - MULTI-FRAMEWORK TABLES READY!');
+        console.log('🔥 CACHE BUSTING TEST - VERSION 116 - MULTI-FRAMEWORK TABLES READY!');
         this.currentPhase = 1;
         this.analysisResults = null;
         this.availableEngines = {};
@@ -467,7 +467,7 @@ class AcquisitionAdvisorApp {
      * introductory section and correctly titling all subsequent parts of the report.
      */
     displayMultiFrameworkResults(frameworks) {
-        console.log('🚀 DISPLAY FUNCTION CALLED - v114!');
+        console.log('🚀 DISPLAY FUNCTION CALLED - v116!');
         const reportContainer = document.getElementById('buyboxSection');
         if (!reportContainer) return;
 

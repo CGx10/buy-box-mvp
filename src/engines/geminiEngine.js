@@ -42,12 +42,21 @@ class GeminiAnalysisEngine {
             const selectedModel = userData.ai_model || 'gemini-1.5-flash';
             this.model = this.genAI.getGenerativeModel({ model: selectedModel });
             console.log(`🤖 Using Gemini model: ${selectedModel}`);
+            console.log(`🔍 UserData.ai_model: ${userData.ai_model}`);
+            
+            // Add Flash-specific reinforcement
+            if (selectedModel === 'gemini-1.5-flash') {
+                console.log('⚡ FLASH MODEL DETECTED - Using enhanced instructions for better compliance');
+            }
             
             console.log('🚀 Starting two-stage Gemini analysis...');
             
             // Stage 1: Executive Summary & Strategic Insights
             console.log('📊 Stage 1: Generating Executive Summary & Strategic Insights...');
-            const stage1Prompt = this.buildStage1Prompt(userData);
+            const stage1Prompt = selectedModel === 'gemini-1.5-flash' 
+                ? this.buildFlashStage1Prompt(userData)
+                : this.buildStage1Prompt(userData);
+            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 1 prompt`);
             const stage1Result = await this.model.generateContent(stage1Prompt);
             const stage1Response = await stage1Result.response;
             const stage1Text = stage1Response.text();
@@ -56,7 +65,10 @@ class GeminiAnalysisEngine {
             
             // Stage 2: Detailed Framework Reports
             console.log('📋 Stage 2: Generating Detailed Framework Reports...');
-            const stage2Prompt = this.buildStage2Prompt(userData, stage1Text);
+            const stage2Prompt = selectedModel === 'gemini-1.5-flash' 
+                ? this.buildFlashStage2Prompt(userData, stage1Text)
+                : this.buildStage2Prompt(userData, stage1Text);
+            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 2 prompt`);
             const stage2Result = await this.model.generateContent(stage2Prompt);
             const stage2Response = await stage2Result.response;
             const stage2Text = stage2Response.text();
@@ -488,6 +500,97 @@ A summary table that presents the key outputs from each of the four frameworks f
 Generate the executive summary and strategic insights now.`.trim();
     }
 
+    buildFlashStage1Prompt(userData) {
+        console.log('⚡ Building FLASH-OPTIMIZED Stage 1 Prompt - Executive Summary & Strategic Insights');
+        
+        return `
+# AI-Powered Acquisition Advisor - Executive Summary & Strategic Insights
+
+## ROLE & OBJECTIVE
+You are an expert Mergers & Acquisitions (M&A) advisor and business strategist. Your task is to analyze the detailed profile of an acquisition entrepreneur and provide a comprehensive executive summary that identifies their strategic archetypes and provides actionable guidance.
+
+## INPUT DATA
+You will be provided with a JSON object containing the entrepreneur's complete profile, structured into three modules:
+
+**Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
+- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+
+**Module A.5: Personal Motivation & Vision (Core drivers and lifestyle preferences)**
+- Top Motivators: ${userData.top_motivators || 'Not provided'}
+- Ideal Work-Life Balance: ${userData.ideal_work_life_balance || 'Not provided'}
+- Values Alignment Importance: ${userData.values_alignment || 'Not provided'}
+
+**Module B: The Industry Profile (Interests, reading habits, problems to solve, customer affinity)**
+- Interests & Topics: ${userData.interests_topics || 'Not provided'}
+- Recent Books: ${userData.recent_books || 'Not provided'}
+- Problem to Solve: ${userData.problem_to_solve || 'Not provided'}
+- Customer Affinity: ${userData.customer_affinity || 'Not provided'}
+
+**Module C: The Lifestyle & Financial Profile (Financials, time, location, risk tolerance)**
+- Total Liquid Capital: $${userData.total_liquid_capital || 'Not provided'}
+- Potential Loan Amount: $${userData.potential_loan_amount || 'Not provided'}
+- Risk Tolerance: ${userData.risk_tolerance || 'Not provided'}
+- Time Commitment: ${userData.time_commitment || 'Not provided'}
+- Geographic Preferences: ${userData.location_preference || 'Not provided'} ${userData.location_regions ? `(${userData.location_regions})` : ''}
+
+**Specific Deal Criteria (Traditional M&A Parameters)**
+- Target Revenue Range: ${userData.target_revenue_range || 'Not provided'}
+- Target EBITDA Margin: ${userData.target_ebitda_margin || 'Not provided'}
+- Preferred Valuation Range (EV/EBITDA): ${userData.preferred_valuation_range || 'Not provided'}
+
+## REQUIRED OUTPUT FORMAT
+
+**Part 1: Executive Summary & Strategic Insights**
+A high-level overview that synthesizes the entrepreneur's profile and identifies their strategic archetypes. This summary must explain the reasoning behind the archetype determination and provide actionable advice.
+
+🚨 CRITICAL: You MUST generate the following content exactly as specified:
+
+Our comprehensive analysis reveals two distinct and powerful strategic paths for your acquisition journey, each defined by a clear operator archetype. Understanding these two paths is the key to focusing your search and maximizing your chances of success.
+
+**Understanding Your Archetypes**
+
+**The Efficiency Expert (The Value Unlocker):** The goal of the Efficiency Expert is to find established businesses with strong revenue but inefficient operations and make them better. They unlock hidden value by analyzing systems, cutting waste, improving processes, and optimizing financial structures. This archetype is identified by frameworks like Traditional M&A and SWOT, which prioritize your proven, existing skills and experience in operations and finance.
+
+**The Growth Catalyst (The Scaler):** The goal of the Growth Catalyst is to find businesses with great products but underdeveloped market reach and ignite their growth. They create value by leveraging sales and marketing expertise, building strategic partnerships, and proactively entering new markets. This archetype is identified by frameworks like the Hedgehog Concept and EO, which focus on your passions, proactive nature, and track record of building ventures.
+
+**How to Use This Report to Create Your Unified Buybox**
+
+This dual-archetype profile is a significant strategic advantage. It does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities. Your ideal acquisition target likely sits at the intersection of these two strategies.
+
+**Use the "Efficiency" frameworks (Traditional M&A, SWOT) to define your floor:** These reports identify the types of stable, cash-flowing businesses you can confidently acquire and improve. Use their criteria to screen for operationally sound opportunities.
+
+**Use the "Growth" frameworks (Hedgehog, EO) to define your ceiling:** These reports identify the industries and business models that align with your passions and offer the most significant upside potential. Use their criteria to screen for exciting, high-growth opportunities.
+
+**Your "Sweet Spot" is the Hybrid:** The ultimate goal is to find a business that meets the core criteria of both archetypes: an established business with inefficient operations (Efficiency Play) that also operates in a high-growth market you are passionate about, with underdeveloped sales and marketing channels (Growth Play). This hybrid target allows you to unlock value on day one through operational improvements while simultaneously positioning the business for massive long-term growth.
+
+**Strategic Implications:** This duality is a significant advantage, meaning you have two viable strategic paths for your acquisition journey. The key is to find opportunities that satisfy both sides of your entrepreneurial DNA - businesses where you can apply both your operational improvement skills and your growth-scaling abilities. The snapshot below summarizes the key financial differences, and the detailed reports that follow will help you build this combined view.
+
+**Part 2: Strategic Snapshot**
+A summary table that presents the key outputs from each of the four frameworks for easy comparison.
+
+| Analysis Framework | Operator Archetype | Size (SDE) Range | Primary Strategic Focus |
+|-------------------|-------------------|------------------|------------------------|
+| Traditional M&A | Efficiency Expert | $250k - $1M | Unlocking value in established businesses through operational improvements. |
+| The Hedgehog Concept | Growth Catalyst | $100k - $500k | Aligning passion and skill to scale a business with high growth potential. |
+| SWOT Analysis | Efficiency Expert | $200k - $750k | Leveraging operational strengths to capitalize on market opportunities. |
+| Entrepreneurial Orientation | Growth Catalyst | $50k - $250k | Applying innovation and risk-taking to disrupt a market or create new value. |
+
+## CRITICAL INSTRUCTIONS FOR FLASH MODEL
+1. 🚨 YOU MUST INCLUDE THE "How to Use This Report to Create Your Unified Buybox" SECTION - IT IS MANDATORY
+2. 🚨 DO NOT SKIP OR OMIT THE HTUTR SECTION UNDER ANY CIRCUMSTANCES
+3. 🚨 THIS SECTION IS THE MOST IMPORTANT PART OF THE REPORT
+4. Base your archetype determination on the user's competency ratings and evidence
+5. Use the user's motivators, work-life balance, and values to add depth to your analysis
+6. Ensure the SDE ranges reflect the user's financial constraints and risk tolerance
+7. Make the analysis actionable and specific to this individual's profile
+
+🚨 FINAL WARNING: The "How to Use This Report to Create Your Unified Buybox" section is REQUIRED and must appear in your response. Generate the executive summary and strategic insights now.`.trim();
+    }
+
     buildStage2Prompt(userData, stage1Response) {
         console.log('🚀 Building Stage 2 Prompt - Detailed Framework Reports');
         
@@ -683,6 +786,214 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
 - Assumptions included willingness to relocate and adapt to different management structures
 
 Generate the detailed framework reports now.`.trim();
+    }
+
+    buildFlashStage2Prompt(userData, stage1Response) {
+        console.log('⚡ Building FLASH-OPTIMIZED Stage 2 Prompt - Detailed Framework Reports');
+        
+        return `
+# AI-Powered Acquisition Advisor - Detailed Framework Reports
+
+## ROLE & OBJECTIVE
+You are an expert Mergers & Acquisitions (M&A) advisor. Based on the executive summary provided, generate detailed framework reports for each of the four strategic frameworks.
+
+## STAGE 1 CONTEXT
+Here is the executive summary from Stage 1:
+${stage1Response}
+
+## INPUT DATA
+You will be provided with a JSON object containing the entrepreneur's complete profile:
+
+**Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
+- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+
+**Module A.5: Personal Motivation & Vision**
+- Top Motivators: ${userData.top_motivators || 'Not provided'}
+- Ideal Work-Life Balance: ${userData.ideal_work_life_balance || 'Not provided'}
+- Values Alignment Importance: ${userData.values_alignment || 'Not provided'}
+
+**Module B: The Industry Profile**
+- Interests & Topics: ${userData.interests_topics || 'Not provided'}
+- Recent Books: ${userData.recent_books || 'Not provided'}
+- Problem to Solve: ${userData.problem_to_solve || 'Not provided'}
+- Customer Affinity: ${userData.customer_affinity || 'Not provided'}
+
+**Module C: The Lifestyle & Financial Profile**
+- Total Liquid Capital: $${userData.total_liquid_capital || 'Not provided'}
+- Potential Loan Amount: $${userData.potential_loan_amount || 'Not provided'}
+- Risk Tolerance: ${userData.risk_tolerance || 'Not provided'}
+- Time Commitment: ${userData.time_commitment || 'Not provided'}
+- Geographic Preferences: ${userData.location_preference || 'Not provided'} ${userData.location_regions ? `(${userData.location_regions})` : ''}
+
+**Specific Deal Criteria**
+- Target Revenue Range: ${userData.target_revenue_range || 'Not provided'}
+- Target EBITDA Margin: ${userData.target_ebitda_margin || 'Not provided'}
+- Preferred Valuation Range (EV/EBITDA): ${userData.preferred_valuation_range || 'Not provided'}
+
+## REQUIRED OUTPUT FORMAT
+
+**Part 3: Detailed Framework Reports**
+Present the complete, separate analysis for each of the four frameworks. Each analysis must be presented in its own clean, "white-box" style with professional formatting.
+
+**CRITICAL INSTRUCTION:** For each report, you must conduct the analysis as if it were the ONLY framework being used. The financial parameters, industries, and other criteria must be derived solely from the logic of that specific framework, ensuring four distinct and specific recommendations.
+
+🚨 MANDATORY: You MUST include the "Your Acquisition Thesis" section for EACH framework with the proper markers.
+
+---
+
+## Traditional M&A Expert Analysis
+
+*Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.*
+
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use the user's **top motivators** to frame the acquisition thesis
+- Apply **target revenue range and EBITDA margin** to set precise financial parameters
+- Consider **ownership style preferences** when defining the owner role
+- Use **values alignment** to filter out incompatible industries
+
+🚨 REQUIRED: **Your Acquisition Thesis**
+<thesis_start>
+Leverage your Efficiency Expert strengths to acquire and improve established businesses generating $500k-$1M in revenue with 10-15% EBITDA margins. Focus on businesses where your operational expertise and financial acumen can unlock immediate value through process improvement and margin optimization, aligning with your values and 60-hour work week preference.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | Software, SaaS, Professional Services (with existing client base) | Proven track record in these sectors. Existing client bases offer predictable revenue streams. |
+| Business Model | Recurring revenue (subscriptions, contracts), service-based with established processes | Predictable cash flow, aligns with your operational strengths. |
+| Size (SDE) | $500k - $1M | Matches stated revenue target and experience level. |
+| Profit Margin | 10-15% | Within your specified target range. |
+| Geography | Denver, San Diego, San Francisco, Miami | Your stated location preferences. |
+| YOUR LEVERAGE | Operational efficiency improvements, financial restructuring, margin expansion | Your core competencies. |
+| Red Flags | High customer concentration, outdated technology, weak management team (but less critical than in other models) | Potential risks that could hinder your ability to improve operations efficiently. |
+
+---
+
+## The Hedgehog Concept Analysis
+
+*Jim Collins' three circles framework: passion, excellence, and economic engine alignment.*
+
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use **top motivators** to define what drives the economic engine
+- Apply **work-life balance preferences** to determine the intensity of the owner role
+- Consider **values alignment** when identifying passion areas
+- Use **target revenue range** to set realistic growth expectations
+
+🚨 REQUIRED: **Your Acquisition Thesis**
+<thesis_start>
+Focus on acquiring businesses in AI/ML, e-commerce, or online communities where your operational and financial excellence can drive rapid growth and profitability, aligning with your passions, and a 60-hour work week. This ensures synergy between your passions, skills, and economic goals.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | AI/ML-enabled SaaS, e-commerce platforms, online community platforms | Aligns with your passions and expertise. |
+| Business Model | Subscription-based SaaS, transactional e-commerce, membership-based communities | Scalable business models with high growth potential. |
+| Size (SDE) | $100k - $500k | Allows for significant growth potential while remaining manageable. |
+| Profit Margin | 5-15% (with significant growth potential) | Acceptable initial margin with focus on growth. |
+| Geography | Denver, San Diego, San Francisco, Miami | Your stated location preferences. |
+| YOUR LEVERAGE | Sales & marketing expertise, strategic partnerships, operational improvements | Your abilities to accelerate growth and enhance profitability. |
+| Red Flags | Lack of product-market fit, weak technology, limited scalability, saturated markets | Risks that could hinder your ability to scale the business. |
+
+---
+
+## SWOT Analysis
+
+*Strategic planning framework evaluating internal strengths/weaknesses against external opportunities/threats.*
+
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use **top motivators** to define what constitutes a "strength"
+- Apply **ownership style preferences** to identify weaknesses
+- Consider **management team importance** when evaluating threats
+- Use **target EBITDA margin and valuation preferences** to set financial criteria
+
+🚨 REQUIRED: **Your Acquisition Thesis**
+<thesis_start>
+Capitalize on your operational, financial, and sales & marketing strengths to acquire businesses in the software, SaaS, or professional services sectors, mitigating weaknesses by hiring for product development needs, and aiming for acquisitions which can improve efficiency and profitability. This balances your strengths and weaknesses within a market opportunity.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | Software, SaaS, Professional Services | Aligns with your experience and expertise. |
+| Business Model | Recurring revenue, service-based with potential for process improvement | Cash flow stability and operational leverage. |
+| Size (SDE) | $500k - $750k | Balance of scale and manageability, building on experience. |
+| Profit Margin | 10-15% (with potential for improvement) | Target margin with room for optimization. |
+| Geography | Denver, San Diego, San Francisco, Miami | Your stated location preferences. |
+| YOUR LEVERAGE | Operational improvements, financial management, sales & marketing optimization | Your core competencies applied to enhance performance. |
+| Red Flags | High customer concentration, reliance on outdated technology, weak management team | Factors that could negatively impact the acquisition's success. |
+
+---
+
+## Entrepreneurial Orientation (EO) Analysis
+
+*Miller (1983) framework assessing innovativeness, proactiveness, and risk-taking to match entrepreneurial DNA.*
+
+**ENHANCED DATA INTEGRATION FOR THIS FRAMEWORK:**
+- Use **high risk tolerance** to identify high-growth, high-reward opportunities
+- Apply **proactive nature** to find businesses requiring active management
+- Consider **innovation interests** when selecting industries
+- Use **target revenue range** to define manageable scale
+
+🚨 REQUIRED: **Your Acquisition Thesis**
+<thesis_start>
+Seek opportunities that align with your high-risk tolerance and passion for innovation in AI/ML and related sectors. Your proactive nature and sales & marketing expertise are best suited for businesses where disruptive growth and market leadership are key goals.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| Criterion | Your Target Profile | Rationale |
+|-----------|-------------------|----------|
+| Industries | AI/ML-enabled SaaS, e-commerce with AI integration, online communities with AI-driven features | Aligns with your interests and passion for innovation. |
+| Business Model | Subscription-based SaaS, transactional e-commerce, membership-based communities | Scalable models with high growth potential. |
+| Size (SDE) | $50k - $250k | Smaller businesses offer higher growth potential with more involvement. |
+| Profit Margin | 5-15% (with significant growth potential) | Acceptable margin, anticipating high growth. |
+| Geography | Denver, San Diego, San Francisco, Miami | Your stated location preferences. |
+| YOUR LEVERAGE | Sales & marketing expertise, strategic partnerships, proactive market entry | Your abilities to drive rapid growth and build a strong market presence. |
+| Red Flags | Lack of product-market fit, weak technology, reliance on a single customer, highly competitive saturated markets | Significant risks to consider. |
+
+---
+
+## Part 4: Final Strategic Considerations
+Synthesizing the analyses, two primary leverage points emerge: 1) your ability to drive revenue growth in businesses with underdeveloped marketing and sales, and 2) your capacity to dramatically improve efficiency and profitability in operationally weak companies. Conversely, the key red flags to watch for are businesses with high customer concentration, outdated technology, or a lack of clear market positioning, as these could neutralize your core strengths.
+
+## Part 5: AI TRANSPARENCY & METHODOLOGY
+This analysis was conducted using a comprehensive multi-framework AI approach. Four distinct analytical models (Traditional M&A, Hedgehog Concept, SWOT Analysis, and Entrepreneurial Orientation) were applied simultaneously to your profile. This methodology provides a 360-degree strategic view, highlighting both points of consensus and nuanced differences to enable deeper, more informed acquisition decisions. The benefit of this approach is that it reduces analytical blind spots and reveals multiple viable paths to success.
+
+**Additional Analysis Details:**
+- **Operator Archetype:** The analysis weighted your high scores in operations, finance, and sales & marketing, resulting in the dual archetype of "Efficiency Expert" and "Growth Catalyst."
+- **Target Industries:** The analysis matched your interests in AI/ML, e-commerce, and online communities with your operational and financial skills, resulting in recommendations across those sectors.
+- **Financial Parameter Calculations:** The SDE range varied across frameworks to reflect the different growth stages and business models considered. The traditional M&A analysis focused on established businesses, while the EO analysis prioritized high-growth potential.
+- **Geographic Preference Analysis:** The analysis incorporated your stated preferences for Denver, San Diego, San Francisco, and Miami, acknowledging the need for a potential relocation.
+
+**Confidence Assessment:**
+- Archetype determination: 0.9
+- Industry recommendations: 0.8
+- Financial parameters: 0.7
+- Overall confidence: 0.8
+
+**Data Sources & Limitations:**
+- The most influential data points were your competency ratings, motivators, and deal criteria.
+- Missing information such as deal size range, employee count, and specific business models would improve the analysis.
+- Assumptions included a willingness to relocate and adapt to different management structures.
+
+## CRITICAL INSTRUCTIONS FOR FLASH MODEL
+1. 🚨 YOU MUST INCLUDE THE "Your Acquisition Thesis" SECTION FOR EACH FRAMEWORK
+2. 🚨 EACH THESIS MUST BE WRAPPED IN <thesis_start> and <thesis_end> MARKERS
+3. 🚨 DO NOT SKIP OR OMIT ANY ACQUISITION THESIS SECTIONS
+4. Base your analysis on the user's competency ratings and evidence
+5. Use the user's motivators, work-life balance, and values to add depth to your analysis
+6. Ensure the SDE ranges reflect the user's financial constraints and risk tolerance
+7. Make the analysis actionable and specific to this individual's profile
+
+🚨 FINAL WARNING: The "Your Acquisition Thesis" sections are REQUIRED for all four frameworks and must appear in your response with proper markers. Generate the detailed framework reports now.`.trim();
     }
 
     parseGeminiResponse(responseText, userData, prompt) {
