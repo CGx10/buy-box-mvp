@@ -481,23 +481,19 @@ class AcquisitionAdvisorApp {
                 // Parse the archetype sections - look for the actual text in the response
                 const efficiencyExpertMatch = part1Content.match(/\*\*The Efficiency Expert \(The Value Unlocker\):\*\*([\s\S]*?)(?=\*\*The Growth Catalyst|$)/);
                 const growthCatalystMatch = part1Content.match(/\*\*The Growth Catalyst \(The Scaler\):\*\*([\s\S]*?)(?=\*\*How to Use This Report|$)/);
-                const howToUseMatch = part1Content.match(/\*\*How to Use This Report[^*]*\*\*([\s\S]*?)(?=\*\*Strategic Implications|$)/);
-                const strategicImplicationsMatch = part1Content.match(/\*\*Strategic Implications\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
+                const howToUseMatch = part1Content.match(/\*\*How to Use This Report[^*]*\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
                 
                 console.log('DEBUG: Efficiency Expert match:', efficiencyExpertMatch ? 'Found' : 'Not found');
                 console.log('DEBUG: Growth Catalyst match:', growthCatalystMatch ? 'Found' : 'Not found');
                 console.log('DEBUG: How to Use match:', howToUseMatch ? 'Found' : 'Not found');
-                console.log('DEBUG: Strategic Implications match:', strategicImplicationsMatch ? 'Found' : 'Not found');
                 
                 const efficiencyExpertText = efficiencyExpertMatch ? efficiencyExpertMatch[1].trim() : 'The Efficiency Expert focuses on finding established businesses with strong revenue but inefficient operations and making them better.';
                 const growthCatalystText = growthCatalystMatch ? growthCatalystMatch[1].trim() : 'The Growth Catalyst focuses on finding businesses with great products but underdeveloped market reach and igniting their growth.';
                 const howToUseText = howToUseMatch ? howToUseMatch[1].trim() : 'This dual-archetype profile does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities.';
-                const strategicImplicationsText = strategicImplicationsMatch ? strategicImplicationsMatch[1].trim() : 'This duality is a significant advantage, meaning you have two viable strategic paths for your acquisition journey.';
                 
                 console.log('DEBUG: Efficiency Expert text:', efficiencyExpertText.substring(0, 100));
                 console.log('DEBUG: Growth Catalyst text:', growthCatalystText.substring(0, 100));
                 console.log('DEBUG: How to Use text:', howToUseText.substring(0, 100));
-                console.log('DEBUG: Strategic Implications text:', strategicImplicationsText.substring(0, 100));
                 
                 overviewHTML = `
                     <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
@@ -512,9 +508,6 @@ class AcquisitionAdvisorApp {
                         <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
                             <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst (The Scaler)</strong>: ${growthCatalystText}</p>
                         </div>
-                        
-                        <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Strategic Implications</h3>
-                        <p style="font-size: 16px; line-height: 1.6; margin-bottom: 20px;">${strategicImplicationsText}</p>
                         
                         <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">How to Use This Report to Create Your Unified Buybox</h3>
                         <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #60a5fa;">
