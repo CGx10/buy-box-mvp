@@ -1,7 +1,7 @@
 class AcquisitionAdvisorApp {
     constructor() {
         console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
-        console.log('🔥 CACHE BUSTING TEST - VERSION 2.0 - MULTI-FRAMEWORK TABLES READY!');
+        console.log('🔥 CACHE BUSTING TEST - VERSION 114 - MULTI-FRAMEWORK TABLES READY!');
         this.currentPhase = 1;
         this.analysisResults = null;
         this.availableEngines = {};
@@ -15,6 +15,7 @@ class AcquisitionAdvisorApp {
         this.setupEventListeners();
         this.setupFormValidation();
         this.setupLinkedInUpload();
+        this.setupModelSelection();
         this.updateProgress();
         await this.loadAvailableEngines();
         this.setupEngineSelection();
@@ -341,6 +342,10 @@ class AcquisitionAdvisorApp {
 
         // Multi-framework analysis - no methodology selection needed
         formData.analysis_methodology = 'multi_framework';
+        
+        // Get selected AI model
+        const selectedModel = document.querySelector('input[name="ai_model"]:checked');
+        formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.5-flash';
 
         return formData;
     }
@@ -462,7 +467,7 @@ class AcquisitionAdvisorApp {
      * introductory section and correctly titling all subsequent parts of the report.
      */
     displayMultiFrameworkResults(frameworks) {
-        console.log('🚀 DISPLAY FUNCTION CALLED - v66!');
+        console.log('🚀 DISPLAY FUNCTION CALLED - v114!');
         const reportContainer = document.getElementById('buyboxSection');
         if (!reportContainer) return;
 
@@ -2782,6 +2787,32 @@ class AcquisitionAdvisorApp {
             statusDiv.style.color = '#ef4444';
         } finally {
             loadingDiv.style.display = 'none';
+        }
+    }
+
+    setupModelSelection() {
+        const modelRadios = document.querySelectorAll('input[name="ai_model"]');
+        const flashLabel = document.getElementById('flash-label');
+        const proLabel = document.getElementById('pro-label');
+
+        // Add event listeners for model selection
+        modelRadios.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Remove selected class from all labels
+                flashLabel.classList.remove('selected');
+                proLabel.classList.remove('selected');
+                
+                // Add selected class to the checked label
+                if (e.target.checked) {
+                    e.target.closest('label').classList.add('selected');
+                }
+            });
+        });
+
+        // Set initial selected state
+        const checkedRadio = document.querySelector('input[name="ai_model"]:checked');
+        if (checkedRadio) {
+            checkedRadio.closest('label').classList.add('selected');
         }
     }
 }
