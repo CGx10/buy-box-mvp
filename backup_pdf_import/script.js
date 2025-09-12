@@ -2786,17 +2786,29 @@ class AcquisitionAdvisorApp {
     }
 }
 
-// Helper function to format "How to Use This Report" text as integrated paragraphs
+// Helper function to format "How to Use This Report" text with bullet points
 function formatHowToUseText(text) {
     if (!text) return '';
     
-    // Convert markdown bold to HTML bold but keep as integrated text
-    let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Split by double asterisks and process each part
+    const parts = text.split(/\*\*(.*?)\*\*/g);
+    let formatted = '';
     
-    // Convert line breaks to HTML breaks
-    formatted = formatted.replace(/\n/g, '<br>');
+    for (let i = 0; i < parts.length; i++) {
+        if (i % 2 === 0) {
+            // Even indices are regular text
+            formatted += parts[i];
+        } else {
+            // Odd indices are bold text that should become bullet points
+            const boldText = parts[i].trim();
+            if (boldText) {
+                formatted += `<div style="margin: 8px 0;"><strong style="color: #60a5fa;">• ${boldText}</strong></div>`;
+            }
+        }
+    }
     
-    return formatted;
+    // Also handle any remaining line breaks
+    return formatted.replace(/\n/g, '<br>');
 }
 
 // Initialize the app when the DOM is loaded
