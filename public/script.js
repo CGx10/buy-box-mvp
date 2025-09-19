@@ -1,7 +1,9 @@
 class AcquisitionAdvisorApp {
     constructor() {
+        // Dynamically extract version from script tag
+        this.scriptVersion = this.getScriptVersion();
         console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
-        console.log('🔥 CACHE BUSTING TEST - VERSION 116 - MULTI-FRAMEWORK TABLES READY!');
+        console.log(`🔥 CACHE BUSTING TEST - VERSION ${this.scriptVersion} - MULTI-FRAMEWORK TABLES READY!`);
         this.currentPhase = 1;
         this.analysisResults = null;
         this.availableEngines = {};
@@ -467,7 +469,7 @@ class AcquisitionAdvisorApp {
      * introductory section and correctly titling all subsequent parts of the report.
      */
     displayMultiFrameworkResults(frameworks) {
-        console.log('🚀 DISPLAY FUNCTION CALLED - v116!');
+        console.log(`🚀 DISPLAY FUNCTION CALLED - v${this.scriptVersion}!`);
         const reportContainer = document.getElementById('buyboxSection');
         if (!reportContainer) return;
 
@@ -2814,6 +2816,18 @@ class AcquisitionAdvisorApp {
         if (checkedRadio) {
             checkedRadio.closest('label').classList.add('selected');
         }
+    }
+
+    getScriptVersion() {
+        // Extract version from script tag src attribute
+        const scripts = document.querySelectorAll('script[src*="script.js"]');
+        for (let script of scripts) {
+            const match = script.src.match(/script\.js\?v=(\d+)/);
+            if (match) {
+                return match[1];
+            }
+        }
+        return 'unknown';
     }
 }
 
