@@ -227,29 +227,23 @@ Template: "Our comprehensive analysis reveals two distinct and powerful strategi
 
 **The Efficiency Expert (The Value Unlocker):** The goal of the Efficiency Expert is to find established businesses with strong revenue but inefficient operations and make them better. They unlock hidden value by analyzing systems, cutting waste, improving processes, and optimizing financial structures. This archetype is identified by frameworks like Traditional M&A and SWOT, which prioritize your proven, existing skills and experience in operations and finance.
 
-**The Growth Catalyst (The Scaler):** The goal of the Growth Catalyst is to find businesses with great products but underdeveloped market reach and ignite their growth. They create value by leveraging sales and marketing expertise, building strategic partnerships, and proactively entering new markets. This archetype is identified by frameworks like the Hedgehog Concept and EO, which focus on your passions, proactive nature, and track record of building ventures.
+**The Growth Catalyst (The Scaler):** The goal of the Growth Catalyst is to find businesses with great products but underdeveloped market reach and ignite their growth. They create value by leveraging sales and marketing expertise, building strategic partnerships, and proactively entering new markets. This archetype is identified by frameworks like the Hedgehog Concept and EO, which focus on your passions, proactive nature, and track record of building ventures."
 
 **How to Use This Report to Create Your Unified Buybox**
 
-This dual-archetype profile is a significant strategic advantage. It does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities. Your ideal acquisition target likely sits at the intersection of these two strategies.
+[AI should provide personalized guidance based on the user's specific archetype(s) and profile. This should explain how their unique strengths and competencies translate into acquisition strategy, what types of businesses they should target, and how to leverage their specific skills for maximum value creation.]
 
-**Use the "Efficiency" frameworks (Traditional M&A, SWOT) to define your floor:** These reports identify the types of stable, cash-flowing businesses you can confidently acquire and improve. Use their criteria to screen for operationally sound opportunities.
-
-**Use the "Growth" frameworks (Hedgehog, EO) to define your ceiling:** These reports identify the industries and business models that align with your passions and offer the most significant upside potential. Use their criteria to screen for exciting, high-growth opportunities.
-
-**Your "Sweet Spot" is the Hybrid:** The ultimate goal is to find a business that meets the core criteria of both archetypes: an established business with inefficient operations (Efficiency Play) that also operates in a high-growth market you are passionate about, with underdeveloped sales and marketing channels (Growth Play). This hybrid target allows you to unlock value on day one through operational improvements while simultaneously positioning the business for massive long-term growth.
-
-**Strategic Implications:** This duality is a significant advantage, meaning you have two viable strategic paths for your acquisition journey. The key is to find opportunities that satisfy both sides of your entrepreneurial DNA - businesses where you can apply both your operational improvement skills and your growth-scaling abilities. The snapshot below summarizes the key financial differences, and the detailed reports that follow will help you build this combined view."
+**Strategic Implications:** [AI should provide personalized strategic implications based on the user's actual profile, not generic advice. This should explain how their specific competencies, experience, and preferences translate into actionable acquisition strategy.]"
 
 **Part 2: Strategic Snapshot**
 A summary table that presents the key outputs from each of the four frameworks for easy comparison.
 
 | Analysis Framework | Operator Archetype | Size (SDE) Range | Primary Strategic Focus |
 |-------------------|-------------------|------------------|------------------------|
-| Traditional M&A | Efficiency Expert | $250k - $1M | Unlocking value in established businesses through operational improvements. |
-| The Hedgehog Concept | Growth Catalyst | $100k - $500k | Aligning passion and skill to scale a business with high growth potential. |
-| SWOT Analysis | Efficiency Expert | $200k - $750k | Leveraging operational strengths to capitalize on market opportunities. |
-| Entrepreneurial Orientation | Growth Catalyst | $50k - $250k | Applying innovation and risk-taking to disrupt a market or create new value. |
+| Traditional M&A | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| The Hedgehog Concept | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| SWOT Analysis | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| Entrepreneurial Orientation | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
 
 **Part 3: Detailed Framework Reports**
 Present the complete, separate analysis for each of the four frameworks. Each analysis must be presented in its own clean, "white-box" style with professional formatting.
@@ -470,25 +464,19 @@ Our comprehensive analysis reveals two distinct and powerful strategic paths for
 
 **How to Use This Report to Create Your Unified Buybox**
 
-This dual-archetype profile is a significant strategic advantage. It does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities. Your ideal acquisition target likely sits at the intersection of these two strategies.
+[AI should provide personalized guidance based on the user's specific archetype(s) and profile. This should explain how their unique strengths and competencies translate into acquisition strategy, what types of businesses they should target, and how to leverage their specific skills for maximum value creation.]
 
-**Use the "Efficiency" frameworks (Traditional M&A, SWOT) to define your floor:** These reports identify the types of stable, cash-flowing businesses you can confidently acquire and improve. Use their criteria to screen for operationally sound opportunities.
-
-**Use the "Growth" frameworks (Hedgehog, EO) to define your ceiling:** These reports identify the industries and business models that align with your passions and offer the most significant upside potential. Use their criteria to screen for exciting, high-growth opportunities.
-
-**Your "Sweet Spot" is the Hybrid:** The ultimate goal is to find a business that meets the core criteria of both archetypes: an established business with inefficient operations (Efficiency Play) that also operates in a high-growth market you are passionate about, with underdeveloped sales and marketing channels (Growth Play). This hybrid target allows you to unlock value on day one through operational improvements while simultaneously positioning the business for massive long-term growth.
-
-**Strategic Implications:** This duality is a significant advantage, meaning you have two viable strategic paths for your acquisition journey. The key is to find opportunities that satisfy both sides of your entrepreneurial DNA - businesses where you can apply both your operational improvement skills and your growth-scaling abilities. The snapshot below summarizes the key financial differences, and the detailed reports that follow will help you build this combined view."
+**Strategic Implications:** [AI should provide personalized strategic implications based on the user's actual profile, not generic advice. This should explain how their specific competencies, experience, and preferences translate into actionable acquisition strategy.]"
 
 **Part 2: Strategic Snapshot**
 A summary table that presents the key outputs from each of the four frameworks for easy comparison.
 
 | Analysis Framework | Operator Archetype | Size (SDE) Range | Primary Strategic Focus |
 |-------------------|-------------------|------------------|------------------------|
-| Traditional M&A | Efficiency Expert | $250k - $1M | Unlocking value in established businesses through operational improvements. |
-| The Hedgehog Concept | Growth Catalyst | $100k - $500k | Aligning passion and skill to scale a business with high growth potential. |
-| SWOT Analysis | Efficiency Expert | $200k - $750k | Leveraging operational strengths to capitalize on market opportunities. |
-| Entrepreneurial Orientation | Growth Catalyst | $50k - $250k | Applying innovation and risk-taking to disrupt a market or create new value. |
+| Traditional M&A | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| The Hedgehog Concept | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| SWOT Analysis | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| Entrepreneurial Orientation | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
 
 ## CRITICAL INSTRUCTIONS
 1. You MUST include the "How to Use This Report to Create Your Unified Buybox" section exactly as specified
@@ -496,6 +484,7 @@ A summary table that presents the key outputs from each of the four frameworks f
 3. Use the user's motivators, work-life balance, and values to add depth to your analysis
 4. Ensure the SDE ranges reflect the user's financial constraints and risk tolerance
 5. Make the analysis actionable and specific to this individual's profile
+6. **DO NOT USE HARDCODED ARCHETYPES** - Every user should receive unique, personalized archetype recommendations based on their specific competency profile
 
 Generate the executive summary and strategic insights now.`.trim();
     }
@@ -559,25 +548,19 @@ Our comprehensive analysis reveals two distinct and powerful strategic paths for
 
 **How to Use This Report to Create Your Unified Buybox**
 
-This dual-archetype profile is a significant strategic advantage. It does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities. Your ideal acquisition target likely sits at the intersection of these two strategies.
+[AI should provide personalized guidance based on the user's specific archetype(s) and profile. This should explain how their unique strengths and competencies translate into acquisition strategy, what types of businesses they should target, and how to leverage their specific skills for maximum value creation.]
 
-**Use the "Efficiency" frameworks (Traditional M&A, SWOT) to define your floor:** These reports identify the types of stable, cash-flowing businesses you can confidently acquire and improve. Use their criteria to screen for operationally sound opportunities.
-
-**Use the "Growth" frameworks (Hedgehog, EO) to define your ceiling:** These reports identify the industries and business models that align with your passions and offer the most significant upside potential. Use their criteria to screen for exciting, high-growth opportunities.
-
-**Your "Sweet Spot" is the Hybrid:** The ultimate goal is to find a business that meets the core criteria of both archetypes: an established business with inefficient operations (Efficiency Play) that also operates in a high-growth market you are passionate about, with underdeveloped sales and marketing channels (Growth Play). This hybrid target allows you to unlock value on day one through operational improvements while simultaneously positioning the business for massive long-term growth.
-
-**Strategic Implications:** This duality is a significant advantage, meaning you have two viable strategic paths for your acquisition journey. The key is to find opportunities that satisfy both sides of your entrepreneurial DNA - businesses where you can apply both your operational improvement skills and your growth-scaling abilities. The snapshot below summarizes the key financial differences, and the detailed reports that follow will help you build this combined view.
+**Strategic Implications:** [AI should provide personalized strategic implications based on the user's actual profile, not generic advice. This should explain how their specific competencies, experience, and preferences translate into actionable acquisition strategy.]
 
 **Part 2: Strategic Snapshot**
 A summary table that presents the key outputs from each of the four frameworks for easy comparison.
 
 | Analysis Framework | Operator Archetype | Size (SDE) Range | Primary Strategic Focus |
 |-------------------|-------------------|------------------|------------------------|
-| Traditional M&A | Efficiency Expert | $250k - $1M | Unlocking value in established businesses through operational improvements. |
-| The Hedgehog Concept | Growth Catalyst | $100k - $500k | Aligning passion and skill to scale a business with high growth potential. |
-| SWOT Analysis | Efficiency Expert | $200k - $750k | Leveraging operational strengths to capitalize on market opportunities. |
-| Entrepreneurial Orientation | Growth Catalyst | $50k - $250k | Applying innovation and risk-taking to disrupt a market or create new value. |
+| Traditional M&A | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| The Hedgehog Concept | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| SWOT Analysis | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
+| Entrepreneurial Orientation | [AI determines based on user profile] | [AI determines based on user profile] | [AI determines based on user profile] |
 
 ## CRITICAL INSTRUCTIONS FOR FLASH MODEL
 1. 🚨 YOU MUST INCLUDE THE "How to Use This Report to Create Your Unified Buybox" SECTION - IT IS MANDATORY

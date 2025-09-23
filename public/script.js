@@ -223,6 +223,9 @@ class AcquisitionAdvisorApp {
         
         const formData = this.collectFormData();
         
+        // Store form data for later use in display functions
+        this.currentFormData = formData;
+        
         // Debug: Log the form data being sent
         console.log('Form data being sent:', formData);
         console.log('Selected engines:', this.selectedEngines);
@@ -275,6 +278,34 @@ class AcquisitionAdvisorApp {
                 console.log('result.data keys:', Object.keys(result.data));
                 this.analysisResults = result.data;
                 console.log('this.analysisResults after setting:', this.analysisResults);
+                
+                // Save report to user's account if authenticated
+                console.log('🔍 Checking authentication for report saving...');
+                console.log('authDashboardManager available:', !!window.authDashboardManager);
+                console.log('currentUser:', window.authDashboardManager?.currentUser);
+                
+                if (window.authDashboardManager && window.authDashboardManager.currentUser) {
+                    const reportData = {
+                        title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
+                        formData: formData,
+                        analysisResults: result.data,
+                        aiModel: formData.ai_model || 'gemini-1.5-flash',
+                        version: '1.0',
+                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash'],
+                        notes: ''
+                    };
+                    
+                    console.log('💾 Attempting to save report:', reportData.title);
+                    try {
+                        const saveResult = await window.authDashboardManager.saveCurrentReport(reportData);
+                        console.log('✅ Report save result:', saveResult);
+                    } catch (error) {
+                        console.error('❌ Failed to save report:', error);
+                    }
+                } else {
+                    console.log('⚠️ User not authenticated, skipping report save');
+                }
+                
                 setTimeout(() => {
                     this.showResults();
                 }, 3000); // Show results after animation completes
@@ -479,6 +510,9 @@ class AcquisitionAdvisorApp {
         const rawResponse = this.analysisResults.rawResponse || '';
         let overviewHTML = '';
         
+        // Generate personalized archetype names based on user's competency ratings
+        const personalizedArchetypes = generatePersonalizedArchetypeNames(this.currentFormData);
+        
         if (rawResponse.includes('**Part 1: Executive Summary & Strategic Insights**')) {
             // Extract the new Part 1 content
             const part1Match = rawResponse.match(/\*\*Part 1: Executive Summary & Strategic Insights\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
@@ -495,9 +529,26 @@ class AcquisitionAdvisorApp {
                 console.log('DEBUG: Growth Catalyst match:', growthCatalystMatch ? 'Found' : 'Not found');
                 console.log('DEBUG: How to Use match:', howToUseMatch ? 'Found' : 'Not found');
                 
-                const efficiencyExpertText = efficiencyExpertMatch ? efficiencyExpertMatch[1].trim() : 'The Efficiency Expert focuses on finding established businesses with strong revenue but inefficient operations and making them better.';
-                const growthCatalystText = growthCatalystMatch ? growthCatalystMatch[1].trim() : 'The Growth Catalyst focuses on finding businesses with great products but underdeveloped market reach and igniting their growth.';
-                const howToUseText = howToUseMatch ? howToUseMatch[1].trim() : 'This dual-archetype profile does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities.';
+                let efficiencyExpertText = efficiencyExpertMatch ? efficiencyExpertMatch[1].trim() : 'The Efficiency Expert focuses on finding established businesses with strong revenue but inefficient operations and making them better.';
+                let growthCatalystText = growthCatalystMatch ? growthCatalystMatch[1].trim() : 'The Growth Catalyst focuses on finding businesses with great products but underdeveloped market reach and igniting their growth.';
+                
+                // Replace old archetype names in descriptions with personalized names
+                efficiencyExpertText = efficiencyExpertText
+                    .replace(/The Efficiency Expert/g, personalizedArchetypes.archetype1)
+                    .replace(/Efficiency Expert/g, personalizedArchetypes.archetype1);
+                    
+                growthCatalystText = growthCatalystText
+                    .replace(/The Growth Catalyst/g, personalizedArchetypes.archetype2)
+                    .replace(/Growth Catalyst/g, personalizedArchetypes.archetype2);
+                    
+                let howToUseText = howToUseMatch ? howToUseMatch[1].trim() : 'This dual-archetype profile does not force you to choose one path over the other; instead, it provides a powerful lens for evaluating opportunities.';
+                
+                // Replace old archetype names in the "How to Use" section as well
+                howToUseText = howToUseText
+                    .replace(/The Efficiency Expert/g, personalizedArchetypes.archetype1)
+                    .replace(/Efficiency Expert/g, personalizedArchetypes.archetype1)
+                    .replace(/The Growth Catalyst/g, personalizedArchetypes.archetype2)
+                    .replace(/Growth Catalyst/g, personalizedArchetypes.archetype2);
                 
                 console.log('DEBUG: Efficiency Expert text:', efficiencyExpertText.substring(0, 100));
                 console.log('DEBUG: Growth Catalyst text:', growthCatalystText.substring(0, 100));
@@ -510,11 +561,11 @@ class AcquisitionAdvisorApp {
                         
                         <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Understanding Your Archetypes</h3>
                         <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4ade80;">
-                            <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">The Efficiency Expert (The Value Unlocker)</strong>: ${efficiencyExpertText}</p>
+                            <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">${personalizedArchetypes.archetype1}</strong>: ${efficiencyExpertText}</p>
                         </div>
                         
                         <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
-                            <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst (The Scaler)</strong>: ${growthCatalystText}</p>
+                            <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">${personalizedArchetypes.archetype2}</strong>: ${growthCatalystText}</p>
                         </div>
                         
                         <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">How to Use This Report to Create Your Unified Buybox</h3>
@@ -536,11 +587,11 @@ class AcquisitionAdvisorApp {
                     
                     <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Archetype</h3>
                     <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #ffd700;">
-                        <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">The Growth Catalyst</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$50k-$250k SDE targets</span>: Your high sales & marketing ratings and entrepreneurial orientation make you ideal for scaling businesses with untapped market potential. You excel at identifying growth opportunities and driving revenue expansion.</p>
+                        <p style="margin: 0 0 10px 0;"><strong style="color: #ffd700;">${personalizedArchetypes.archetype2}</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$50k-$250k SDE targets</span>: Your high sales & marketing ratings and entrepreneurial orientation make you ideal for scaling businesses with untapped market potential. You excel at identifying growth opportunities and driving revenue expansion.</p>
                     </div>
                     
                     <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #4ade80;">
-                        <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">The Efficiency Expert</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$250k-$1M SDE targets</span>: Your operational excellence and financial acumen position you to acquire established businesses with operational inefficiencies. You can unlock hidden value through process improvement and margin optimization.</p>
+                        <p style="margin: 0 0 10px 0;"><strong style="color: #4ade80;">${personalizedArchetypes.archetype1}</strong> <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 12px;">$250k-$1M SDE targets</span>: Your operational excellence and financial acumen position you to acquire established businesses with operational inefficiencies. You can unlock hidden value through process improvement and margin optimization.</p>
                     </div>
                     
                     <h3 style="color: #ffd700; font-size: 20px; margin-top: 25px; margin-bottom: 15px;">Financial</h3>
@@ -2842,6 +2893,77 @@ function formatHowToUseText(text) {
     formatted = formatted.replace(/\n/g, '<br>');
     
     return formatted;
+}
+
+function generatePersonalizedArchetypeNames(formData) {
+    // Get competency ratings
+    const ratings = {
+        sales: parseInt(formData.sales_marketing?.rating || '0'),
+        operations: parseInt(formData.operations_systems?.rating || '0'),
+        finance: parseInt(formData.finance_analytics?.rating || '0'),
+        team: parseInt(formData.team_culture?.rating || '0'),
+        product: parseInt(formData.product_technology?.rating || '0')
+    };
+    
+    // Find the two highest-rated competencies
+    const sortedRatings = Object.entries(ratings)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 2);
+    
+    const [top1, top2] = sortedRatings;
+    const [top1Name, top1Rating] = top1;
+    const [top2Name, top2Rating] = top2;
+    
+    // Generate personalized archetype names based on the top two competencies
+    let archetype1, archetype2;
+    
+    if (top1Name === 'operations' && top2Name === 'finance') {
+        archetype1 = 'The Operational Optimizer';
+        archetype2 = 'The Financial Restructurer';
+    } else if (top1Name === 'sales' && top2Name === 'product') {
+        archetype1 = 'The Market Innovator';
+        archetype2 = 'The Product Growth Specialist';
+    } else if (top1Name === 'team' && top2Name === 'product') {
+        archetype1 = 'The Culture Builder';
+        archetype2 = 'The Product Team Leader';
+    } else if (top1Name === 'sales' && top2Name === 'team') {
+        archetype1 = 'The Relationship Driver';
+        archetype2 = 'The Community Builder';
+    } else if (top1Name === 'operations' && top2Name === 'sales') {
+        archetype1 = 'The Process Optimizer';
+        archetype2 = 'The Revenue Accelerator';
+    } else if (top1Name === 'finance' && top2Name === 'product') {
+        archetype1 = 'The Financial Strategist';
+        archetype2 = 'The Tech Value Creator';
+    } else {
+        // Fallback based on single highest competency
+        if (top1Name === 'operations') {
+            archetype1 = 'The Operational Expert';
+            archetype2 = 'The Systems Optimizer';
+        } else if (top1Name === 'sales') {
+            archetype1 = 'The Market Driver';
+            archetype2 = 'The Revenue Builder';
+        } else if (top1Name === 'finance') {
+            archetype1 = 'The Financial Architect';
+            archetype2 = 'The Value Optimizer';
+        } else if (top1Name === 'team') {
+            archetype1 = 'The Culture Catalyst';
+            archetype2 = 'The Team Builder';
+        } else if (top1Name === 'product') {
+            archetype1 = 'The Product Innovator';
+            archetype2 = 'The Tech Visionary';
+        } else {
+            archetype1 = 'The Strategic Operator';
+            archetype2 = 'The Value Creator';
+        }
+    }
+    
+    return {
+        archetype1: archetype1,
+        archetype2: archetype2,
+        topCompetencies: [top1Name, top2Name],
+        ratings: ratings
+    };
 }
 
 // Initialize the app when the DOM is loaded

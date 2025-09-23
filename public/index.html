@@ -556,6 +556,23 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- pdf.js library from Mozilla -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
-        <script src="script.js?v=118"></script>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js';
+        import { getAuth } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/12.3.0/firebase-analytics.js';
+        
+        // Make Firebase available globally
+        window.Firebase = { initializeApp, getAuth, getFirestore, getAnalytics };
+    </script>
+    
+    <!-- Include authentication modal and dashboard -->
+    <div id="authModalContainer"></div>
+    <div id="dashboardContainer"></div>
+    
+    <script src="auth-dashboard-manager.js"></script>
+    <script src="script.js?v=146"></script>
 </body>
 </html>
