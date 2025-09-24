@@ -4,18 +4,30 @@
   "description": "Buybox Generator - A specialized AI system to generate personalized acquisition strategies and buybox criteria",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "NODE_ENV=production node server.js",
+    "dev": "nodemon server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "build": "echo 'No build step required for Node.js app'",
+    "lint": "echo 'Linting not configured yet'",
+    "security:audit": "npm audit",
+    "security:fix": "npm audit fix",
+    "logs": "tail -f logs/combined.log",
+    "health": "curl -f http://localhost:3000/health || exit 1"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.17.1",
     "@google/generative-ai": "^0.2.1",
     "axios": "^1.6.5",
     "body-parser": "^1.20.2",
+    "compression": "^1.8.1",
     "compromise": "^14.10.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "express-cache-headers": "^0.1.4",
+    "express-rate-limit": "^8.1.0",
     "firebase": "^12.3.0",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.2",
@@ -24,10 +36,13 @@
     "natural": "^6.6.0",
     "openai": "^4.28.0",
     "sentiment": "^5.0.2",
-    "vader-sentiment": "^1.1.3"
+    "vader-sentiment": "^1.1.3",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1"
+    "jest": "^30.1.3",
+    "nodemon": "^3.0.1",
+    "supertest": "^7.1.4"
   },
   "keywords": [
     "ai",
