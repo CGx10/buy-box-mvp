@@ -7,8 +7,17 @@ class AuthDashboardManager {
         this.isInitialized = false;
         this.authStateListenerSet = false;
         this.db = null; // Add db as instance variable
+        // Debug flag - set to false for production
+        this.debugMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
         this.init();
+    }
+
+    // Debug helper method
+    debugLog(message, ...args) {
+        if (this.debugMode) {
+            console.log(message, ...args);
+        }
     }
 
     async init() {
@@ -256,7 +265,7 @@ class AuthDashboardManager {
         
         // Check current auth state immediately
         const currentUser = this.authService.getCurrentUser();
-        console.log('🔍 Current user check:', currentUser ? currentUser.email : 'null');
+        this.debugLog('🔍 Current user check:', currentUser ? currentUser.email : 'null');
         
         if (currentUser) {
             console.log('✅ User already authenticated:', currentUser.email);
@@ -364,10 +373,10 @@ class AuthDashboardManager {
         const dashboard = document.getElementById('userDashboard');
         const mainForm = document.getElementById('discoveryForm');
         
-        console.log('🎯 Showing dashboard, hiding modal and main form');
-        console.log('Modal element:', modal);
-        console.log('Dashboard element:', dashboard);
-        console.log('Main form element:', mainForm);
+        this.debugLog('🎯 Showing dashboard, hiding modal and main form');
+        this.debugLog('Modal element:', modal);
+        this.debugLog('Dashboard element:', dashboard);
+        this.debugLog('Main form element:', mainForm);
         
         // Hide the modal
         if (modal) {

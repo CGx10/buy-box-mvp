@@ -2,8 +2,14 @@ class AcquisitionAdvisorApp {
     constructor() {
         // Dynamically extract version from script tag
         this.scriptVersion = this.getScriptVersion();
-        console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
-        console.log(`🔥 CACHE BUSTING TEST - VERSION ${this.scriptVersion} - MULTI-FRAMEWORK TABLES READY!`);
+        // Debug flag - set to false for production
+        this.debugMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        
+        if (this.debugMode) {
+            console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
+            console.log(`🔥 CACHE BUSTING TEST - VERSION ${this.scriptVersion} - MULTI-FRAMEWORK TABLES READY!`);
+        }
+        
         this.currentPhase = 1;
         this.analysisResults = null;
         this.availableEngines = {};
@@ -11,6 +17,13 @@ class AcquisitionAdvisorApp {
         this.selectedEngines = [];
         this.comparisonMode = false;
         this.init();
+    }
+
+    // Debug helper method
+    debugLog(message, ...args) {
+        if (this.debugMode) {
+            console.log(message, ...args);
+        }
     }
 
     async init() {
@@ -456,11 +469,11 @@ class AcquisitionAdvisorApp {
         }
 
         // Check if this is multi-framework analysis
-        console.log('🔍 DEBUG: analysis_methodology =', this.analysisResults.analysis_methodology);
-        console.log('🔍 DEBUG: analysisResults keys =', Object.keys(this.analysisResults));
+        this.debugLog('🔍 DEBUG: analysis_methodology =', this.analysisResults.analysis_methodology);
+        this.debugLog('🔍 DEBUG: analysisResults keys =', Object.keys(this.analysisResults));
         
         if (this.analysisResults.analysis_methodology === 'multi_framework') {
-            console.log('🎯 DEBUG: Calling populateMultiFrameworkResults');
+            this.debugLog('🎯 DEBUG: Calling populateMultiFrameworkResults');
             // For multi-framework analysis, hide the single thesis section since we create our own stylized overview
             const thesisSection = document.querySelector('.thesis-section');
             if (thesisSection) {
@@ -483,12 +496,12 @@ class AcquisitionAdvisorApp {
 
     populateMultiFrameworkResults() {
         const rawResponse = this.analysisResults.rawResponse || '';
-        console.log('DEBUG: Raw response length:', rawResponse.length);
-        console.log('DEBUG: Raw response first 1000 chars:', rawResponse.substring(0, 1000));
+        this.debugLog('DEBUG: Raw response length:', rawResponse.length);
+        this.debugLog('DEBUG: Raw response first 1000 chars:', rawResponse.substring(0, 1000));
         
         // Parse the multi-framework response
         const frameworks = this.parseMultiFrameworkResponse(rawResponse);
-        console.log('Parsed frameworks:', frameworks);
+        this.debugLog('Parsed frameworks:', frameworks);
         
         // Display the results
         this.displayMultiFrameworkResults(frameworks);
