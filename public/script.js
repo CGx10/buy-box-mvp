@@ -414,9 +414,9 @@ class AcquisitionAdvisorApp {
                         title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
                         formData: formData,
                         analysisResults: result.data,
-                        aiModel: formData.ai_model || 'gemini-1.5-flash-002',
+                        aiModel: formData.ai_model || 'gemini-1.0-pro-002',
                         version: '1.0',
-                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash-002'],
+                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.0-pro-002'],
                         notes: ''
                     };
                     
@@ -521,9 +521,9 @@ class AcquisitionAdvisorApp {
         
         // For non-admin users, default to Gemini
         if (!selectedModel && !this.checkIfAdmin()) {
-            formData.ai_model = 'gemini-1.5-flash-002';
+            formData.ai_model = 'gemini-1.0-pro-002';
         } else {
-            formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.5-flash-002';
+            formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.0-pro-002';
         }
 
         return formData;
@@ -2091,7 +2091,7 @@ class AcquisitionAdvisorApp {
             html += '<div class="gemini-debug-simple">';
             html += '<h4>🔍 Gemini Debug Information</h4>';
             html += '<div class="debug-meta">';
-            html += '<span><strong>Model:</strong> gemini-1.5-flash-002</span>';
+            html += '<span><strong>Model:</strong> gemini-1.0-pro-002</span>';
             html += '<span><strong>Processing Time:</strong> ' + (this.analysisResults.processingTimeMs || 'N/A') + 'ms</span>';
             html += '</div>';
             html += '<h5>📝 Actual AI Prompt Sent to Gemini:</h5>';
@@ -2483,7 +2483,7 @@ class AcquisitionAdvisorApp {
                 if (engineName === 'gemini') {
                     html += `<div class="engine-config">`;
                     html += `<h6>Configuration:</h6>`;
-                    html += `<p><strong>Model:</strong> gemini-1.5-flash-002</p>`;
+                    html += `<p><strong>Model:</strong> gemini-1.0-pro-002</p>`;
                     html += `<p><strong>API Version:</strong> v1beta</p>`;
                     html += `<p><strong>Max Tokens:</strong> 8,192</p>`;
                     html += `<p><strong>Temperature:</strong> 0.7</p>`;
@@ -2501,7 +2501,7 @@ class AcquisitionAdvisorApp {
                 html += '<div class="transparency-section-item">';
                 html += '<h4>🔍 Gemini Debug Information</h4>';
                 html += '<div class="debug-info">';
-                html += '<p><strong>Model Used:</strong> gemini-1.5-flash-002</p>';
+                html += '<p><strong>Model Used:</strong> gemini-1.0-pro-002</p>';
                 html += '<p><strong>Prompt Methodology:</strong> Same as Traditional AI (Multi-Factor Scoring)</p>';
                 html += '<p><strong>Archetype Detection:</strong> Weighted composite scoring with key phrase analysis</p>';
                 html += '<p><strong>Key Phrases Analyzed:</strong> efficiency, process, systems, automation, workflow, optimization, streamline, cost reduction, scalability, operations</p>';
