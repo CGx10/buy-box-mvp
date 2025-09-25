@@ -21,6 +21,11 @@ class AcquisitionAdvisorApp {
         this.selectedEngines = [];
         this.comparisonMode = false;
         this.init();
+        
+        // Initialize admin manager if available
+        if (window.adminManager) {
+            window.adminManager.init();
+        }
     }
 
     // Debug helper method
@@ -30,7 +35,79 @@ class AcquisitionAdvisorApp {
         }
     }
 
+    // Check if current user is admin
+    async checkIfAdmin() {
+        if (window.authDashboardManager && window.authDashboardManager.currentUser) {
+            const userEmail = window.authDashboardManager.currentUser.email;
+            
+            // First check email (fast check)
+            if (userEmail === 'capitalgainsx10@gmail.com') {
+                return true;
+            }
+            
+            // For other users, check database role (more secure)
+            try {
+                const { doc, getDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                const userDoc = await getDoc(doc(window.Firebase.getFirestore(), 'users', window.authDashboardManager.currentUser.uid));
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    return userData.role === 'admin';
+                }
+            } catch (error) {
+                console.error('❌ Error checking admin status:', error);
+            }
+        }
+        return false;
+    }
+
+    // Refresh engine selection based on admin status
+    async refreshEngineSelection() {
+        console.log('🔄 Refreshing engine selection based on admin status...');
+        await this.setupEngineSelection();
+    }
+
+    // Reset form state for new analysis
+    resetFormState() {
+        console.log('🔄 Resetting form state...');
+        
+        // Clear analysis results
+        this.analysisResults = null;
+        
+        // Reset to phase 1
+        this.currentPhase = 1;
+        this.updateProgress();
+        
+        // Show questionnaire phase
+        this.showPhase('discoveryPhase');
+        
+        // Reset form
+        const form = document.getElementById('discoveryForm');
+        if (form) {
+            form.reset();
+        }
+        
+        // Clear results display
+        const resultsContainer = document.getElementById('resultsContainer');
+        if (resultsContainer) {
+            resultsContainer.innerHTML = '';
+            resultsContainer.style.display = 'none';
+        }
+        
+        // Hide strategy phase
+        const strategyPhase = document.getElementById('strategyPhase');
+        if (strategyPhase) {
+            strategyPhase.style.display = 'none';
+        }
+        
+        console.log('✅ Form state reset complete');
+    }
+
     async init() {
+        console.log('🚀 AcquisitionAdvisorApp init called');
+        console.log('Current phase:', this.currentPhase);
+        console.log('Analysis results:', this.analysisResults);
+        
         this.setupEventListeners();
         this.setupFormValidation();
         this.setupLinkedInUpload();
@@ -38,6 +115,9 @@ class AcquisitionAdvisorApp {
         this.updateProgress();
         await this.loadAvailableEngines();
         this.setupEngineSelection();
+        
+        console.log('✅ AcquisitionAdvisorApp init complete');
+        console.log('Current phase after init:', this.currentPhase);
     }
 
     setupEventListeners() {
@@ -218,7 +298,8 @@ class AcquisitionAdvisorApp {
         const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
         competencies.forEach(competency => {
             const evidence = document.getElementById(`${competency}_evidence`);
-            if (evidence.value.length < 200) {
+            console.log(`Validating ${competency} evidence:`, evidence ? `length=${evidence.value.length}` : 'NOT FOUND');
+            if (evidence && evidence.value.length < 200) {
                 isValid = false;
                 this.setFieldValidation(evidence.closest('.competency'), false, 'Evidence must be at least 200 characters.');
             }
@@ -249,6 +330,13 @@ class AcquisitionAdvisorApp {
         console.log('Selected engine (single):', this.selectedEngine);
         console.log('Comparison mode:', this.comparisonMode);
         console.log('Available engines:', Object.keys(this.availableEngines));
+        
+        // Debug: Check evidence field lengths
+        const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
+        competencies.forEach(competency => {
+            const evidence = document.getElementById(`${competency}_evidence`);
+            console.log(`${competency} evidence length:`, evidence ? evidence.value.length : 'NOT FOUND');
+        });
         
         // Move to analysis phase
         this.currentPhase = 2;
@@ -288,9 +376,19 @@ class AcquisitionAdvisorApp {
             }
 
             // Check if response is valid JSON
-            if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-                console.warn('API not available, using fallback mode');
-                result = this.generateFallbackAnalysis();
+            console.log('Response status:', response.status);
+            console.log('Response headers:', response.headers.get('content-type'));
+            
+            if (!response.ok) {
+                console.error('API response not OK:', response.status, response.statusText);
+                const errorText = await response.text();
+                console.error('Error response body:', errorText);
+                throw new Error(`API Error: ${response.status} ${response.statusText}`);
+            }
+            
+            if (!response.headers.get('content-type')?.includes('application/json')) {
+                console.warn('API not returning JSON, using fallback mode');
+                result = this.generateFallbackAnalysis(formData);
             } else {
                 result = await response.json();
             }
@@ -316,9 +414,9 @@ class AcquisitionAdvisorApp {
                         title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
                         formData: formData,
                         analysisResults: result.data,
-                        aiModel: formData.ai_model || 'gemini-1.5-flash',
+                        aiModel: formData.ai_model || 'gemini-1.5-flash-002',
                         version: '1.0',
-                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash'],
+                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash-002'],
                         notes: ''
                     };
                     
@@ -414,9 +512,19 @@ class AcquisitionAdvisorApp {
         // Multi-framework analysis - no methodology selection needed
         formData.analysis_methodology = 'multi_framework';
         
-        // Get selected AI model
-        const selectedModel = document.querySelector('input[name="ai_model"]:checked');
-        formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.5-flash';
+        // Get selected AI model - check both old and new selectors
+        let selectedModel = document.querySelector('input[name="ai_model"]:checked');
+        if (!selectedModel) {
+            // Try the new engine selection format
+            selectedModel = document.querySelector('input[name="engineSelect"]:checked');
+        }
+        
+        // For non-admin users, default to Gemini
+        if (!selectedModel && !this.checkIfAdmin()) {
+            formData.ai_model = 'gemini-1.5-flash-002';
+        } else {
+            formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.5-flash-002';
+        }
 
         return formData;
     }
@@ -1174,12 +1282,26 @@ class AcquisitionAdvisorApp {
     }
 
     showPhase(phaseId) {
+        console.log('🔄 showPhase called with:', phaseId);
+        console.log('Current phase:', this.currentPhase);
+        
         const phases = document.querySelectorAll('.phase-content');
-        phases.forEach(phase => {
+        console.log('Found phase elements:', phases.length);
+        phases.forEach((phase, index) => {
+            console.log(`Phase ${index}:`, phase.id, phase.className);
             phase.classList.remove('active');
         });
         
-        document.getElementById(phaseId).classList.add('active');
+        const targetPhase = document.getElementById(phaseId);
+        console.log('Target phase element:', targetPhase);
+        if (targetPhase) {
+            targetPhase.classList.add('active');
+            console.log('✅ Phase shown:', phaseId);
+            console.log('Phase classes after activation:', targetPhase.className);
+        } else {
+            console.log('❌ Phase not found:', phaseId);
+            console.log('Available phase IDs:', Array.from(phases).map(p => p.id));
+        }
     }
 
     downloadReport() {
@@ -1969,7 +2091,7 @@ class AcquisitionAdvisorApp {
             html += '<div class="gemini-debug-simple">';
             html += '<h4>🔍 Gemini Debug Information</h4>';
             html += '<div class="debug-meta">';
-            html += '<span><strong>Model:</strong> gemini-1.5-flash</span>';
+            html += '<span><strong>Model:</strong> gemini-1.5-flash-002</span>';
             html += '<span><strong>Processing Time:</strong> ' + (this.analysisResults.processingTimeMs || 'N/A') + 'ms</span>';
             html += '</div>';
             html += '<h5>📝 Actual AI Prompt Sent to Gemini:</h5>';
@@ -2016,9 +2138,32 @@ class AcquisitionAdvisorApp {
         }
     }
 
-    setupEngineSelection() {
+    async setupEngineSelection() {
         const engineGrid = document.getElementById('engineGrid');
         if (!engineGrid) return;
+
+        // Check if user is admin
+        const isAdmin = await this.checkIfAdmin();
+        
+        // Find the AI Model Selection section
+        const aiModelSection = engineGrid.closest('.form-section');
+        if (aiModelSection) {
+            if (isAdmin) {
+                console.log('🔐 Admin user detected - showing AI Model Selection');
+                aiModelSection.style.display = 'block';
+            } else {
+                console.log('👤 Regular user - hiding AI Model Selection');
+                aiModelSection.style.display = 'none';
+            }
+        }
+
+        // Only populate engine grid if user is admin
+        if (!isAdmin) {
+            // For non-admin users, just set default engine and return
+            this.selectedEngine = 'gemini'; // Default to Gemini for regular users
+            console.log('👤 Non-admin user - using default engine:', this.selectedEngine);
+            return;
+        }
 
         engineGrid.innerHTML = '';
         
@@ -2338,7 +2483,7 @@ class AcquisitionAdvisorApp {
                 if (engineName === 'gemini') {
                     html += `<div class="engine-config">`;
                     html += `<h6>Configuration:</h6>`;
-                    html += `<p><strong>Model:</strong> gemini-1.5-flash</p>`;
+                    html += `<p><strong>Model:</strong> gemini-1.5-flash-002</p>`;
                     html += `<p><strong>API Version:</strong> v1beta</p>`;
                     html += `<p><strong>Max Tokens:</strong> 8,192</p>`;
                     html += `<p><strong>Temperature:</strong> 0.7</p>`;
@@ -2356,7 +2501,7 @@ class AcquisitionAdvisorApp {
                 html += '<div class="transparency-section-item">';
                 html += '<h4>🔍 Gemini Debug Information</h4>';
                 html += '<div class="debug-info">';
-                html += '<p><strong>Model Used:</strong> gemini-1.5-flash</p>';
+                html += '<p><strong>Model Used:</strong> gemini-1.5-flash-002</p>';
                 html += '<p><strong>Prompt Methodology:</strong> Same as Traditional AI (Multi-Factor Scoring)</p>';
                 html += '<p><strong>Archetype Detection:</strong> Weighted composite scoring with key phrase analysis</p>';
                 html += '<p><strong>Key Phrases Analyzed:</strong> efficiency, process, systems, automation, workflow, optimization, streamline, cost reduction, scalability, operations</p>';
@@ -3161,17 +3306,15 @@ class AcquisitionAdvisorApp {
 
 Our comprehensive analysis reveals two distinct and powerful strategic paths for your acquisition journey, each defined by a clear operator archetype. Understanding these two paths is the key to focusing your search and maximizing your chances of success.
 
-**Understanding Your Archetypes**
-
-**The ${personalizedArchetypes.archetype1}**
+**The Efficiency Expert (The Value Unlocker):**
 This archetype represents your primary strength in ${this.getTopCompetency(competencies)}. You excel at leveraging ${this.getTopCompetency(competencies)} to drive strategic value and operational excellence, and are driven by ${motivators.join(' and ')}. Your ${riskTolerance} risk tolerance and ${timeHorizon} time horizon make you well-suited for ${this.getInvestmentRangeDescription(investmentAmount)} acquisitions.
 
-**The ${personalizedArchetypes.archetype2}**
+**The Growth Catalyst (The Scaler):**
 This secondary archetype leverages your ${this.getSecondCompetency(competencies)} capabilities. You have strong potential in leveraging ${this.getSecondCompetency(competencies)} for strategic advantage and can complement your primary archetype through strategic integration of ${this.getTopCompetency(competencies)} and ${this.getSecondCompetency(competencies)} capabilities.
 
 **How to Use This Report to Create Your Unified Buybox**
 
-This analysis provides your personalized acquisition strategy framework. Focus on opportunities that align with your ${personalizedArchetypes.archetype1} strengths while developing your ${personalizedArchetypes.archetype2} capabilities. Your ideal targets will be ${this.getTargetDescription(userData)} that offer significant ${motivators.join(' and ')} potential.
+This analysis provides your personalized acquisition strategy framework. Focus on opportunities that align with your Efficiency Expert strengths while developing your Growth Catalyst capabilities. Your ideal targets will be ${this.getTargetDescription(userData)} that offer significant ${motivators.join(' and ')} potential.
 
 Strategic Implications: Your unique combination of competencies positions you for success in ${this.getIndustryFocus(userData)}. Prioritize deals that leverage your ${this.getTopCompetency(competencies)} expertise while building your ${this.getSecondCompetency(competencies)} capabilities for long-term value creation.
 
@@ -3595,7 +3738,7 @@ function generatePersonalizedArchetypeNames(formData) {
 
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new AcquisitionAdvisorApp();
+    window.acquisitionAdvisorApp = new AcquisitionAdvisorApp();
 });
 
 // Setup pdf.js worker

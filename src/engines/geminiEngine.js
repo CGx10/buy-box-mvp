@@ -10,7 +10,7 @@ class GeminiAnalysisEngine {
         if (process.env.GEMINI_API_KEY && process.env.ENABLE_GEMINI === 'true') {
             try {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-002' });
                 this.available = true;
                 console.log('✅ Gemini engine initialized successfully');
             } catch (error) {
@@ -39,13 +39,13 @@ class GeminiAnalysisEngine {
 
         try {
             // Set model based on user selection
-            const selectedModel = userData.ai_model || 'gemini-1.5-flash';
+            const selectedModel = userData.ai_model || 'gemini-1.5-flash-002';
             this.model = this.genAI.getGenerativeModel({ model: selectedModel });
             console.log(`🤖 Using Gemini model: ${selectedModel}`);
             console.log(`🔍 UserData.ai_model: ${userData.ai_model}`);
             
             // Add Flash-specific reinforcement
-            if (selectedModel === 'gemini-1.5-flash') {
+            if (selectedModel === 'gemini-1.5-flash-002') {
                 console.log('⚡ FLASH MODEL DETECTED - Using enhanced instructions for better compliance');
             }
             
@@ -53,10 +53,10 @@ class GeminiAnalysisEngine {
             
             // Stage 1: Executive Summary & Strategic Insights
             console.log('📊 Stage 1: Generating Executive Summary & Strategic Insights...');
-            const stage1Prompt = selectedModel === 'gemini-1.5-flash' 
+            const stage1Prompt = selectedModel === 'gemini-1.5-flash-002' 
                 ? this.buildFlashStage1Prompt(userData)
                 : this.buildStage1Prompt(userData);
-            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 1 prompt`);
+            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash-002' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 1 prompt`);
             const stage1Result = await this.model.generateContent(stage1Prompt);
             const stage1Response = await stage1Result.response;
             const stage1Text = stage1Response.text();
@@ -65,10 +65,10 @@ class GeminiAnalysisEngine {
             
             // Stage 2: Detailed Framework Reports
             console.log('📋 Stage 2: Generating Detailed Framework Reports...');
-            const stage2Prompt = selectedModel === 'gemini-1.5-flash' 
+            const stage2Prompt = selectedModel === 'gemini-1.5-flash-002' 
                 ? this.buildFlashStage2Prompt(userData, stage1Text)
                 : this.buildStage2Prompt(userData, stage1Text);
-            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 2 prompt`);
+            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash-002' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 2 prompt`);
             const stage2Result = await this.model.generateContent(stage2Prompt);
             const stage2Response = await stage2Result.response;
             const stage2Text = stage2Response.text();
@@ -1157,7 +1157,7 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
         return {
             name: "Google Gemini",
             type: "Expert M&A Advisor",
-            model: "gemini-1.5-flash",
+            model: "gemini-1.5-flash-002",
             provider: "Google",
             capabilities: [
                 "Expert M&A analysis and strategy",
@@ -1170,7 +1170,7 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
             enabled: this.available,
             available: this.available,
             configuration: {
-                model: "gemini-1.5-flash",
+                model: "gemini-1.5-flash-002",
                 apiVersion: "v1beta",
                 maxTokens: 8192,
                 temperature: 0.7,

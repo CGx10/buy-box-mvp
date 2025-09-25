@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Buybox Generator</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        
+        .admin-content {
+            padding: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .stat-card .number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .user-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .user-table th,
+        .user-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .user-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .role-admin { background: #dc3545; color: white; }
+        .role-premium { background: #28a745; color: white; }
+        .role-basic { background: #6c757d; color: white; }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 2px;
+        }
+        
+        .btn-primary { background: #667eea; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-danger { background: #dc3545; color: white; }
+        
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>🔐 Admin Panel</h1>
+            <p>User Management & System Administration</p>
+        </div>
+        
+        <div class="admin-content">
+            <!-- Statistics Overview -->
+            <div class="section">
+                <h2>System Statistics</h2>
+                <div class="stats-grid" id="statsGrid">
+                    <div class="stat-card">
+                        <h3>Total Users</h3>
+                        <div class="number" id="totalUsers">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Active Users (30 days)</h3>
+                        <div class="number" id="activeUsers">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Reports</h3>
+                        <div class="number" id="totalReports">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Reports This Month</h3>
+                        <div class="number" id="monthlyReports">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Management -->
+            <div class="section">
+                <h2>User Management</h2>
+                <div id="userManagement">
+                    <div class="loading">Loading users...</div>
+                </div>
+            </div>
+            
+            <!-- Role Management -->
+            <div class="section">
+                <h2>Role Management</h2>
+                <div id="roleManagement">
+                    <div class="loading">Loading role management...</div>
+                </div>
+            </div>
+            
+            <!-- System Settings -->
+            <div class="section">
+                <h2>System Settings</h2>
+                <div id="systemSettings">
+                    <div class="loading">Loading system settings...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+    
+    <script src="auth-dashboard-manager.js"></script>
+    <script src="permission-manager.js"></script>
+    <script>
+        // Initialize Firebase for admin panel
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWUj5YXXwnM1LwLoeDxAIHoVk8Yufg9zY",
+            authDomain: "buybox-generator.firebaseapp.com",
+            projectId: "buybox-generator",
+            storageBucket: "buybox-generator.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef123456"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+    </script>
+    <script>
+        class AdminPanel {
+            constructor() {
+                this.users = [];
+                this.stats = {};
+                this.init();
+            }
+
+            async init() {
+                // Check authentication
+                auth.onAuthStateChanged(async (user) => {
+                    if (user && user.email === 'capitalgainsx10@gmail.com') {
+                        console.log('🔐 Admin user authenticated:', user.email);
+                        // Load data
+                        await this.loadStats();
+                        await this.loadUsers();
+                        this.setupEventListeners();
+                    } else if (user) {
+                        this.showError('Admin access required. Only administrators can access this panel.');
+                    } else {
+                        this.showError('Authentication required. Please sign in to access the admin panel.');
+                    }
+                });
+            }
+
+            async loadStats() {
+                try {
+                    console.log('📊 Loading system statistics...');
+                    
+                    // Get user count from Firebase
+                    const usersSnapshot = await db.collection('users').get();
+                    const totalUsers = usersSnapshot.size;
+                    
+                    // Get reports count from Firebase
+                    const reportsSnapshot = await db.collection('reports').get();
+                    const totalReports = reportsSnapshot.size;
+                    
+                    // Calculate active users (last 30 days)
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    
+                    let activeUsers = 0;
+                    let monthlyReports = 0;
+                    
+                    usersSnapshot.forEach(doc => {
+                        const userData = doc.data();
+                        if (userData.lastLoginAt && userData.lastLoginAt.toDate() > thirtyDaysAgo) {
+                            activeUsers++;
+                        }
+                    });
+                    
+                    // Calculate monthly reports
+                    reportsSnapshot.forEach(doc => {
+                        const reportData = doc.data();
+                        if (reportData.generatedAt && reportData.generatedAt.toDate() > thirtyDaysAgo) {
+                            monthlyReports++;
+                        }
+                    });
+                    
+                    this.stats = {
+                        totalUsers,
+                        activeUsers,
+                        totalReports,
+                        monthlyReports
+                    };
+
+                    document.getElementById('totalUsers').textContent = this.stats.totalUsers;
+                    document.getElementById('activeUsers').textContent = this.stats.activeUsers;
+                    document.getElementById('totalReports').textContent = this.stats.totalReports;
+                    document.getElementById('monthlyReports').textContent = this.stats.monthlyReports;
+                    
+                    console.log('✅ Stats loaded:', this.stats);
+                } catch (error) {
+                    console.error('❌ Error loading stats:', error);
+                    this.showError('Failed to load system statistics');
+                }
+            }
+
+            async loadUsers() {
+                try {
+                    console.log('👥 Loading users from Firebase...');
+                    
+                    // Get users from Firebase
+                    const usersSnapshot = await db.collection('users').get();
+                    this.users = [];
+                    
+                    // Get reports for each user to calculate their stats
+                    const reportsSnapshot = await db.collection('reports').get();
+                    const userReports = {};
+                    
+                    reportsSnapshot.forEach(doc => {
+                        const reportData = doc.data();
+                        const userId = reportData.userId;
+                        if (!userReports[userId]) {
+                            userReports[userId] = [];
+                        }
+                        userReports[userId].push(reportData);
+                    });
+                    
+                    // Calculate monthly reports (last 30 days)
+                    const thirtyDaysAgo = new Date();
+                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                    
+                    usersSnapshot.forEach(doc => {
+                        const userData = doc.data();
+                        const userId = doc.id;
+                        const userReportsList = userReports[userId] || [];
+                        
+                        // Count reports this month
+                        const reportsThisMonth = userReportsList.filter(report => 
+                            report.generatedAt && report.generatedAt.toDate() > thirtyDaysAgo
+                        ).length;
+                        
+                        // Determine role (admin if email matches, otherwise basic)
+                        const role = userData.email === 'capitalgainsx10@gmail.com' ? 'admin' : (userData.role || 'basic');
+                        
+                        this.users.push({
+                            id: userId,
+                            email: userData.email,
+                            displayName: userData.displayName || userData.email,
+                            role: role,
+                            createdAt: userData.createdAt ? userData.createdAt.toDate() : new Date(),
+                            lastLoginAt: userData.lastLoginAt ? userData.lastLoginAt.toDate() : null,
+                            totalReports: userReportsList.length,
+                            reportsThisMonth: reportsThisMonth
+                        });
+                    });
+                    
+                    // Sort by creation date (newest first)
+                    this.users.sort((a, b) => b.createdAt - a.createdAt);
+                    
+                    console.log('✅ Users loaded:', this.users.length);
+                    this.renderUsers();
+                } catch (error) {
+                    console.error('❌ Error loading users:', error);
+                    this.showError('Failed to load users');
+                }
+            }
+
+            renderUsers() {
+                const container = document.getElementById('userManagement');
+                
+                const tableHTML = `
+                    <table class="user-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Reports</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${this.users.map(user => `
+                                <tr>
+                                    <td>${user.email}</td>
+                                    <td>${user.displayName}</td>
+                                    <td><span class="role-badge role-${user.role}">${user.role}</span></td>
+                                    <td>${user.totalReports} (${user.reportsThisMonth} this month)</td>
+                                    <td>${user.lastLoginAt ? user.lastLoginAt.toLocaleDateString() : 'Never'}</td>
+                                    <td>
+                                        <button class="btn btn-primary" onclick="adminPanel.upgradeUser('${user.id}', 'premium')">Upgrade to Premium</button>
+                                        <button class="btn btn-warning" onclick="adminPanel.downgradeUser('${user.id}', 'basic')">Downgrade to Basic</button>
+                                        <button class="btn btn-danger" onclick="adminPanel.deleteUser('${user.id}')">Delete</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+                
+                container.innerHTML = tableHTML;
+            }
+
+            async upgradeUser(userId, newRole) {
+                try {
+                    // This would call your backend API
+                    console.log(`Upgrading user ${userId} to ${newRole}`);
+                    this.showSuccess(`User upgraded to ${newRole}`);
+                    await this.loadUsers(); // Refresh the list
+                } catch (error) {
+                    console.error('Error upgrading user:', error);
+                    this.showError('Failed to upgrade user');
+                }
+            }
+
+            async downgradeUser(userId, newRole) {
+                try {
+                    // This would call your backend API
+                    console.log(`Downgrading user ${userId} to ${newRole}`);
+                    this.showSuccess(`User downgraded to ${newRole}`);
+                    await this.loadUsers(); // Refresh the list
+                } catch (error) {
+                    console.error('Error downgrading user:', error);
+                    this.showError('Failed to downgrade user');
+                }
+            }
+
+            async deleteUser(userId) {
+                if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+                    try {
+                        // This would call your backend API
+                        console.log(`Deleting user ${userId}`);
+                        this.showSuccess('User deleted');
+                        await this.loadUsers(); // Refresh the list
+                    } catch (error) {
+                        console.error('Error deleting user:', error);
+                        this.showError('Failed to delete user');
+                    }
+                }
+            }
+
+            setupEventListeners() {
+                // Add any additional event listeners here
+            }
+
+            showError(message) {
+                const container = document.querySelector('.admin-content');
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                container.insertBefore(errorDiv, container.firstChild);
+                
+                setTimeout(() => errorDiv.remove(), 5000);
+            }
+
+            showSuccess(message) {
+                const container = document.querySelector('.admin-content');
+                const successDiv = document.createElement('div');
+                successDiv.className = 'success';
+                successDiv.textContent = message;
+                container.insertBefore(successDiv, container.firstChild);
+                
+                setTimeout(() => successDiv.remove(), 5000);
+            }
+        }
+
+        // Initialize admin panel when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adminPanel = new AdminPanel();
+        });
+    </script>
+</body>
+</html>

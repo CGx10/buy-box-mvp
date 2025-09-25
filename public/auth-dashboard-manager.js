@@ -7,6 +7,7 @@ class AuthDashboardManager {
         this.isInitialized = false;
         this.authStateListenerSet = false;
         this.db = null; // Add db as instance variable
+        this.isInAnalysisMode = false; // Track when user is in analysis mode
         // Debug flag - set to false for production
         this.debugMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
@@ -95,10 +96,63 @@ class AuthDashboardManager {
             async signIn(email, password) {
                 try {
                     const { signInWithEmailAndPassword } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                    const { doc, getDoc, setDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    
                     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    this.currentUser = userCredential.user;
-                    return { success: true, user: userCredential.user };
+                    const user = userCredential.user;
+                    
+                    // Check if user profile exists, create if not
+                    const userDoc = await getDoc(doc(this.db, 'users', user.uid));
+                    if (!userDoc.exists()) {
+                        console.log('📝 Creating missing user profile for existing user');
+                        const isAdmin = email === 'capitalgainsx10@gmail.com';
+                        const userProfile = {
+                            uid: user.uid,
+                            email: email,
+                            displayName: user.displayName || email,
+                            role: isAdmin ? 'admin' : 'basic',
+                            permissions: isAdmin ? [
+                                'create_reports', 'view_own_reports', 'delete_own_reports', 'export_reports',
+                                'use_gemini', 'use_openai', 'use_claude', 'use_hybrid',
+                                'comparison_mode', 'bulk_analysis', 'api_access',
+                                'view_all_reports', 'manage_users', 'system_settings'
+                            ] : [
+                                'create_reports', 'view_own_reports', 'delete_own_reports', 'use_gemini'
+                            ],
+                            limits: isAdmin ? {
+                                monthlyReports: -1,
+                                dailyReports: -1,
+                                maxReportHistory: -1,
+                                apiCallsPerMonth: -1
+                            } : {
+                                monthlyReports: 5,
+                                dailyReports: 2,
+                                maxReportHistory: 50,
+                                apiCallsPerMonth: 50
+                            },
+                            usage: {
+                                reportsThisMonth: 0,
+                                reportsToday: 0,
+                                totalReports: 0,
+                                lastReportAt: null
+                            },
+                            createdAt: new Date(),
+                            lastLoginAt: new Date()
+                        };
+                        
+                        await setDoc(doc(this.db, 'users', user.uid), userProfile);
+                        console.log('✅ User profile created with role:', userProfile.role);
+                    } else {
+                        // Update last login time
+                        await setDoc(doc(this.db, 'users', user.uid), {
+                            lastLoginAt: new Date()
+                        }, { merge: true });
+                    }
+                    
+                    this.currentUser = user;
+                    return { success: true, user: user };
                 } catch (error) {
+                    console.error('❌ Sign in error:', error);
                     return { success: false, error: error.message };
                 }
             },
@@ -106,13 +160,56 @@ class AuthDashboardManager {
             async register(email, password, displayName) {
                 try {
                     const { createUserWithEmailAndPassword, updateProfile } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js');
+                    const { doc, setDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const user = userCredential.user;
                     
                     await updateProfile(user, { displayName: displayName });
+                    
+                    // Create user profile in Firestore with proper role
+                    const isAdmin = email === 'capitalgainsx10@gmail.com';
+                    const userProfile = {
+                        uid: user.uid,
+                        email: email,
+                        displayName: displayName,
+                        role: isAdmin ? 'admin' : 'basic',
+                        permissions: isAdmin ? [
+                            'create_reports', 'view_own_reports', 'delete_own_reports', 'export_reports',
+                            'use_gemini', 'use_openai', 'use_claude', 'use_hybrid',
+                            'comparison_mode', 'bulk_analysis', 'api_access',
+                            'view_all_reports', 'manage_users', 'system_settings'
+                        ] : [
+                            'create_reports', 'view_own_reports', 'delete_own_reports', 'use_gemini'
+                        ],
+                        limits: isAdmin ? {
+                            monthlyReports: -1,
+                            dailyReports: -1,
+                            maxReportHistory: -1,
+                            apiCallsPerMonth: -1
+                        } : {
+                            monthlyReports: 5,
+                            dailyReports: 2,
+                            maxReportHistory: 50,
+                            apiCallsPerMonth: 50
+                        },
+                        usage: {
+                            reportsThisMonth: 0,
+                            reportsToday: 0,
+                            totalReports: 0,
+                            lastReportAt: null
+                        },
+                        createdAt: new Date(),
+                        lastLoginAt: new Date()
+                    };
+                    
+                    await setDoc(doc(this.db, 'users', user.uid), userProfile);
+                    console.log('✅ User profile created with role:', userProfile.role);
+                    
                     this.currentUser = user;
                     return { success: true, user: user };
                 } catch (error) {
+                    console.error('❌ Registration error:', error);
                     return { success: false, error: error.message };
                 }
             },
@@ -246,11 +343,15 @@ class AuthDashboardManager {
 
         // Dashboard events
         document.addEventListener('click', (e) => {
+            console.log('🔍 Click detected on element:', e.target.id, e.target);
+            
             if (e.target.id === 'signOutBtn') {
+                console.log('🚪 Sign out button clicked');
                 this.handleSignOut();
             }
             
             if (e.target.id === 'newAnalysisBtn') {
+                console.log('📊 New Analysis button clicked');
                 this.showAnalysisForm();
             }
         });
@@ -369,6 +470,12 @@ class AuthDashboardManager {
     }
 
     showDashboard() {
+        // Don't show dashboard if user is in analysis mode
+        if (this.isInAnalysisMode) {
+            console.log('🔄 User is in analysis mode, skipping dashboard show');
+            return;
+        }
+        
         const modal = document.getElementById('authModal');
         const dashboard = document.getElementById('userDashboard');
         const mainForm = document.getElementById('discoveryForm');
@@ -849,11 +956,25 @@ class AuthDashboardManager {
     }
 
     showAnalysisForm() {
+        console.log('🔄 showAnalysisForm called');
+        
+        // Set analysis mode flag to prevent auth state from overriding
+        this.isInAnalysisMode = true;
+        
         // Hide dashboard and show the main analysis form
         const dashboard = document.getElementById('userDashboard');
         const mainForm = document.getElementById('discoveryForm');
         
-        if (dashboard) dashboard.style.display = 'none';
+        console.log('Dashboard element:', dashboard);
+        console.log('Main form element:', mainForm);
+        
+        if (dashboard) {
+            dashboard.style.display = 'none';
+            console.log('✅ Dashboard hidden');
+        } else {
+            console.log('❌ Dashboard element not found');
+        }
+        
         if (mainForm) {
             mainForm.style.display = 'block';
             mainForm.style.visibility = 'visible';
@@ -872,11 +993,62 @@ class AuthDashboardManager {
                 console.log('✅ Main container restored');
             }
             
+            // Reset form state and clear any cached results
+            this.resetFormState();
+            
             // Add back to dashboard button if not already present
             this.addBackToDashboardButton();
+        } else {
+            console.log('❌ Main form element not found');
         }
         
         console.log('✅ Analysis form shown, dashboard hidden');
+    }
+
+    // Method to exit analysis mode and return to dashboard
+    exitAnalysisMode() {
+        console.log('🔄 Exiting analysis mode, returning to dashboard');
+        this.isInAnalysisMode = false;
+        this.showDashboard();
+    }
+
+    resetFormState() {
+        console.log('🔄 Resetting form state for new analysis...');
+        
+        // Reset the acquisition advisor app state
+        if (window.acquisitionAdvisorApp) {
+            // Clear any cached analysis results
+            window.acquisitionAdvisorApp.analysisResults = null;
+            
+            // Reset to phase 1 (questionnaire)
+            window.acquisitionAdvisorApp.currentPhase = 1;
+            window.acquisitionAdvisorApp.updateProgress();
+            
+            // Show the questionnaire phase
+            window.acquisitionAdvisorApp.showPhase('discoveryPhase');
+            
+            // Reset form
+            const form = document.getElementById('discoveryForm');
+            if (form) {
+                form.reset();
+                console.log('✅ Form reset');
+            }
+            
+            // Clear any results display
+            const resultsContainer = document.getElementById('resultsContainer');
+            if (resultsContainer) {
+                resultsContainer.innerHTML = '';
+                resultsContainer.style.display = 'none';
+            }
+            
+            // Hide strategy phase if it's showing
+            const strategyPhase = document.getElementById('strategyPhase');
+            if (strategyPhase) {
+                strategyPhase.style.display = 'none';
+            }
+            
+            console.log('✅ Form state reset complete');
+        }
     }
 
     addBackToDashboardButton() {
@@ -914,7 +1086,7 @@ class AuthDashboardManager {
         backButton.onclick = (e) => {
             e.preventDefault();
             console.log('🔄 Back to dashboard button clicked');
-            this.showDashboard();
+            this.exitAnalysisMode();
         };
         
         // Add hover effect
