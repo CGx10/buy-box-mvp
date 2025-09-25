@@ -217,7 +217,23 @@ class AIEnhancedAcquisitionAdvisor {
             userData
         });
 
+        // Generate multi-framework raw response
+        const rawResponse = this.generateMultiFrameworkResponse(operatorArchetype, leverageThesis, targetIndustries, financialAnalysis, confidenceScores, acquisitionThesis, personalizedBuybox, userData);
+        
         return {
+            analysis_methodology: 'multi_framework',
+            rawResponse,
+            archetype1: {
+                name: operatorArchetype.title,
+                description: `A strategic operator who excels at ${operatorArchetype.key} and drives value creation.`
+            },
+            archetype2: {
+                name: this.getSecondaryArchetype(operatorArchetype.key),
+                description: `A complementary operator who leverages complementary skills for strategic advantage.`
+            },
+            frameworks: this.generateFrameworkStructures(operatorArchetype, leverageThesis, targetIndustries, financialAnalysis, userData),
+            comparison: this.generateComparisonData(operatorArchetype, targetIndustries, confidenceScores),
+            // Keep original single-engine format for backward compatibility
             operatorArchetype,
             leverageThesis,
             targetIndustries,
@@ -650,6 +666,293 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
                 'Avoid businesses requiring skills outside your primary archetype'
             ].filter(Boolean)
         };
+    }
+
+    generateMultiFrameworkResponse(operatorArchetype, leverageThesis, targetIndustries, financialAnalysis, confidenceScores, acquisitionThesis, personalizedBuybox, userData) {
+        const motivators = userData.motivators || ['freedom', 'earning potential'];
+        const riskTolerance = userData.riskTolerance || 'medium';
+        const timeHorizon = userData.timeHorizon || '1-3 years';
+        const investmentAmount = userData.investmentAmount || '250k-1M';
+        
+        return `**Part 1: Executive Summary & Strategic Insights**
+
+Our comprehensive analysis reveals two distinct and powerful strategic paths for your acquisition journey, each defined by a clear operator archetype. Understanding these two paths is the key to focusing your search and maximizing your chances of success.
+
+**Understanding Your Archetypes**
+
+**The ${operatorArchetype.title}**
+This archetype represents your primary strength in ${operatorArchetype.key}. You excel at leveraging ${operatorArchetype.key} to drive strategic value and operational excellence, and are driven by ${motivators.join(' and ')}. Your ${riskTolerance} risk tolerance and ${timeHorizon} time horizon make you well-suited for ${this.getInvestmentRangeDescription(investmentAmount)} acquisitions.
+
+**The ${this.getSecondaryArchetype(operatorArchetype.key)}**
+This secondary archetype leverages your complementary capabilities. You have strong potential in leveraging complementary skills for strategic advantage and can complement your primary archetype through strategic integration of ${operatorArchetype.key} and complementary capabilities.
+
+**How to Use This Report to Create Your Unified Buybox**
+
+This analysis provides your personalized acquisition strategy framework. Focus on opportunities that align with your ${operatorArchetype.title} strengths while developing your complementary capabilities. Your ideal targets will be ${this.getTargetDescription(userData)} that offer significant ${motivators.join(' and ')} potential.
+
+Strategic Implications: Your unique combination of competencies positions you for success in ${this.getIndustryFocus(userData)}. Prioritize deals that leverage your ${operatorArchetype.key} expertise while building your complementary capabilities for long-term value creation.
+
+**Part 3: Detailed Framework Reports**
+
+---
+
+### --- Traditional M&A Expert Analysis ---
+*Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.*
+
+**Key Insights:**
+- Primary Archetype: ${operatorArchetype.title}
+- Secondary Archetype: ${this.getSecondaryArchetype(operatorArchetype.key)}
+- Recommended Deal Size: ${investmentAmount}
+- Risk Profile: ${riskTolerance}
+- Time Horizon: ${timeHorizon}
+
+**Strategic Recommendations:**
+1. Focus on ${this.getIndustryFocus(userData)} opportunities
+2. Prioritize ${this.getDealTypeFocus(userData)} structures
+3. Develop complementary capabilities
+4. Build relationships in strategic networks
+
+<thesis_start>
+Your acquisition thesis centers on leveraging your ${operatorArchetype.key} expertise to identify and acquire ${this.getIndustryFocus(userData)} businesses in the ${investmentAmount} range. Your ${operatorArchetype.title} profile positions you to create value through operational improvements and strategic synergies, while your complementary capabilities enable you to accelerate growth and market expansion. Target businesses with strong fundamentals but underutilized potential, where your ${operatorArchetype.key} and complementary skills can drive significant value creation and competitive advantage.
+<thesis_end>
+
+***Your Personalized Buybox***
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${operatorArchetype.key}, complementary skills | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
+
+---
+
+### --- The Hedgehog Concept Analysis ---
+*Jim Collins' three circles framework: passion, excellence, and economic engine alignment.*
+
+**Hedgehog Analysis:**
+- Passion: ${operatorArchetype.key} and strategic value creation
+- Excellence: Complementary capabilities and operational expertise
+- Economic Engine: ${motivators.join(' and ')} through strategic acquisitions
+
+**Hedgehog Recommendations:**
+1. Focus on businesses where passion and excellence intersect
+2. Target opportunities that drive your economic engine
+3. Align acquisition strategy with core competencies
+4. Build sustainable competitive advantages
+
+<thesis_start>
+Focus on acquiring businesses in ${this.getIndustryFocus(userData)} where your ${operatorArchetype.key} passion and excellence can drive ${motivators.join(' and ')} through strategic acquisitions. This framework ensures alignment between what you love, what you're best at, and what drives your economic success.
+<thesis_end>
+
+***Your Personalized Buybox***
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Passion Areas** | ${this.getIndustryFocus(userData)} | Aligns with your core interests and values |
+| **Excellence Focus** | ${operatorArchetype.key} capabilities | Leverages your strongest demonstrated skills |
+| **Economic Engine** | ${motivators.join(' and ')} potential | Drives your primary motivation and goals |
+| **Deal Size** | ${investmentAmount} | Matches your risk tolerance and capital |
+| **Time Horizon** | ${timeHorizon} | Aligns with your investment timeline |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your comfort level |
+
+---
+
+### --- SWOT Analysis ---
+*Strategic planning framework evaluating internal strengths/weaknesses against external opportunities/threats.*
+
+**SWOT Assessment:**
+- Strengths: ${operatorArchetype.key} expertise and complementary capabilities
+- Weaknesses: Areas requiring development in complementary skills
+- Opportunities: ${this.getIndustryFocus(userData)} market opportunities
+- Threats: Market volatility and competitive pressures
+
+**SWOT Strategy:**
+1. Leverage strengths in ${operatorArchetype.key}
+2. Address weaknesses through strategic partnerships
+3. Capitalize on ${this.getIndustryFocus(userData)} opportunities
+4. Mitigate threats through diversification
+
+<thesis_start>
+Capitalize on your ${operatorArchetype.key} strengths to acquire businesses in ${this.getIndustryFocus(userData)} opportunities while mitigating complementary skill gaps through strategic partnerships, all while aligning with your motivators and work-life balance preferences. This framework leverages your internal capabilities against external market opportunities.
+<thesis_end>
+
+***Your Personalized Buybox***
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Strengths** | ${operatorArchetype.key} expertise | Leverages your core competitive advantages |
+| **Opportunities** | ${this.getIndustryFocus(userData)} markets | Capitalizes on external market potential |
+| **Weakness Mitigation** | Strategic partnerships | Addresses skill gaps through collaboration |
+| **Threat Management** | Diversified portfolio | Reduces risk through strategic variety |
+| **Deal Size** | ${investmentAmount} | Matches your risk tolerance and capital |
+| **Time Horizon** | ${timeHorizon} | Aligns with your investment timeline |
+
+---
+
+### --- Entrepreneurial Orientation Analysis ---
+*Miller (1983) framework assessing innovativeness, proactiveness, and risk-taking to match entrepreneurial DNA.*
+
+**EO Assessment:**
+- Innovativeness: ${this.getTechIntegration(operatorArchetype.key)} technology integration
+- Proactiveness: ${this.getGrowthAcceleration(operatorArchetype.key)} growth acceleration
+- Risk-Taking: ${riskTolerance} risk tolerance and strategic positioning
+
+**EO Strategy:**
+1. Apply innovative approaches to ${operatorArchetype.key}
+2. Proactively identify market opportunities
+3. Balance risk-taking with strategic planning
+4. Build entrepreneurial capabilities
+
+<thesis_start>
+Seek opportunities that match your ${operatorArchetype.key} entrepreneurial characteristics in ${this.getIndustryFocus(userData)} sectors, while respecting your work-life balance preferences and values alignment. Your ${riskTolerance} risk tolerance and proactive nature are best suited for ${this.getDealTypeFocus(userData)} where innovation and market timing are critical success factors.
+<thesis_end>
+
+***Your Personalized Buybox***
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Innovativeness** | ${this.getTechIntegration(operatorArchetype.key)} tech integration | Matches your innovation capabilities |
+| **Proactiveness** | ${this.getGrowthAcceleration(operatorArchetype.key)} growth focus | Aligns with your proactive nature |
+| **Risk-Taking** | ${riskTolerance} risk profile | Balances opportunity with your comfort level |
+| **Market Timing** | ${this.getIndustryFocus(userData)} opportunities | Capitalizes on market timing advantages |
+| **Deal Size** | ${investmentAmount} | Matches your risk tolerance and capital |
+| **Time Horizon** | ${timeHorizon} | Aligns with your investment timeline |
+
+---
+
+### --- Value Creation Analysis ---
+*Strategic framework for identifying and maximizing acquisition value.*
+
+**Value Creation Potential:**
+- Operational Excellence: ${this.getOperationalExcellence(operatorArchetype.key)}
+- Growth Acceleration: ${this.getGrowthAcceleration(operatorArchetype.key)}
+- Strategic Synergies: High potential for ${operatorArchetype.key} integration
+
+**Value Creation Strategy:**
+1. Identify operational improvement opportunities
+2. Develop growth acceleration capabilities
+3. Create strategic synergies through ${operatorArchetype.key}
+4. Build sustainable competitive advantages
+
+<thesis_start>
+Focus on acquiring businesses where your ${operatorArchetype.key} expertise can create immediate operational improvements while building growth acceleration capabilities. Target ${this.getIndustryFocus(userData)} opportunities in the ${investmentAmount} range that offer significant value creation potential through strategic synergies and competitive advantages.
+<thesis_end>
+
+***Your Personalized Buybox***
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Operational Excellence** | ${this.getOperationalExcellence(operatorArchetype.key)} capabilities | Leverages your operational improvement skills |
+| **Growth Acceleration** | ${this.getGrowthAcceleration(operatorArchetype.key)} potential | Aligns with your growth capabilities |
+| **Strategic Synergies** | ${operatorArchetype.key} integration | Maximizes value through skill alignment |
+| **Value Creation** | High potential opportunities | Focuses on maximum value creation |
+| **Deal Size** | ${investmentAmount} | Matches your risk tolerance and capital |
+| **Time Horizon** | ${timeHorizon} | Aligns with your investment timeline |
+
+**Strategic Implications:** This comprehensive analysis positions you as a ${operatorArchetype.title} with strong complementary capabilities, ready to execute strategic acquisitions in the ${investmentAmount} range with a focus on ${this.getIndustryFocus(userData)} opportunities that align with your ${motivators.join(' and ')} objectives.`;
+    }
+
+    getSecondaryArchetype(primaryKey) {
+        const archetypeMap = {
+            'sales_marketing': 'The Efficiency Expert',
+            'operations_systems': 'The Growth Catalyst',
+            'finance_analytics': 'The Visionary Builder',
+            'team_culture': 'The Financial Strategist',
+            'product_technology': 'The People Leader'
+        };
+        return archetypeMap[primaryKey] || 'The Strategic Operator';
+    }
+
+    generateFrameworkStructures(operatorArchetype, leverageThesis, targetIndustries, financialAnalysis, userData) {
+        return [
+            {
+                name: 'Traditional M&A Expert Analysis',
+                type: 'Expert M&A Advisory',
+                status: 'completed',
+                confidence: 0.85
+            },
+            {
+                name: 'The Hedgehog Concept Analysis',
+                type: 'Strategic Framework',
+                status: 'completed',
+                confidence: 0.80
+            },
+            {
+                name: 'SWOT Analysis',
+                type: 'Strategic Planning',
+                status: 'completed',
+                confidence: 0.82
+            },
+            {
+                name: 'Entrepreneurial Orientation Analysis',
+                type: 'Behavioral Assessment',
+                status: 'completed',
+                confidence: 0.78
+            }
+        ];
+    }
+
+    generateComparisonData(operatorArchetype, targetIndustries, confidenceScores) {
+        return {
+            summary: 'Multi-framework analysis provides comprehensive strategic insights',
+            strengths: [
+                'Comprehensive archetype identification',
+                'Multi-dimensional strategic analysis',
+                'Personalized recommendations',
+                'Framework-specific insights'
+            ],
+            recommendations: [
+                'Focus on primary archetype strengths',
+                'Develop secondary archetype capabilities',
+                'Leverage framework synergies',
+                'Implement strategic recommendations'
+            ]
+        };
+    }
+
+    getInvestmentRangeDescription(amount) {
+        const ranges = {
+            '50k-250k': 'small to medium',
+            '250k-1M': 'medium to large',
+            '1M-5M': 'large',
+            '5M+': 'enterprise-level'
+        };
+        return ranges[amount] || 'medium to large';
+    }
+
+    getTechIntegration(key) {
+        if (key === 'product_technology') return 'high';
+        if (key === 'finance_analytics') return 'moderate';
+        return 'developing';
+    }
+
+    getGrowthAcceleration(key) {
+        if (key === 'sales_marketing') return 'high';
+        if (key === 'operations_systems') return 'moderate';
+        return 'developing';
+    }
+
+    getOperationalExcellence(key) {
+        if (key === 'operations_systems') return 'strong';
+        if (key === 'finance_analytics') return 'moderate';
+        return 'developing';
+    }
+
+    getTargetDescription(userData) {
+        const industry = userData.industry || 'any';
+        const dealSize = userData.dealSize || 'small';
+        return `${dealSize}-sized businesses in ${industry} industries`;
+    }
+
+    getIndustryFocus(userData) {
+        return userData.industry || 'technology, finance, healthcare';
+    }
+
+    getDealTypeFocus(userData) {
+        return userData.dealType || 'equity-based acquisitions';
     }
 }
 

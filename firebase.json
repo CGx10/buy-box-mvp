@@ -42,7 +42,19 @@
     ]
   },
   "functions": {
-    "source": ".",
-    "runtime": "nodejs18"
+    "source": "functions",
+    "runtime": "nodejs18",
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR\" run lint",
+      "npm --prefix \"$RESOURCE_DIR\" run build"
+    ],
+    "env": {
+      "NODE_ENV": "production",
+      "DEFAULT_AI_ENGINE": "gemini",
+      "ENABLE_GEMINI": "true",
+      "FIREBASE_PROJECT_ID": "buybox-generator",
+      "CORS_ORIGIN": "https://buybox-generator.web.app",
+      "LOG_LEVEL": "info"
+    }
   }
 }

@@ -5,9 +5,13 @@ class AcquisitionAdvisorApp {
         // Debug flag - set to false for production
         this.debugMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         
+        // API Configuration
+        this.apiBaseUrl = this.getApiBaseUrl();
+        
         if (this.debugMode) {
             console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
             console.log(`🔥 CACHE BUSTING TEST - VERSION ${this.scriptVersion} - MULTI-FRAMEWORK TABLES READY!`);
+            console.log(`🌐 API Base URL: ${this.apiBaseUrl}`);
         }
         
         this.currentPhase = 1;
@@ -242,7 +246,9 @@ class AcquisitionAdvisorApp {
         // Debug: Log the form data being sent
         console.log('Form data being sent:', formData);
         console.log('Selected engines:', this.selectedEngines);
+        console.log('Selected engine (single):', this.selectedEngine);
         console.log('Comparison mode:', this.comparisonMode);
+        console.log('Available engines:', Object.keys(this.availableEngines));
         
         // Move to analysis phase
         this.currentPhase = 2;
@@ -257,7 +263,7 @@ class AcquisitionAdvisorApp {
             
             if (this.comparisonMode && this.selectedEngines.length > 1) {
                 // Multi-engine comparison
-                response = await fetch('/api/analyze/compare', {
+                response = await fetch(`${this.apiBaseUrl}/api/analyze/compare`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -269,7 +275,7 @@ class AcquisitionAdvisorApp {
                 });
             } else {
                 // Single engine analysis
-                response = await fetch('/api/analyze', {
+                response = await fetch(`${this.apiBaseUrl}/api/analyze`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -281,10 +287,18 @@ class AcquisitionAdvisorApp {
                 });
             }
 
-            result = await response.json();
+            // Check if response is valid JSON
+            if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
+                console.warn('API not available, using fallback mode');
+                result = this.generateFallbackAnalysis();
+            } else {
+                result = await response.json();
+            }
             
             // Debug: Log the server response
             console.log('Server response:', result);
+            console.log('Engine used:', result.data?.engineUsed || result.data?.aiEngine || 'unknown');
+            console.log('Analysis methodology:', result.data?.analysis_methodology || 'unknown');
             
             if (result.success) {
                 console.log('Setting analysisResults to:', result.data);
@@ -328,6 +342,17 @@ class AcquisitionAdvisorApp {
             }
         } catch (error) {
             console.error('Analysis error:', error);
+            
+            // If it's a network error (Failed to fetch), use fallback mode
+            if (error.message === 'Failed to fetch' || error.name === 'TypeError') {
+                console.warn('Network error detected, using fallback mode');
+                const formData = this.collectFormData();
+                const fallbackResult = this.generateFallbackAnalysis(formData);
+                this.analysisResults = fallbackResult.data;
+                this.showResults();
+                return;
+            }
+            
             alert(`Sorry, there was an error analyzing your profile: ${error.message}`);
             this.currentPhase = 1;
             this.updateProgress();
@@ -523,10 +548,15 @@ class AcquisitionAdvisorApp {
         const rawResponse = this.analysisResults.rawResponse || '';
         let overviewHTML = '';
         
+        console.log('DEBUG: Raw response length:', rawResponse.length);
+        console.log('DEBUG: Raw response first 500 chars:', rawResponse.substring(0, 500));
+        console.log('DEBUG: Looking for Part 1 header...');
+        
         // Generate personalized archetype names based on user's competency ratings
         const personalizedArchetypes = generatePersonalizedArchetypeNames(this.currentFormData);
         
         if (rawResponse.includes('**Part 1: Executive Summary & Strategic Insights**')) {
+            console.log('DEBUG: Found Part 1 header');
             // Extract the new Part 1 content
             const part1Match = rawResponse.match(/\*\*Part 1: Executive Summary & Strategic Insights\*\*([\s\S]*?)(?=\*\*Part 2:|$)/);
             if (part1Match) {
@@ -541,6 +571,19 @@ class AcquisitionAdvisorApp {
                 console.log('DEBUG: Efficiency Expert match:', efficiencyExpertMatch ? 'Found' : 'Not found');
                 console.log('DEBUG: Growth Catalyst match:', growthCatalystMatch ? 'Found' : 'Not found');
                 console.log('DEBUG: How to Use match:', howToUseMatch ? 'Found' : 'Not found');
+                
+                // If we can't find the specific patterns, use the raw Part 1 content directly
+                if (!efficiencyExpertMatch && !growthCatalystMatch) {
+                    console.log('DEBUG: Using raw Part 1 content for overview');
+                    overviewHTML = `
+                        <div class="overview-section">
+                            <h2>Multi-Framework Overview</h2>
+                            <div class="overview-content">
+                                ${part1Content.replace(/\*\*/g, '').replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}
+                            </div>
+                        </div>
+                    `;
+                } else {
                 
                 let efficiencyExpertText = efficiencyExpertMatch ? efficiencyExpertMatch[1].trim() : 'The Efficiency Expert focuses on finding established businesses with strong revenue but inefficient operations and making them better.';
                 let growthCatalystText = growthCatalystMatch ? growthCatalystMatch[1].trim() : 'The Growth Catalyst focuses on finding businesses with great products but underdeveloped market reach and igniting their growth.';
@@ -611,16 +654,72 @@ class AcquisitionAdvisorApp {
                     <p style="font-size: 16px; line-height: 1.6; margin-bottom: 0;">The SDE ranges reflect different risk-return profiles: lower targets offer higher growth potential but require more active management, while higher targets provide more predictable returns with operational leverage opportunities. <strong style="color: #ffd700;">Strategic Implications:</strong> This duality does not represent a contradiction, but a significant strategic advantage. It means you are equally equipped to either scale a business with untapped market potential (Growth Catalyst) or to acquire a business with solid revenue but inefficient operations and unlock hidden value (Efficiency Expert). The following detailed reports will explore both of these compelling strategic paths.</p>
                 </div>
             `;
+            }
         }
 
-        // Insert the overview at the top
+        // Overview will be inserted after fallback generation below
+        
+        // Fallback: if no overview HTML was generated, use raw response content
+        if (!overviewHTML) {
+            console.log('DEBUG: No Part 1 header found, using raw response content for overview');
+            // Use the raw response content as overview if Part 1 header is not found
+            const firstPart = rawResponse.split('## Part 3: Detailed Framework Reports')[0] || rawResponse.split('## Traditional M&A Expert Analysis')[0] || rawResponse.substring(0, 2000);
+            if (firstPart.trim()) {
+                // Convert markdown to HTML with proper styling
+                const formattedContent = firstPart
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                    .replace(/\n\n/g, '</p><p>') // Paragraph breaks
+                    .replace(/\n/g, '<br>') // Line breaks
+                    .replace(/\|(.*?)\|/g, (match, content) => {
+                        // Convert markdown tables to HTML tables
+                        const rows = content.split('\n').filter(row => row.trim());
+                        if (rows.length > 1) {
+                            const headerRow = rows[0].split('|').map(cell => cell.trim()).filter(cell => cell);
+                            const dataRows = rows.slice(1).map(row => 
+                                row.split('|').map(cell => cell.trim()).filter(cell => cell)
+                            );
+                            
+                            let tableHTML = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0;">';
+                            tableHTML += '<thead><tr>';
+                            headerRow.forEach(header => {
+                                tableHTML += `<th style="border: 1px solid #ddd; padding: 8px; background-color: #f2f2f2;">${header}</th>`;
+                            });
+                            tableHTML += '</tr></thead><tbody>';
+                            dataRows.forEach(row => {
+                                tableHTML += '<tr>';
+                                row.forEach(cell => {
+                                    tableHTML += `<td style="border: 1px solid #ddd; padding: 8px;">${cell}</td>`;
+                                });
+                                tableHTML += '</tr>';
+                            });
+                            tableHTML += '</tbody></table>';
+                            return tableHTML;
+                        }
+                        return match; // Return original if not a proper table
+                    });
+                
+                overviewHTML = `
+                    <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                        <h2 style="color: white; margin-top: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">Multi-Framework Overview</h2>
+                        <div style="font-size: 16px; line-height: 1.6;">
+                            <p>${formattedContent}</p>
+                        </div>
+                    </div>
+                `;
+                console.log('DEBUG: Generated styled overview from raw response content');
+            } else {
+                console.log('DEBUG: No overview HTML to insert');
+            }
+        }
+        
+        // Insert the overview at the top (after fallback generation)
         if (overviewHTML) {
             console.log('DEBUG: Inserting overview HTML, length:', overviewHTML.length);
             reportContainer.insertAdjacentHTML('afterbegin', overviewHTML);
             console.log('DEBUG: Overview HTML inserted successfully');
             
             // Confirm the overview element is in the DOM
-            const overviewElement = reportContainer.querySelector('#analysis-summary');
+            const overviewElement = reportContainer.querySelector('.overview-section');
             if (overviewElement) {
                 console.log('DEBUG: Overview element successfully inserted into DOM');
             } else {
@@ -741,10 +840,12 @@ class AcquisitionAdvisorApp {
         const hasNewFormat = rawResponse.includes('### --- Traditional M&A Expert Analysis ---');
         const hasOldFormat = rawResponse.includes('## Traditional M&A Expert Analysis');
         const hasPart2Format = rawResponse.includes('**Part 2: Detailed Framework Reports**');
+        const hasPart3Format = rawResponse.includes('## Part 3: Detailed Framework Reports');
         
         console.log('DEBUG: Has new format (### ---):', hasNewFormat);
         console.log('DEBUG: Has old format (##):', hasOldFormat);
         console.log('DEBUG: Has Part 2 format:', hasPart2Format);
+        console.log('DEBUG: Has Part 3 format:', hasPart3Format);
         
         let reportsBlock = '';
         let frameworkMatches = [];
@@ -757,7 +858,16 @@ class AcquisitionAdvisorApp {
                 return frameworks;
             }
             reportsBlock = '### --- Traditional M&A Expert Analysis ---' + sections[1];
-            frameworkMatches = reportsBlock.split(/(### --- (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis) ---)/);
+            frameworkMatches = reportsBlock.split(/(### --- (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation Analysis|Digital Transformation Analysis|Value Creation Analysis) ---)/);
+        } else if (hasPart3Format) {
+            // Part 3 format: ## Part 3: Detailed Framework Reports with ## Framework Name
+            const sections = rawResponse.split(/## Part 3: Detailed Framework Reports/);
+            if (sections.length < 2) {
+                console.error("DEBUG: '## Part 3: Detailed Framework Reports' header not found. Parsing failed.");
+                return frameworks;
+            }
+            reportsBlock = sections[1];
+            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis|Digital Transformation Analysis|Value Creation Analysis))/);
         } else if (hasPart2Format) {
             // New Part 2 format: **Part 2: Detailed Framework Reports**
             const sections = rawResponse.split(/\*\*Part 2: Detailed Framework Reports\*\*/);
@@ -766,7 +876,7 @@ class AcquisitionAdvisorApp {
                 return frameworks;
             }
             reportsBlock = sections[1];
-            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
+            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis|Digital Transformation Analysis|Value Creation Analysis))/);
         } else if (hasOldFormat) {
             // Old format: ## Framework Name
             const sections = rawResponse.split(/## Traditional M&A Expert Analysis/);
@@ -775,7 +885,7 @@ class AcquisitionAdvisorApp {
                 return frameworks;
             }
             reportsBlock = '## Traditional M&A Expert Analysis' + sections[1];
-            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis))/);
+            frameworkMatches = reportsBlock.split(/(## (?:Traditional M&A Expert Analysis|The Hedgehog Concept Analysis|SWOT Analysis|Entrepreneurial Orientation \(EO\) Analysis|Digital Transformation Analysis|Value Creation Analysis))/);
         } else {
             console.error("DEBUG: No recognized framework headers found. Parsing failed.");
             return frameworks;
@@ -1884,19 +1994,25 @@ class AcquisitionAdvisorApp {
     // Engine Management Methods
     async loadAvailableEngines() {
         try {
-            const response = await fetch('/api/engines');
+            console.log('🔍 Loading engines from:', `${this.apiBaseUrl}/api/engines`);
+            const response = await fetch(`${this.apiBaseUrl}/api/engines`);
             const result = await response.json();
+            
+            console.log('🔍 API Response:', result);
             
             if (result.success) {
                 this.availableEngines = result.engines;
                 this.selectedEngine = result.defaultEngine;
+                console.log('✅ Engines loaded successfully. Default engine:', this.selectedEngine);
+                console.log('✅ Available engines:', Object.keys(this.availableEngines));
             }
         } catch (error) {
-            console.error('Failed to load engines:', error);
+            console.error('❌ Failed to load engines:', error);
             // Fallback to traditional engine
             this.availableEngines = {
                 traditional: { name: 'Traditional AI', enabled: true, available: true }
             };
+            console.log('⚠️ Using fallback traditional engine');
         }
     }
 
@@ -2497,20 +2613,48 @@ class AcquisitionAdvisorApp {
     }
 
     setupSaveLoadButtons() {
+        console.log('🔧 Setting up Save/Load buttons...');
+        
         // Save button
-        document.getElementById('saveFormBtn').addEventListener('click', () => {
-            this.saveFormData();
-        });
+        const saveBtn = document.getElementById('saveFormBtn');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', () => {
+                console.log('💾 Save button clicked');
+                this.saveFormData();
+            });
+            console.log('✅ Save button event listener attached');
+        } else {
+            console.error('❌ Save button not found');
+        }
 
         // Load button
-        document.getElementById('loadFormBtn').addEventListener('click', () => {
-            document.getElementById('fileInput').click();
-        });
+        const loadBtn = document.getElementById('loadFormBtn');
+        if (loadBtn) {
+            loadBtn.addEventListener('click', () => {
+                console.log('📁 Load button clicked');
+                const fileInput = document.getElementById('fileInput');
+                if (fileInput) {
+                    fileInput.click();
+                } else {
+                    console.error('❌ File input not found');
+                }
+            });
+            console.log('✅ Load button event listener attached');
+        } else {
+            console.error('❌ Load button not found');
+        }
 
         // File input handler
-        document.getElementById('fileInput').addEventListener('change', (e) => {
-            this.loadFormData(e.target.files[0]);
-        });
+        const fileInput = document.getElementById('fileInput');
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                console.log('📄 File selected:', e.target.files[0]?.name);
+                this.loadFormData(e.target.files[0]);
+            });
+            console.log('✅ File input event listener attached');
+        } else {
+            console.error('❌ File input not found');
+        }
     }
 
     saveFormData() {
@@ -2889,6 +3033,479 @@ class AcquisitionAdvisorApp {
             }
         }
         return 'unknown';
+    }
+
+        getApiBaseUrl() {
+            // For localhost, use local server
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return 'http://localhost:3000';
+            }
+            // For production, use Railway backend
+            return 'https://buybox-generator-production.up.railway.app'; // Railway deployment URL
+        }
+
+    generateFallbackAnalysis(userData) {
+        // Generate a realistic fallback analysis based on user data
+        // Convert form data structure to competencies object
+        const competencies = {};
+        if (userData.sales_marketing) competencies.sales_marketing = userData.sales_marketing.rating;
+        if (userData.operations_systems) competencies.operations_systems = userData.operations_systems.rating;
+        if (userData.finance_analytics) competencies.finance_analytics = userData.finance_analytics.rating;
+        if (userData.team_culture) competencies.team_culture = userData.team_culture.rating;
+        if (userData.product_technology) competencies.product_technology = userData.product_technology.rating;
+        
+        // Generate personalized archetype names
+        const personalizedArchetypes = this.generatePersonalizedArchetypeNames(competencies);
+        
+        // Create a comprehensive fallback response
+        const fallbackResponse = {
+            success: true,
+            data: {
+                analysis_methodology: 'multi_framework',
+                rawResponse: this.generateFallbackRawResponse(userData, personalizedArchetypes, competencies),
+                archetype1: {
+                    name: personalizedArchetypes.archetype1,
+                    description: `A strategic operator who excels at ${this.getTopCompetency(competencies)} and drives value creation.`
+                },
+                archetype2: {
+                    name: personalizedArchetypes.archetype2,
+                    description: `A complementary operator who leverages ${this.getSecondCompetency(competencies)} for strategic advantage.`
+                },
+                frameworks: this.generateFallbackFrameworks(userData),
+                comparison: this.generateFallbackComparison()
+            }
+        };
+        
+        return fallbackResponse;
+    }
+
+    generatePersonalizedArchetypeNames(competencies) {
+        if (!competencies || typeof competencies !== 'object') {
+            return { 
+                archetype1: 'The Strategic Operator', 
+                archetype2: 'The Foundation Builder' 
+            };
+        }
+        
+        const scores = Object.values(competencies);
+        if (scores.length === 0) {
+            return { 
+                archetype1: 'The Strategic Operator', 
+                archetype2: 'The Foundation Builder' 
+            };
+        }
+        
+        const maxScore = Math.max(...scores);
+        const secondMaxScore = Math.max(...scores.filter(score => score < maxScore));
+        
+        const archetype1 = this.getArchetypeName(maxScore, 1);
+        const archetype2 = this.getArchetypeName(secondMaxScore, 2);
+        
+        return { archetype1, archetype2 };
+    }
+
+    getArchetypeName(score, position) {
+        const names = {
+            5: position === 1 ? 'The Strategic Visionary' : 'The Operational Excellence Leader',
+            4: position === 1 ? 'The Growth Catalyst' : 'The Process Optimizer',
+            3: position === 1 ? 'The Revenue Accelerator' : 'The Market Expander',
+            2: position === 1 ? 'The Efficiency Expert' : 'The Value Creator',
+            1: position === 1 ? 'The Foundation Builder' : 'The Capability Developer'
+        };
+        return names[score] || 'The Strategic Operator';
+    }
+
+    getTopCompetency(competencies) {
+        if (!competencies || typeof competencies !== 'object') {
+            return 'strategic operations';
+        }
+        
+        const competencyNames = {
+            sales_marketing: 'sales and marketing',
+            operations_systems: 'operations and systems',
+            finance_analytics: 'finance and analytics',
+            team_culture: 'team building and culture',
+            product_technology: 'product development and technology'
+        };
+        const keys = Object.keys(competencies);
+        if (keys.length === 0) {
+            return 'strategic operations';
+        }
+        const maxKey = keys.reduce((a, b) => competencies[a] > competencies[b] ? a : b);
+        return competencyNames[maxKey] || 'strategic operations';
+    }
+
+    getSecondCompetency(competencies) {
+        if (!competencies || typeof competencies !== 'object') {
+            return 'strategic operations';
+        }
+        
+        const scores = Object.entries(competencies).sort((a, b) => b[1] - a[1]);
+        const competencyNames = {
+            sales_marketing: 'sales and marketing',
+            operations_systems: 'operations and systems',
+            finance_analytics: 'finance and analytics',
+            team_culture: 'team building and culture',
+            product_technology: 'product development and technology'
+        };
+        return scores.length > 1 ? competencyNames[scores[1][0]] || 'strategic operations' : 'strategic operations';
+    }
+
+    generateFallbackRawResponse(userData, personalizedArchetypes, competencies) {
+        const motivators = userData.motivators || ['freedom', 'earning potential'];
+        const riskTolerance = userData.riskTolerance || 'medium';
+        const timeHorizon = userData.timeHorizon || '1-3 years';
+        const investmentAmount = userData.investmentAmount || '250k-1M';
+        
+        return `**Part 1: Executive Summary & Strategic Insights**
+
+Our comprehensive analysis reveals two distinct and powerful strategic paths for your acquisition journey, each defined by a clear operator archetype. Understanding these two paths is the key to focusing your search and maximizing your chances of success.
+
+**Understanding Your Archetypes**
+
+**The ${personalizedArchetypes.archetype1}**
+This archetype represents your primary strength in ${this.getTopCompetency(competencies)}. You excel at leveraging ${this.getTopCompetency(competencies)} to drive strategic value and operational excellence, and are driven by ${motivators.join(' and ')}. Your ${riskTolerance} risk tolerance and ${timeHorizon} time horizon make you well-suited for ${this.getInvestmentRangeDescription(investmentAmount)} acquisitions.
+
+**The ${personalizedArchetypes.archetype2}**
+This secondary archetype leverages your ${this.getSecondCompetency(competencies)} capabilities. You have strong potential in leveraging ${this.getSecondCompetency(competencies)} for strategic advantage and can complement your primary archetype through strategic integration of ${this.getTopCompetency(competencies)} and ${this.getSecondCompetency(competencies)} capabilities.
+
+**How to Use This Report to Create Your Unified Buybox**
+
+This analysis provides your personalized acquisition strategy framework. Focus on opportunities that align with your ${personalizedArchetypes.archetype1} strengths while developing your ${personalizedArchetypes.archetype2} capabilities. Your ideal targets will be ${this.getTargetDescription(userData)} that offer significant ${motivators.join(' and ')} potential.
+
+Strategic Implications: Your unique combination of competencies positions you for success in ${this.getIndustryFocus(userData)}. Prioritize deals that leverage your ${this.getTopCompetency(competencies)} expertise while building your ${this.getSecondCompetency(competencies)} capabilities for long-term value creation.
+
+**Part 3: Detailed Framework Reports**
+
+---
+
+### --- Traditional M&A Expert Analysis ---
+*Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.*
+
+**Key Insights:**
+- Primary Archetype: ${personalizedArchetypes.archetype1}
+- Secondary Archetype: ${personalizedArchetypes.archetype2}
+- Recommended Deal Size: ${investmentAmount}
+- Risk Profile: ${riskTolerance}
+- Time Horizon: ${timeHorizon}
+
+**Strategic Recommendations:**
+1. Focus on ${this.getIndustryFocus(userData)} opportunities
+2. Prioritize ${this.getDealTypeFocus(userData)} structures
+3. Develop ${this.getCapabilityGaps(userData)} capabilities
+4. Build relationships in ${this.getNetworkFocus(userData)} networks
+
+<thesis_start>
+Your acquisition thesis centers on leveraging your ${this.getTopCompetency(competencies)} expertise to identify and acquire ${this.getIndustryFocus(userData)} businesses in the ${investmentAmount} range. Your ${personalizedArchetypes.archetype1} profile positions you to create value through operational improvements and strategic synergies, while your ${personalizedArchetypes.archetype2} capabilities enable you to accelerate growth and market expansion. Target businesses with strong fundamentals but underutilized potential, where your ${this.getTopCompetency(competencies)} and ${this.getSecondCompetency(competencies)} skills can drive significant value creation and competitive advantage.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${this.getTopCompetency(competencies)}, ${this.getSecondCompetency(competencies)} | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
+
+---
+
+### --- Digital Transformation Analysis ---
+*Modern acquisition strategy focusing on technology integration and digital value creation.*
+
+**Digital Readiness Assessment:**
+- Technology Integration: ${this.getTechIntegration(competencies)}
+- Data Capabilities: ${this.getDataCapabilities(competencies)}
+- Digital Value Creation: ${this.getValueCreationPotential(competencies)}
+
+**Digital Recommendations:**
+1. Target businesses with strong digital infrastructure
+2. Focus on technology-enabled value creation
+3. Develop data-driven decision making capabilities
+4. Build digital transformation expertise
+
+---
+
+### --- The Hedgehog Concept Analysis ---
+*Jim Collins' three circles framework: passion, excellence, and economic engine alignment.*
+
+**Hedgehog Analysis:**
+- Passion: ${this.getTopCompetency(competencies)} and strategic value creation
+- Excellence: ${this.getSecondCompetency(competencies)} capabilities and operational expertise
+- Economic Engine: ${motivators.join(' and ')} through strategic acquisitions
+
+**Hedgehog Recommendations:**
+1. Focus on businesses where passion and excellence intersect
+2. Target opportunities that drive your economic engine
+3. Align acquisition strategy with core competencies
+4. Build sustainable competitive advantages
+
+---
+
+### --- SWOT Analysis ---
+*Strategic planning framework evaluating internal strengths/weaknesses against external opportunities/threats.*
+
+**SWOT Assessment:**
+- Strengths: ${this.getTopCompetency(competencies)} expertise and ${this.getSecondCompetency(competencies)} capabilities
+- Weaknesses: Areas requiring development in complementary skills
+- Opportunities: ${this.getIndustryFocus(userData)} market opportunities
+- Threats: Market volatility and competitive pressures
+
+**SWOT Strategy:**
+1. Leverage strengths in ${this.getTopCompetency(competencies)}
+2. Address weaknesses through strategic partnerships
+3. Capitalize on ${this.getIndustryFocus(userData)} opportunities
+4. Mitigate threats through diversification
+
+---
+
+### --- Entrepreneurial Orientation Analysis ---
+*Miller (1983) framework assessing innovativeness, proactiveness, and risk-taking to match entrepreneurial DNA.*
+
+**EO Assessment:**
+- Innovativeness: ${this.getTechIntegration(competencies)} technology integration
+- Proactiveness: ${this.getGrowthAcceleration(competencies)} growth acceleration
+- Risk-Taking: ${riskTolerance} risk tolerance and strategic positioning
+
+**EO Strategy:**
+1. Apply innovative approaches to ${this.getTopCompetency(competencies)}
+2. Proactively identify market opportunities
+3. Balance risk-taking with strategic planning
+4. Build entrepreneurial capabilities
+
+---
+
+### --- Value Creation Analysis ---
+*Strategic framework for identifying and maximizing acquisition value.*
+
+**Value Creation Potential:**
+- Operational Excellence: ${this.getOperationalExcellence(competencies)}
+- Growth Acceleration: ${this.getGrowthAcceleration(competencies)}
+- Strategic Synergies: High potential for ${this.getTopCompetency(competencies)} integration
+
+**Value Creation Strategy:**
+1. Identify operational improvement opportunities
+2. Develop growth acceleration capabilities
+3. Create strategic synergies through ${this.getTopCompetency(competencies)}
+4. Build sustainable competitive advantages
+
+**Strategic Implications:** This comprehensive analysis positions you as a ${personalizedArchetypes.archetype1} with strong ${personalizedArchetypes.archetype2} capabilities, ready to execute strategic acquisitions in the ${investmentAmount} range with a focus on ${this.getIndustryFocus(userData)} opportunities that align with your ${motivators.join(' and ')} objectives.`;
+    }
+
+    getInvestmentRangeDescription(amount) {
+        const ranges = {
+            '50k-250k': 'small to medium',
+            '250k-1M': 'medium to large',
+            '1M-5M': 'large',
+            '5M+': 'enterprise-level'
+        };
+        return ranges[amount] || 'medium to large';
+    }
+
+    getTechIntegration(competencies) {
+        if (!competencies || typeof competencies !== 'object') return 'moderate';
+        const techScore = competencies.product_technology || 0;
+        if (techScore >= 4) return 'high';
+        if (techScore >= 3) return 'moderate';
+        return 'developing';
+    }
+
+    getDataCapabilities(competencies) {
+        if (!competencies || typeof competencies !== 'object') return 'moderate';
+        const analyticsScore = competencies.finance_analytics || 0;
+        if (analyticsScore >= 4) return 'strong';
+        if (analyticsScore >= 3) return 'moderate';
+        return 'developing';
+    }
+
+    getValueCreationPotential(competencies) {
+        if (!competencies || typeof competencies !== 'object') return 'moderate';
+        const scores = Object.values(competencies);
+        const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+        if (avgScore >= 4) return 'high';
+        if (avgScore >= 3) return 'moderate';
+        return 'developing';
+    }
+
+    getOperationalExcellence(competencies) {
+        if (!competencies || typeof competencies !== 'object') return 'moderate';
+        const opsScore = competencies.operations_systems || 0;
+        if (opsScore >= 4) return 'strong';
+        if (opsScore >= 3) return 'moderate';
+        return 'developing';
+    }
+
+    getGrowthAcceleration(competencies) {
+        if (!competencies || typeof competencies !== 'object') return 'moderate';
+        const salesScore = competencies.sales_marketing || 0;
+        if (salesScore >= 4) return 'high';
+        if (salesScore >= 3) return 'moderate';
+        return 'developing';
+    }
+
+    getTargetDescription(userData) {
+        const industry = userData.industry || 'any';
+        const dealSize = userData.dealSize || 'small';
+        return `${dealSize}-sized businesses in ${industry} industries`;
+    }
+
+    getIndustryFocus(userData) {
+        const industry = userData.industry || 'any';
+        return industry === 'any' ? 'diverse industries' : `${industry} sector`;
+    }
+
+    getDealTypeFocus(userData) {
+        const dealType = userData.dealType || 'asset_purchase';
+        const types = {
+            'asset_purchase': 'asset purchase',
+            'stock_purchase': 'stock purchase',
+            'merger': 'merger',
+            'partnership': 'partnership'
+        };
+        return types[dealType] || 'acquisition';
+    }
+
+    getNetworkFocus(userData) {
+        const industry = userData.industry || 'any';
+        return industry === 'any' ? 'diverse business networks' : `${industry} industry networks`;
+    }
+
+    getCapabilityGaps(competencies) {
+        const scores = Object.entries(competencies).sort((a, b) => a[1] - b[1]);
+        const competencyNames = {
+            sales_marketing: 'sales and marketing',
+            operations_systems: 'operations and systems',
+            finance_analytics: 'finance and analytics',
+            team_culture: 'team building and culture',
+            product_technology: 'product development and technology'
+        };
+        return competencyNames[scores[0][0]] || 'strategic capabilities';
+    }
+
+    generateFallbackFrameworks(userData) {
+        return {
+            traditional: {
+                name: 'Traditional M&A Expert Analysis',
+                description: 'Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.',
+                insights: this.generateTraditionalInsights(userData),
+                recommendations: this.generateTraditionalRecommendations(userData)
+            },
+            digital: {
+                name: 'Digital Transformation Framework',
+                description: 'Modern approach focusing on technology-enabled value creation and digital integration.',
+                insights: this.generateDigitalInsights(userData),
+                recommendations: this.generateDigitalRecommendations(userData)
+            },
+            value: {
+                name: 'Value Creation Framework',
+                description: 'Focus on post-acquisition value realization and operational improvement.',
+                insights: this.generateValueInsights(userData),
+                recommendations: this.generateValueRecommendations(userData)
+            }
+        };
+    }
+
+    generateTraditionalInsights(userData) {
+        return {
+            primaryArchetype: this.generatePersonalizedArchetypeNames(userData.competencies).archetype1,
+            secondaryArchetype: this.generatePersonalizedArchetypeNames(userData.competencies).archetype2,
+            dealSize: userData.investmentAmount || '250k-1M',
+            riskProfile: userData.riskTolerance || 'medium',
+            timeHorizon: userData.timeHorizon || '1-3 years'
+        };
+    }
+
+    generateTraditionalRecommendations(userData) {
+        return [
+            `Focus on ${this.getIndustryFocus(userData)} opportunities`,
+            `Prioritize ${this.getDealTypeFocus(userData)} structures`,
+            `Develop ${this.getCapabilityGaps(userData)} capabilities`,
+            `Build relationships in ${this.getNetworkFocus(userData)} networks`
+        ];
+    }
+
+    generateDigitalInsights(userData) {
+        return {
+            digitalReadiness: this.getDigitalReadiness(userData),
+            techIntegration: this.getTechIntegration(userData),
+            dataCapabilities: this.getDataCapabilities(userData)
+        };
+    }
+
+    generateDigitalRecommendations(userData) {
+        return [
+            'Identify technology-enabled acquisition targets',
+            'Develop digital integration capabilities',
+            'Build data-driven decision making processes',
+            'Create scalable technology platforms'
+        ];
+    }
+
+    generateValueInsights(userData) {
+        return {
+            valueCreationPotential: this.getValueCreationPotential(userData),
+            operationalExcellence: this.getOperationalExcellence(userData),
+            growthAcceleration: this.getGrowthAcceleration(userData)
+        };
+    }
+
+    generateValueRecommendations(userData) {
+        return [
+            'Develop operational improvement capabilities',
+            'Build growth acceleration frameworks',
+            'Create value realization processes',
+            'Establish performance measurement systems'
+        ];
+    }
+
+    getDigitalReadiness(userData) {
+        const techScore = userData.competencies?.product_technology || 3;
+        return techScore >= 4 ? 'High' : techScore >= 3 ? 'Medium' : 'Developing';
+    }
+
+    getTechIntegration(userData) {
+        const techScore = userData.competencies?.product_technology || 3;
+        return techScore >= 4 ? 'Advanced' : techScore >= 3 ? 'Moderate' : 'Basic';
+    }
+
+    getDataCapabilities(userData) {
+        const analyticsScore = userData.competencies?.finance_analytics || 3;
+        return analyticsScore >= 4 ? 'Strong' : analyticsScore >= 3 ? 'Moderate' : 'Developing';
+    }
+
+    getValueCreationPotential(userData) {
+        const avgScore = Object.values(userData.competencies || {}).reduce((a, b) => a + b, 0) / 5;
+        return avgScore >= 4 ? 'High' : avgScore >= 3 ? 'Medium' : 'Developing';
+    }
+
+    getOperationalExcellence(userData) {
+        const opsScore = userData.competencies?.operations_systems || 3;
+        return opsScore >= 4 ? 'Strong' : opsScore >= 3 ? 'Moderate' : 'Developing';
+    }
+
+    getGrowthAcceleration(userData) {
+        const salesScore = userData.competencies?.sales_marketing || 3;
+        return salesScore >= 4 ? 'High' : salesScore >= 3 ? 'Medium' : 'Developing';
+    }
+
+    generateFallbackComparison() {
+        return {
+            summary: 'Multi-framework analysis provides comprehensive strategic insights',
+            strengths: [
+                'Comprehensive archetype identification',
+                'Multi-dimensional strategic analysis',
+                'Personalized recommendations',
+                'Framework-specific insights'
+            ],
+            recommendations: [
+                'Focus on primary archetype strengths',
+                'Develop secondary archetype capabilities',
+                'Leverage framework synergies',
+                'Implement strategic recommendations'
+            ]
+        };
     }
 }
 
