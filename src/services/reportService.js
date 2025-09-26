@@ -28,7 +28,7 @@ class ReportService {
         generatedAt: new Date(),
         formData: reportData.formData,
         analysisResults: reportData.analysisResults,
-        aiModel: reportData.aiModel || 'gemini-1.0-pro-002',
+        aiModel: reportData.aiModel || 'gemini-2.0-flash-live-001',
         version: reportData.version || '1.0',
         isPublic: false,
         tags: reportData.tags || [],
