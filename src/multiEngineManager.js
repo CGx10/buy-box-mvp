@@ -24,6 +24,9 @@ class MultiEngineManager {
     async getAvailableEngines() {
         const engineInfo = {};
         
+        console.log('🔍 MultiEngineManager Debug:');
+        console.log('Default engine:', this.defaultEngine);
+        
         for (const [name, engine] of Object.entries(this.engines)) {
             try {
                 if (name === 'traditional') {
@@ -52,6 +55,7 @@ class MultiEngineManager {
                     };
                 }
             } catch (error) {
+                console.log(`❌ Engine ${name} error:`, error.message);
                 engineInfo[name] = {
                     name: name,
                     enabled: false,
@@ -60,6 +64,9 @@ class MultiEngineManager {
                 };
             }
         }
+        
+        console.log('🔍 Available engines:', Object.keys(engineInfo).filter(name => engineInfo[name].available));
+        console.log('🔍 Enabled engines:', Object.keys(engineInfo).filter(name => engineInfo[name].enabled));
         
         return engineInfo;
     }
