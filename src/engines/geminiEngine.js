@@ -7,10 +7,11 @@ class GeminiAnalysisEngine {
         this.available = false;
         
         // Initialize Gemini client if API key is available
-        console.log('🔍 Gemini Engine Debug:');
+        console.log('🔍 Gemini Engine Debug - DEPLOYMENT v2.0:');
         console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
         console.log('ENABLE_GEMINI value:', process.env.ENABLE_GEMINI);
         console.log('ENABLE_GEMINI === "true":', process.env.ENABLE_GEMINI === 'true');
+        console.log('🚀 Using model: gemini-1.0-pro-002 (UPDATED)');
         
         if (process.env.GEMINI_API_KEY && (process.env.ENABLE_GEMINI === 'true' || process.env.ENABLE_GEMINI === undefined)) {
             try {
