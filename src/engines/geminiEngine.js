@@ -17,7 +17,7 @@ class GeminiAnalysisEngine {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
                 this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.0-pro-002' });
                 this.available = true;
-                console.log('✅ Gemini engine initialized successfully');
+                console.log('✅ Gemini engine initialized successfully with model: gemini-1.0-pro-002');
             } catch (error) {
                 console.error('❌ Failed to initialize Gemini engine:', error.message);
                 this.available = false;
