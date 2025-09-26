@@ -7,7 +7,7 @@ class GeminiAnalysisEngine {
         this.available = false;
         
         // Initialize Gemini client if API key is available
-        if (process.env.GEMINI_API_KEY && process.env.ENABLE_GEMINI === 'true') {
+        if (process.env.GEMINI_API_KEY && process.env.ENABLE_GEMINI === 'true' && false) {
             try {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
                 this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.0-pro-002' });
