@@ -18,7 +18,7 @@ class MultiEngineManager {
             hybrid: new HybridAnalysisEngine()
         };
         
-        this.defaultEngine = process.env.DEFAULT_AI_ENGINE || 'traditional';
+        this.defaultEngine = process.env.DEFAULT_AI_ENGINE || 'gemini';
     }
 
     async getAvailableEngines() {

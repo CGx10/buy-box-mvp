@@ -383,6 +383,17 @@ class AcquisitionAdvisorApp {
                 console.error('API response not OK:', response.status, response.statusText);
                 const errorText = await response.text();
                 console.error('Error response body:', errorText);
+                
+                // If it's a 500 error, use fallback mode instead of throwing
+                if (response.status === 500) {
+                    console.warn('500 error detected, using fallback mode');
+                    const formData = this.collectFormData();
+                    const fallbackResult = this.generateFallbackAnalysis(formData);
+                    this.analysisResults = fallbackResult.data;
+                    this.showResults();
+                    return;
+                }
+                
                 throw new Error(`API Error: ${response.status} ${response.statusText}`);
             }
             
@@ -648,8 +659,16 @@ class AcquisitionAdvisorApp {
     displayMultiFrameworkResults(frameworks) {
         console.log(`🚀 DISPLAY FUNCTION CALLED - v${this.scriptVersion}!`);
         const reportContainer = document.getElementById('buyboxSection');
-        if (!reportContainer) return;
-
+        if (!reportContainer) {
+            console.error('Report container not found');
+            return;
+        }
+        
+        console.log('DEBUG: Report container found:', reportContainer);
+        console.log('DEBUG: Report container display:', reportContainer.style.display);
+        console.log('DEBUG: Report container visibility:', reportContainer.style.visibility);
+        console.log('DEBUG: Report container height:', reportContainer.style.height);
+        
         reportContainer.innerHTML = ''; // Clear previous results
 
         // Parse the new Part 1: Executive Summary & Strategic Insights from the raw response
@@ -827,7 +846,7 @@ class AcquisitionAdvisorApp {
             console.log('DEBUG: Overview HTML inserted successfully');
             
             // Confirm the overview element is in the DOM
-            const overviewElement = reportContainer.querySelector('.overview-section');
+            const overviewElement = reportContainer.querySelector('#analysis-summary');
             if (overviewElement) {
                 console.log('DEBUG: Overview element successfully inserted into DOM');
             } else {
@@ -846,6 +865,7 @@ class AcquisitionAdvisorApp {
         ];
 
         console.log('DEBUG: Starting to create framework cards, count:', frameworks.length);
+        console.log('DEBUG: Report container before framework creation:', reportContainer.innerHTML.length, 'characters');
         frameworks.forEach((framework, index) => {
             console.log(`DEBUG: Creating framework card ${index + 1}/${frameworks.length}: ${framework.title}`);
             const colors = frameworkColors[index % frameworkColors.length];
@@ -904,6 +924,177 @@ class AcquisitionAdvisorApp {
         });
 
         reportContainer.style.display = 'block';
+        // reportContainer.style.backgroundColor = '#ff0000'; // Bright red background for testing - REMOVED
+        reportContainer.style.minHeight = '500px'; // Ensure minimum height
+        
+        // Create a completely new container to avoid any CSS conflicts
+        const newReportContainer = document.createElement('div');
+        newReportContainer.id = 'newReportContainer';
+        newReportContainer.innerHTML = reportContainer.innerHTML;
+        
+        // Apply styles to the new container
+        newReportContainer.style.position = 'fixed';
+        newReportContainer.style.top = '0px';
+        newReportContainer.style.left = '0px';
+        newReportContainer.style.right = '0px';
+        newReportContainer.style.bottom = '0px';
+        newReportContainer.style.zIndex = '1000';
+        newReportContainer.style.backgroundColor = 'white';
+        newReportContainer.style.padding = '20px';
+        newReportContainer.style.margin = '0';
+        newReportContainer.style.overflowY = 'auto';
+        newReportContainer.style.overflowX = 'hidden';
+        newReportContainer.style.height = '100vh';
+        newReportContainer.style.width = '100vw';
+        newReportContainer.style.maxWidth = '100vw';
+        newReportContainer.style.boxSizing = 'border-box';
+        
+        // Hide the original container
+        reportContainer.style.display = 'none';
+        
+        // Add CSS to prevent horizontal overflow
+        const style = document.createElement('style');
+        style.textContent = `
+            #newReportContainer * {
+                max-width: 100% !important;
+                word-wrap: break-word !important;
+                overflow-wrap: break-word !important;
+            }
+            #newReportContainer table {
+                width: 100% !important;
+                table-layout: fixed !important;
+            }
+            #newReportContainer pre, #newReportContainer code {
+                white-space: pre-wrap !important;
+                word-wrap: break-word !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Add the new container to the body
+        document.body.appendChild(newReportContainer);
+        
+        // Update the reference to use the new container
+        const actualReportContainer = newReportContainer;
+        
+        // Hide all other content to focus on the report
+        const discoveryPhase = document.getElementById('discoveryPhase');
+        const analysisPhase = document.getElementById('analysisPhase');
+        if (discoveryPhase) discoveryPhase.style.display = 'none';
+        if (analysisPhase) analysisPhase.style.display = 'none';
+        
+        // Add a back button and download button to the report
+        const buttonContainer = document.createElement('div');
+        buttonContainer.style.position = 'sticky';
+        buttonContainer.style.top = '0px';
+        buttonContainer.style.zIndex = '1001';
+        buttonContainer.style.backgroundColor = 'white';
+        buttonContainer.style.padding = '10px 0';
+        buttonContainer.style.marginBottom = '20px';
+        buttonContainer.style.borderBottom = '1px solid #ddd';
+        buttonContainer.style.display = 'flex';
+        buttonContainer.style.gap = '10px';
+        buttonContainer.style.alignItems = 'center';
+        
+        const backButton = document.createElement('button');
+        backButton.textContent = '← Back to Analysis';
+        backButton.className = 'btn btn-secondary';
+        backButton.style.padding = '10px 20px';
+        backButton.style.border = '1px solid #ddd';
+        backButton.style.borderRadius = '5px';
+        backButton.onclick = () => {
+            // Show the questionnaire again
+            if (discoveryPhase) discoveryPhase.style.display = 'block';
+            if (analysisPhase) analysisPhase.style.display = 'block';
+            // Remove the new container and show the original
+            if (newReportContainer && newReportContainer.parentNode) {
+                newReportContainer.parentNode.removeChild(newReportContainer);
+            }
+            reportContainer.style.display = 'block';
+            // Show the questionnaire
+            this.showPhase('discoveryPhase');
+        };
+        
+        const downloadButton = document.createElement('button');
+        downloadButton.textContent = '📄 Download PDF';
+        downloadButton.className = 'btn btn-primary';
+        downloadButton.id = 'downloadBtn';
+        downloadButton.style.padding = '10px 20px';
+        downloadButton.style.border = '1px solid #007bff';
+        downloadButton.style.borderRadius = '5px';
+        downloadButton.style.backgroundColor = '#007bff';
+        downloadButton.style.color = 'white';
+        downloadButton.onclick = () => {
+            console.log('DEBUG: PDF download button clicked');
+            // Call the downloadPDF method directly
+            if (typeof this.downloadPDF === 'function') {
+                this.downloadPDF();
+            } else {
+                console.error('DEBUG: downloadPDF method not found');
+                // Fallback: try to find and click the original download button
+                const originalDownloadBtn = document.getElementById('downloadBtn');
+                if (originalDownloadBtn) {
+                    originalDownloadBtn.click();
+                } else {
+                    console.error('DEBUG: Original download button not found');
+                }
+            }
+        };
+        
+        buttonContainer.appendChild(backButton);
+        buttonContainer.appendChild(downloadButton);
+        actualReportContainer.insertBefore(buttonContainer, actualReportContainer.firstChild);
+        
+        // Auto-scroll to the content after a short delay to ensure it's rendered
+        setTimeout(() => {
+            // Scroll to the top of the page first, then to the report
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            setTimeout(() => {
+                actualReportContainer.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+                console.log('DEBUG: Scrolled to new report container');
+            }, 100);
+        }, 50);
+        console.log('DEBUG: Final report container state:');
+        console.log('DEBUG: - Display:', reportContainer.style.display);
+        console.log('DEBUG: - Visibility:', reportContainer.style.visibility);
+        console.log('DEBUG: - Height:', reportContainer.style.height);
+        console.log('DEBUG: - Content length:', reportContainer.innerHTML.length, 'characters');
+        console.log('DEBUG: - Children count:', reportContainer.children.length);
+        
+        // Check computed styles
+        const computedStyle = window.getComputedStyle(reportContainer);
+        console.log('DEBUG: Computed styles:');
+        console.log('DEBUG: - Display:', computedStyle.display);
+        console.log('DEBUG: - Visibility:', computedStyle.visibility);
+        console.log('DEBUG: - Height:', computedStyle.height);
+        console.log('DEBUG: - Width:', computedStyle.width);
+        console.log('DEBUG: - Position:', computedStyle.position);
+        console.log('DEBUG: - Top:', computedStyle.top);
+        console.log('DEBUG: - Left:', computedStyle.left);
+        
+        // Check if container is in viewport
+        const rect = reportContainer.getBoundingClientRect();
+        console.log('DEBUG: Container position:');
+        console.log('DEBUG: - Top:', rect.top);
+        console.log('DEBUG: - Left:', rect.left);
+        console.log('DEBUG: - Width:', rect.width);
+        console.log('DEBUG: - Height:', rect.height);
+        console.log('DEBUG: - Visible:', rect.width > 0 && rect.height > 0);
+        
+        // Check first child
+        if (reportContainer.children.length > 0) {
+            const firstChild = reportContainer.children[0];
+            const childRect = firstChild.getBoundingClientRect();
+            console.log('DEBUG: First child position:');
+            console.log('DEBUG: - Top:', childRect.top);
+            console.log('DEBUG: - Left:', childRect.left);
+            console.log('DEBUG: - Width:', childRect.width);
+            console.log('DEBUG: - Height:', childRect.height);
+            console.log('DEBUG: - Visible:', childRect.width > 0 && childRect.height > 0);
+        }
     }
 
     populateSingleFrameworkResults() {
@@ -1296,8 +1487,29 @@ class AcquisitionAdvisorApp {
         console.log('Target phase element:', targetPhase);
         if (targetPhase) {
             targetPhase.classList.add('active');
+            // Force visibility with explicit styles
+            targetPhase.style.display = 'block';
+            targetPhase.style.visibility = 'visible';
+            targetPhase.style.height = 'auto';
+            targetPhase.style.width = '100%';
             console.log('✅ Phase shown:', phaseId);
             console.log('Phase classes after activation:', targetPhase.className);
+            
+            // Debug the phase visibility
+            const computedStyle = window.getComputedStyle(targetPhase);
+            console.log('DEBUG: Phase visibility after activation:');
+            console.log('DEBUG: - Display:', computedStyle.display);
+            console.log('DEBUG: - Visibility:', computedStyle.visibility);
+            console.log('DEBUG: - Height:', computedStyle.height);
+            console.log('DEBUG: - Width:', computedStyle.width);
+            
+            const rect = targetPhase.getBoundingClientRect();
+            console.log('DEBUG: Phase position after activation:');
+            console.log('DEBUG: - Top:', rect.top);
+            console.log('DEBUG: - Left:', rect.left);
+            console.log('DEBUG: - Width:', rect.width);
+            console.log('DEBUG: - Height:', rect.height);
+            console.log('DEBUG: - Visible:', rect.width > 0 && rect.height > 0);
         } else {
             console.log('❌ Phase not found:', phaseId);
             console.log('Available phase IDs:', Array.from(phases).map(p => p.id));
@@ -1978,15 +2190,25 @@ class AcquisitionAdvisorApp {
     }
 
     toggleTransparency() {
+        console.log('🔄 toggleTransparency called');
         const content = document.getElementById('transparencyContent');
         const button = document.getElementById('toggleTransparency');
         
-        if (content.style.display === 'none') {
-            content.style.display = 'block';
-            button.textContent = 'Hide Detailed AI Analysis';
+        console.log('DEBUG: Content element:', content);
+        console.log('DEBUG: Button element:', button);
+        
+        if (content && button) {
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                button.textContent = 'Hide Detailed AI Analysis';
+                console.log('✅ Showing transparency content');
+            } else {
+                content.style.display = 'none';
+                button.textContent = 'Show Detailed AI Analysis';
+                console.log('✅ Hiding transparency content');
+            }
         } else {
-            content.style.display = 'none';
-            button.textContent = 'Show Detailed AI Analysis';
+            console.error('❌ Could not find transparency elements');
         }
     }
 
@@ -3369,6 +3591,21 @@ Your acquisition thesis centers on leveraging your ${this.getTopCompetency(compe
 3. Develop data-driven decision making capabilities
 4. Build digital transformation expertise
 
+<thesis_start>
+Your acquisition thesis centers on leveraging digital transformation opportunities to identify and acquire technology-enabled businesses in the 250k-1M range. Your moderate technology integration capabilities position you to create value through digital improvements and strategic technology synergies, while your developing digital value creation skills enable you to accelerate growth and market expansion. Target businesses with strong digital infrastructure but underutilized technology potential, where your operations and systems and sales and marketing skills can drive significant digital value creation and competitive advantage.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${this.getTopCompetency(competencies)}, ${this.getSecondCompetency(competencies)} | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
+
 ---
 
 ### --- The Hedgehog Concept Analysis ---
@@ -3384,6 +3621,21 @@ Your acquisition thesis centers on leveraging your ${this.getTopCompetency(compe
 2. Target opportunities that drive your economic engine
 3. Align acquisition strategy with core competencies
 4. Build sustainable competitive advantages
+
+<thesis_start>
+Your acquisition thesis centers on leveraging your passion for operations and systems and strategic value creation to identify and acquire businesses in the 250k-1M range where your excellence in sales and marketing capabilities and operational expertise can drive your economic engine of freedom and earning potential. Your passion-excellence intersection positions you to create value through strategic synergies and operational improvements, while your economic engine focus enables you to accelerate growth and market expansion. Target businesses where your core competencies align with market opportunities, where your operations and systems and sales and marketing skills can drive significant value creation and sustainable competitive advantage.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${this.getTopCompetency(competencies)}, ${this.getSecondCompetency(competencies)} | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
 
 ---
 
@@ -3402,6 +3654,21 @@ Your acquisition thesis centers on leveraging your ${this.getTopCompetency(compe
 3. Capitalize on ${this.getIndustryFocus(userData)} opportunities
 4. Mitigate threats through diversification
 
+<thesis_start>
+Your acquisition thesis centers on leveraging your operations and systems expertise and sales and marketing capabilities to identify and acquire diverse industries businesses in the 250k-1M range. Your strengths position you to create value through operational improvements and strategic synergies, while addressing weaknesses through strategic partnerships enables you to accelerate growth and market expansion. Target businesses with strong fundamentals but areas for improvement, where your operations and systems and sales and marketing skills can drive significant value creation and competitive advantage while mitigating market volatility and competitive pressures.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${this.getTopCompetency(competencies)}, ${this.getSecondCompetency(competencies)} | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
+
 ---
 
 ### --- Entrepreneurial Orientation Analysis ---
@@ -3418,6 +3685,21 @@ Your acquisition thesis centers on leveraging your ${this.getTopCompetency(compe
 3. Balance risk-taking with strategic planning
 4. Build entrepreneurial capabilities
 
+<thesis_start>
+Your acquisition thesis centers on leveraging your moderate technology integration and medium growth acceleration capabilities to identify and acquire diverse industries businesses in the 250k-1M range. Your medium risk tolerance and strategic positioning enable you to create value through innovative operational approaches and proactive market identification, while your entrepreneurial capabilities enable you to accelerate growth and market expansion. Target businesses with growth potential but underutilized innovation opportunities, where your operations and systems and sales and marketing skills can drive significant value creation and competitive advantage through balanced risk-taking and strategic planning.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${this.getTopCompetency(competencies)}, ${this.getSecondCompetency(competencies)} | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
+
 ---
 
 ### --- Value Creation Analysis ---
@@ -3433,6 +3715,21 @@ Your acquisition thesis centers on leveraging your ${this.getTopCompetency(compe
 2. Develop growth acceleration capabilities
 3. Create strategic synergies through ${this.getTopCompetency(competencies)}
 4. Build sustainable competitive advantages
+
+<thesis_start>
+Your acquisition thesis centers on leveraging your moderate operational excellence and medium growth acceleration capabilities to identify and acquire diverse industries businesses in the 250k-1M range with high potential for operations and systems integration. Your strategic synergies focus enables you to create value through operational improvements and growth acceleration, while your sustainable competitive advantages enable you to accelerate market expansion. Target businesses with operational improvement opportunities and growth potential, where your operations and systems and sales and marketing skills can drive significant value creation and competitive advantage through strategic synergies and sustainable competitive positioning.
+<thesis_end>
+
+**Your Personalized Buybox**
+
+| CRITERION | YOUR TARGET PROFILE | RATIONALE |
+|-----------|-------------------|-----------|
+| **Target Size** | ${investmentAmount} | Aligns with your risk tolerance and available capital |
+| **Industry Focus** | ${this.getIndustryFocus(userData)} | Matches your operational expertise and market knowledge |
+| **Deal Structure** | ${this.getDealTypeFocus(userData)} | Optimizes for your acquisition strategy and risk profile |
+| **Key Capabilities** | ${this.getTopCompetency(competencies)}, ${this.getSecondCompetency(competencies)} | Leverages your strongest competencies for value creation |
+| **Risk Profile** | ${riskTolerance} | Balances opportunity with your risk tolerance |
+| **Time Horizon** | ${timeHorizon} | Matches your investment timeline and exit strategy |
 
 **Strategic Implications:** This comprehensive analysis positions you as a ${personalizedArchetypes.archetype1} with strong ${personalizedArchetypes.archetype2} capabilities, ready to execute strategic acquisitions in the ${investmentAmount} range with a focus on ${this.getIndustryFocus(userData)} opportunities that align with your ${motivators.join(' and ')} objectives.`;
     }
