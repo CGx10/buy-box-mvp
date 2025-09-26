@@ -140,3 +140,4 @@ The application includes comprehensive error handling and user-friendly validati
 ---
 
 *Built with ❤️ for acquisition entrepreneurs seeking their perfect business buybox.*
+# Railway deployment trigger
