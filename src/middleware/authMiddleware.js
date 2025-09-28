@@ -1,5 +1,5 @@
 // Authentication and Permission Middleware
-import PermissionService from '../services/permissionService.js';
+const PermissionService = require('../services/permissionService.js');
 
 class AuthMiddleware {
   constructor() {
@@ -121,4 +121,4 @@ class AuthMiddleware {
   }
 }
 
-export default AuthMiddleware;
+module.exports = AuthMiddleware;
