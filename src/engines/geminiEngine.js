@@ -45,13 +45,13 @@ class GeminiAnalysisEngine {
 
         try {
             // Set model based on user selection
-            const selectedModel = userData.ai_model || 'gemini-2.5-flash';
+            const selectedModel = userData.ai_model || 'gemini-2.5-flash-preview-05-20';
             this.model = this.genAI.getGenerativeModel({ model: selectedModel });
             console.log(`🤖 Using Gemini model: ${selectedModel}`);
             console.log(`🔍 UserData.ai_model: ${userData.ai_model}`);
             
             // Add Flash-specific reinforcement
-            if (selectedModel === 'gemini-2.5-flash') {
+            if (selectedModel === 'gemini-2.5-flash-preview-05-20') {
                 console.log('⚡ FLASH MODEL DETECTED - Using enhanced instructions for better compliance');
             }
             
