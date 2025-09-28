@@ -5,20 +5,20 @@ class GeminiAnalysisEngine {
     constructor() {
         this.name = 'Google Gemini';
         this.available = false;
+        this.genAI = null;
         
         // Initialize Gemini client if API key is available
-        console.log('🔍 Gemini Engine Debug - DEPLOYMENT v2.2 - FORCING RAILWAY UPDATE:');
+        console.log('🔍 Gemini Engine Debug - DEPLOYMENT v2.3 - SUPPORTING BOTH MODELS:');
         console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
         console.log('ENABLE_GEMINI value:', process.env.ENABLE_GEMINI);
         console.log('ENABLE_GEMINI === "true":', process.env.ENABLE_GEMINI === 'true');
-        console.log('🚀 Using model: gemini-2.5-flash (CURRENT MODEL)');
+        console.log('🚀 Supporting models: gemini-2.5-flash and gemini-2.5-pro');
         
         if (process.env.GEMINI_API_KEY && (process.env.ENABLE_GEMINI === 'true' || process.env.ENABLE_GEMINI === undefined)) {
             try {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-                this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
                 this.available = true;
-                console.log('✅ Gemini engine initialized successfully with model: gemini-2.5-flash');
+                console.log('✅ Gemini engine initialized successfully - ready for both models');
             } catch (error) {
                 console.error('❌ Failed to initialize Gemini engine:', error.message);
                 this.available = false;
@@ -45,13 +45,13 @@ class GeminiAnalysisEngine {
 
         try {
             // Set model based on user selection
-            const selectedModel = userData.ai_model || 'gemini-1.0-pro-002';
+            const selectedModel = userData.ai_model || 'gemini-2.5-flash';
             this.model = this.genAI.getGenerativeModel({ model: selectedModel });
             console.log(`🤖 Using Gemini model: ${selectedModel}`);
             console.log(`🔍 UserData.ai_model: ${userData.ai_model}`);
             
             // Add Flash-specific reinforcement
-            if (selectedModel === 'gemini-1.0-pro-002') {
+            if (selectedModel === 'gemini-2.5-flash') {
                 console.log('⚡ FLASH MODEL DETECTED - Using enhanced instructions for better compliance');
             }
             
