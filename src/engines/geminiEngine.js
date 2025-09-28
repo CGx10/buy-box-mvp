@@ -120,11 +120,11 @@ You **MUST** conduct your analysis using ALL FOUR strategic frameworks simultane
 You will be provided with a JSON object containing the entrepreneur's complete profile, structured into three modules:
 
 **Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
-- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
-- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
-- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
-- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
-- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+- Sales & Marketing Skills: ${userData.competencies?.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.competencies?.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.competencies?.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.competencies?.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.competencies?.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.competencies?.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.competencies?.team_culture?.rating || 'Not provided'} (Evidence: ${userData.competencies?.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.competencies?.product_technology?.rating || 'Not provided'} (Evidence: ${userData.competencies?.product_technology?.evidence || 'None'})
 
 **Module A.5: Personal Motivation & Vision (Core drivers and lifestyle preferences)**
 - Top Motivators: ${userData.top_motivators || 'Not provided'}
@@ -424,11 +424,11 @@ You are an expert Mergers & Acquisitions (M&A) advisor and business strategist. 
 You will be provided with a JSON object containing the entrepreneur's complete profile, structured into three modules:
 
 **Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
-- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
-- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
-- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
-- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
-- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+- Sales & Marketing Skills: ${userData.competencies?.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.competencies?.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.competencies?.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.competencies?.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.competencies?.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.competencies?.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.competencies?.team_culture?.rating || 'Not provided'} (Evidence: ${userData.competencies?.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.competencies?.product_technology?.rating || 'Not provided'} (Evidence: ${userData.competencies?.product_technology?.evidence || 'None'})
 
 **Module A.5: Personal Motivation & Vision (Core drivers and lifestyle preferences)**
 - Top Motivators: ${userData.top_motivators || 'Not provided'}
@@ -508,11 +508,11 @@ You are an expert Mergers & Acquisitions (M&A) advisor and business strategist. 
 You will be provided with a JSON object containing the entrepreneur's complete profile, structured into three modules:
 
 **Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
-- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
-- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
-- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
-- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
-- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+- Sales & Marketing Skills: ${userData.competencies?.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.competencies?.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.competencies?.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.competencies?.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.competencies?.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.competencies?.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.competencies?.team_culture?.rating || 'Not provided'} (Evidence: ${userData.competencies?.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.competencies?.product_technology?.rating || 'Not provided'} (Evidence: ${userData.competencies?.product_technology?.evidence || 'None'})
 
 **Module A.5: Personal Motivation & Vision (Core drivers and lifestyle preferences)**
 - Top Motivators: ${userData.top_motivators || 'Not provided'}
@@ -597,11 +597,11 @@ ${stage1Response}
 You will be provided with a JSON object containing the entrepreneur's complete profile:
 
 **Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
-- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
-- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
-- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
-- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
-- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+- Sales & Marketing Skills: ${userData.competencies?.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.competencies?.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.competencies?.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.competencies?.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.competencies?.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.competencies?.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.competencies?.team_culture?.rating || 'Not provided'} (Evidence: ${userData.competencies?.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.competencies?.product_technology?.rating || 'Not provided'} (Evidence: ${userData.competencies?.product_technology?.evidence || 'None'})
 
 **Module A.5: Personal Motivation & Vision**
 - Top Motivators: ${userData.top_motivators || 'Not provided'}
@@ -794,11 +794,11 @@ ${stage1Response}
 You will be provided with a JSON object containing the entrepreneur's complete profile:
 
 **Module A: The Operator Profile (5x competency ratings and qualitative evidence)**
-- Sales & Marketing Skills: ${userData.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.sales_marketing?.evidence || 'None'})
-- Operations & Systems: ${userData.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.operations_systems?.evidence || 'None'})
-- Finance & Analytics: ${userData.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.finance_analytics?.evidence || 'None'})
-- Team & Culture: ${userData.team_culture?.rating || 'Not provided'} (Evidence: ${userData.team_culture?.evidence || 'None'})
-- Product & Technology: ${userData.product_technology?.rating || 'Not provided'} (Evidence: ${userData.product_technology?.evidence || 'None'})
+- Sales & Marketing Skills: ${userData.competencies?.sales_marketing?.rating || 'Not provided'} (Evidence: ${userData.competencies?.sales_marketing?.evidence || 'None'})
+- Operations & Systems: ${userData.competencies?.operations_systems?.rating || 'Not provided'} (Evidence: ${userData.competencies?.operations_systems?.evidence || 'None'})
+- Finance & Analytics: ${userData.competencies?.finance_analytics?.rating || 'Not provided'} (Evidence: ${userData.competencies?.finance_analytics?.evidence || 'None'})
+- Team & Culture: ${userData.competencies?.team_culture?.rating || 'Not provided'} (Evidence: ${userData.competencies?.team_culture?.evidence || 'None'})
+- Product & Technology: ${userData.competencies?.product_technology?.rating || 'Not provided'} (Evidence: ${userData.competencies?.product_technology?.evidence || 'None'})
 
 **Module A.5: Personal Motivation & Vision**
 - Top Motivators: ${userData.top_motivators || 'Not provided'}

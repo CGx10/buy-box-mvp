@@ -121,12 +121,13 @@ class AIEnhancedAcquisitionAdvisor {
     validateInput(userData) {
         const errors = [];
 
-        // Module A validation
+        // Module A validation - check competencies in nested structure
         const requiredCompetencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
         for (const comp of requiredCompetencies) {
-            if (!userData[comp] || !userData[comp].rating || !userData[comp].evidence) {
+            const competency = userData.competencies?.[comp];
+            if (!competency || !competency.rating || !competency.evidence) {
                 errors.push(`Missing ${comp} rating or evidence`);
-            } else if (userData[comp].evidence.length < 200) {
+            } else if (competency.evidence.length < 200) {
                 errors.push(`${comp} evidence must be at least 200 characters`);
             }
         }

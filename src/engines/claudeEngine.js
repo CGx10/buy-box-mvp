@@ -128,20 +128,20 @@ Be thorough, evidence-based, and provide clear reasoning for all conclusions.`;
 
 === COMPETENCY EVIDENCE ===
 
-Sales & Marketing (Self-Rating: ${userData.sales_marketing.rating}/5):
-Evidence: "${userData.sales_marketing.evidence}"
+Sales & Marketing (Self-Rating: ${userData.competencies?.sales_marketing?.rating || 0}/5):
+Evidence: "${userData.competencies?.sales_marketing?.evidence || 'None'}"
 
-Operations & Systems (Self-Rating: ${userData.operations_systems.rating}/5):
-Evidence: "${userData.operations_systems.evidence}"
+Operations & Systems (Self-Rating: ${userData.competencies?.operations_systems?.rating || 0}/5):
+Evidence: "${userData.competencies?.operations_systems?.evidence || 'None'}"
 
-Finance & Analytics (Self-Rating: ${userData.finance_analytics.rating}/5):
-Evidence: "${userData.finance_analytics.evidence}"
+Finance & Analytics (Self-Rating: ${userData.competencies?.finance_analytics?.rating || 0}/5):
+Evidence: "${userData.competencies?.finance_analytics?.evidence || 'None'}"
 
-Team & Culture (Self-Rating: ${userData.team_culture.rating}/5):
-Evidence: "${userData.team_culture.evidence}"
+Team & Culture (Self-Rating: ${userData.competencies?.team_culture?.rating || 0}/5):
+Evidence: "${userData.competencies?.team_culture?.evidence || 'None'}"
 
-Product & Technology (Self-Rating: ${userData.product_technology.rating}/5):
-Evidence: "${userData.product_technology.evidence}"
+Product & Technology (Self-Rating: ${userData.competencies?.product_technology?.rating || 0}/5):
+Evidence: "${userData.competencies?.product_technology?.evidence || 'None'}"
 
 === INTERESTS & MOTIVATIONS ===
 

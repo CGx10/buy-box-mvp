@@ -84,20 +84,20 @@ class OllamaAnalysisEngine {
 ENTREPRENEUR PROFILE:
 
 COMPETENCY EVIDENCE:
-1. Sales & Marketing (Self-rated: ${userData.sales_marketing.rating}/5)
-   Evidence: "${userData.sales_marketing.evidence}"
+1. Sales & Marketing (Self-rated: ${userData.competencies?.sales_marketing?.rating || 0}/5)
+   Evidence: "${userData.competencies?.sales_marketing?.evidence || 'None'}"
 
-2. Operations & Systems (Self-rated: ${userData.operations_systems.rating}/5)
-   Evidence: "${userData.operations_systems.evidence}"
+2. Operations & Systems (Self-rated: ${userData.competencies?.operations_systems?.rating || 0}/5)
+   Evidence: "${userData.competencies?.operations_systems?.evidence || 'None'}"
 
-3. Finance & Analytics (Self-rated: ${userData.finance_analytics.rating}/5)
-   Evidence: "${userData.finance_analytics.evidence}"
+3. Finance & Analytics (Self-rated: ${userData.competencies?.finance_analytics?.rating || 0}/5)
+   Evidence: "${userData.competencies?.finance_analytics?.evidence || 'None'}"
 
-4. Team & Culture (Self-rated: ${userData.team_culture.rating}/5)
-   Evidence: "${userData.team_culture.evidence}"
+4. Team & Culture (Self-rated: ${userData.competencies?.team_culture?.rating || 0}/5)
+   Evidence: "${userData.competencies?.team_culture?.evidence || 'None'}"
 
-5. Product & Technology (Self-rated: ${userData.product_technology.rating}/5)
-   Evidence: "${userData.product_technology.evidence}"
+5. Product & Technology (Self-rated: ${userData.competencies?.product_technology?.rating || 0}/5)
+   Evidence: "${userData.competencies?.product_technology?.evidence || 'None'}"
 
 INTERESTS & GOALS:
 - Industry Interests: "${userData.interests_topics}"

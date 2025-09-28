@@ -247,7 +247,7 @@ class AuthDashboardManager {
                         generatedAt: new Date(),
                         formData: reportData.formData,
                         analysisResults: reportData.analysisResults,
-                        aiModel: reportData.aiModel || 'gemini-1.5-flash',
+                        aiModel: reportData.aiModel || 'gemini-2.5-flash',
                         version: reportData.version || '1.0',
                         isPublic: false,
                         tags: reportData.tags || [],
@@ -872,7 +872,7 @@ class AuthDashboardManager {
                         </p>
                         <div style="margin-top: 10px;">
                             <span style="background: #e3f2fd; color: #1976d2; padding: 4px 8px; border-radius: 4px; font-size: 12px; margin-right: 8px;">
-                                ${reportData.aiModel || 'gemini-1.5-flash'}
+                                ${reportData.aiModel || 'gemini-2.5-flash'}
                             </span>
                             <span style="background: #f5f5f5; color: #666; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
                                 ${reportData.version || 'v1.0'}
