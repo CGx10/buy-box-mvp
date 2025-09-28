@@ -1,11 +1,11 @@
 // Authentication service for user management
-import { 
+const { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut, 
   onAuthStateChanged,
   updateProfile
-} from 'firebase/auth';
+} = require('firebase/auth');
 const { doc, setDoc, getDoc } = require('firebase/firestore');
 const { auth, db } = require('./firebaseConfig.js');
 

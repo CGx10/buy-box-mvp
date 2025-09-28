@@ -1,5 +1,5 @@
 // Report service for managing user reports and history
-import { 
+const { 
   collection, 
   addDoc, 
   getDocs, 
@@ -11,7 +11,7 @@ import {
   where, 
   orderBy, 
   limit 
-} from 'firebase/firestore';
+} = require('firebase/firestore');
 const { db } = require('./firebaseConfig.js');
 
 class ReportService {
