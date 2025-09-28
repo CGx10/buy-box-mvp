@@ -119,6 +119,7 @@ class AIEnhancedAcquisitionAdvisor {
     }
 
     validateInput(userData) {
+        console.log('🔍 VALIDATION DEBUG v2.4 - Checking nested competencies structure');
         const errors = [];
 
         // Module A validation - check competencies in nested structure
