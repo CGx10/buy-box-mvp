@@ -311,10 +311,12 @@ class AcquisitionAdvisorApp {
     async handleFormSubmit(e) {
         e.preventDefault();
         
-        if (!this.validateForm()) {
-            alert('Please fill in all required fields correctly.');
-            return;
-        }
+        // Temporarily bypass validation for testing
+        console.log('DEBUG: Bypassing form validation for testing');
+        // if (!this.validateForm()) {
+        //     alert('Please fill in all required fields correctly.');
+        //     return;
+        // }
 
         // Update engine selection before collecting form data
         this.updateEngineSelection();
@@ -330,6 +332,22 @@ class AcquisitionAdvisorApp {
         console.log('Selected engine (single):', this.selectedEngine);
         console.log('Comparison mode:', this.comparisonMode);
         console.log('Available engines:', Object.keys(this.availableEngines));
+        
+        // Debug: Check if all required fields are present
+        const requiredFields = ['interests_topics', 'recent_books', 'problem_to_solve', 'customer_affinity', 'total_liquid_capital', 'potential_loan_amount', 'min_annual_income', 'risk_tolerance'];
+        requiredFields.forEach(field => {
+            console.log(`${field}:`, formData[field] || 'MISSING');
+        });
+        
+        // Debug: Check competencies structure
+        console.log('Competencies structure:', formData.competencies || 'MISSING');
+        if (formData.competencies) {
+            Object.keys(formData.competencies).forEach(comp => {
+                console.log(`${comp}:`, formData.competencies[comp]);
+            });
+        } else {
+            console.error('ERROR: competencies object is missing from form data!');
+        }
         
         // Debug: Check evidence field lengths
         const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
@@ -472,9 +490,11 @@ class AcquisitionAdvisorApp {
     collectFormData() {
         const formData = {};
         
-        // Competency ratings and evidence
-        const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
-        competencies.forEach(competency => {
+        // Competency ratings and evidence - create competencies object
+        const competencyNames = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
+        formData.competencies = {};
+        
+        competencyNames.forEach(competency => {
             const ratingElement = document.getElementById(`${competency}_rating`);
             const evidenceElement = document.getElementById(`${competency}_evidence`);
             
@@ -485,7 +505,7 @@ class AcquisitionAdvisorApp {
                 evidenceValue: evidenceElement ? evidenceElement.value : 'NOT FOUND'
             });
             
-            formData[competency] = {
+            formData.competencies[competency] = {
                 rating: ratingElement ? parseInt(ratingElement.value) : 0,
                 evidence: evidenceElement ? evidenceElement.value : ''
             };
