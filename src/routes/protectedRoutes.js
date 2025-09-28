@@ -1,7 +1,7 @@
 // Protected API Routes with Permission Checks
-import express from 'express';
-import AuthMiddleware from '../middleware/authMiddleware.js';
-import PermissionService from '../services/permissionService.js';
+const express = require('express');
+const AuthMiddleware = require('../middleware/authMiddleware.js');
+const PermissionService = require('../services/permissionService.js');
 
 const router = express.Router();
 const authMiddleware = new AuthMiddleware();
@@ -97,4 +97,4 @@ router.post('/admin/upgrade-role', authMiddleware.requireRole('admin'), async (r
   }
 });
 
-export default router;
+module.exports = router;
