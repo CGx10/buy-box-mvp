@@ -8,7 +8,7 @@ class GeminiAnalysisEngine {
         this.genAI = null;
         
         // Initialize Gemini client if API key is available
-        console.log('🔍 Gemini Engine Debug - DEPLOYMENT v2.3 - SUPPORTING BOTH MODELS:');
+        console.log('🔍 Gemini Engine Debug - DEPLOYMENT v2.5 - FORCING REBUILD:');
         console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
         console.log('ENABLE_GEMINI value:', process.env.ENABLE_GEMINI);
         console.log('ENABLE_GEMINI === "true":', process.env.ENABLE_GEMINI === 'true');
