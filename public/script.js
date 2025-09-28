@@ -17,6 +17,7 @@ class AcquisitionAdvisorApp {
         this.currentPhase = 1;
         this.analysisResults = null;
         this.availableEngines = {};
+        this.availableModels = [];
         this.selectedEngine = 'traditional';
         this.selectedEngines = [];
         this.comparisonMode = false;
@@ -2369,6 +2370,11 @@ class AcquisitionAdvisorApp {
                 this.selectedEngine = result.defaultEngine;
                 console.log('✅ Engines loaded successfully. Default engine:', this.selectedEngine);
                 console.log('✅ Available engines:', Object.keys(this.availableEngines));
+                
+                // Also load available models for Gemini
+                if (this.selectedEngine === 'gemini') {
+                    await this.loadAvailableModels();
+                }
             }
         } catch (error) {
             console.error('❌ Failed to load engines:', error);
@@ -2377,6 +2383,28 @@ class AcquisitionAdvisorApp {
                 traditional: { name: 'Traditional AI', enabled: true, available: true }
             };
             console.log('⚠️ Using fallback traditional engine');
+        }
+    }
+
+    async loadAvailableModels() {
+        try {
+            console.log('🔍 Loading available Gemini models...');
+            const response = await fetch(`${this.apiBaseUrl}/api/models/available`);
+            if (response.ok) {
+                const result = await response.json();
+                console.log('✅ Available models:', result);
+                if (result.success && result.models) {
+                    this.availableModels = result.models;
+                    this.updateModelSelectionUI();
+                }
+                return result;
+            } else {
+                console.error('❌ Failed to load models:', response.status);
+                return { success: false, models: [] };
+            }
+        } catch (error) {
+            console.error('❌ Error loading models:', error);
+            return { success: false, models: [] };
         }
     }
 
@@ -3408,6 +3436,61 @@ class AcquisitionAdvisorApp {
         if (checkedRadio) {
             checkedRadio.closest('label').classList.add('selected');
         }
+    }
+
+    updateModelSelectionUI() {
+        if (!this.availableModels || this.availableModels.length === 0) {
+            console.log('⚠️ No models available for UI update');
+            return;
+        }
+
+        console.log('🔄 Updating model selection UI with available models:', this.availableModels);
+
+        // Find the model selection container
+        const modelSelection = document.querySelector('.model-selection');
+        if (!modelSelection) {
+            console.log('⚠️ Model selection container not found');
+            return;
+        }
+
+        // Clear existing model options
+        const existingRadios = modelSelection.querySelectorAll('input[name="ai_model"]');
+        existingRadios.forEach(radio => radio.remove());
+
+        // Create new model options based on available models
+        this.availableModels.forEach((model, index) => {
+            if (model.available) {
+                const label = document.createElement('label');
+                label.style.cssText = 'display: flex; align-items: center; cursor: pointer; padding: 10px; border-radius: 6px; border: 2px solid #e2e8f0; transition: all 0.3s ease; flex: 1;';
+                label.id = `${model.name.replace(/[^a-zA-Z0-9]/g, '-')}-label`;
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'ai_model';
+                radio.value = model.name;
+                radio.style.marginRight = '10px';
+                if (index === 0) radio.checked = true; // Select first available model
+
+                const content = document.createElement('div');
+                const nameDiv = document.createElement('div');
+                nameDiv.style.cssText = 'font-weight: 600; color: #1e293b;';
+                nameDiv.textContent = model.displayName;
+
+                const descDiv = document.createElement('div');
+                descDiv.style.cssText = 'font-size: 12px; color: #64748b;';
+                descDiv.textContent = model.description;
+
+                content.appendChild(nameDiv);
+                content.appendChild(descDiv);
+                label.appendChild(radio);
+                label.appendChild(content);
+
+                modelSelection.appendChild(label);
+            }
+        });
+
+        // Re-setup event listeners
+        this.setupModelSelection();
     }
 
     getScriptVersion() {

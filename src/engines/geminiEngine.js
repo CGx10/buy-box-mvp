@@ -44,6 +44,145 @@ class GeminiAnalysisEngine {
         }
 
         try {
+            // Get available models dynamically
+            const availableModels = await this.fetchAvailableModels();
+            
+            // Prioritize user-selected model if specified
+            const userSelectedModel = userData.ai_model || userData.model;
+            let modelsToTry = [];
+            
+            if (userSelectedModel) {
+                console.log(`🎯 User selected specific model: ${userSelectedModel}`);
+                modelsToTry = [userSelectedModel, ...availableModels.filter(m => m !== userSelectedModel)];
+            } else {
+                console.log(`🔄 No specific model selected, using default order`);
+                modelsToTry = availableModels;
+            }
+            
+            // Try models in order until one works
+            let lastError = null;
+            let successfulModel = null;
+            
+            for (const tryModel of modelsToTry) {
+                try {
+                    console.log(`🔄 Trying model: ${tryModel}`);
+                    
+                    const result = await this.callGeminiAPI(userData, tryModel);
+                    successfulModel = tryModel;
+                    console.log(`✅ Success with model: ${successfulModel}`);
+                    return result;
+                    
+                } catch (error) {
+                    console.log(`❌ Model ${tryModel} failed:`, error.message);
+                    lastError = error;
+                    continue; // Try next model
+                }
+            }
+            
+            // If all models failed
+            throw new Error(`All models failed. Last error: ${lastError?.message}`);
+        } catch (error) {
+            console.error('Gemini analysis error:', error);
+            throw new Error(`Gemini analysis failed: ${error.message}`);
+        }
+    }
+
+    async fetchAvailableModels() {
+        try {
+            const geminiApiKey = process.env.GEMINI_API_KEY;
+            if (!geminiApiKey) {
+                throw new Error('Gemini API key not configured');
+            }
+
+            console.log('🔍 Fetching available models from Gemini API...');
+            const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+            
+            if (modelsResponse.ok) {
+                const modelsData = await modelsResponse.json();
+                const availableModels = modelsData.models
+                    ?.filter(model => model.supportedGenerationMethods?.includes('generateContent'))
+                    ?.map(model => model.name.replace('models/', '')) || [];
+                
+                console.log('✅ Available models from API:', availableModels);
+                return availableModels;
+            }
+        } catch (error) {
+            console.log('⚠️ Could not fetch models from API:', error.message);
+        }
+        
+        // Fallback models for 2025
+        const fallbackModels = [
+            'gemini-2.5-pro',
+            'gemini-2.5-flash',
+            'gemini-2.5-flash-8b',
+            'gemini-2.0-flash-exp',
+            'gemini-1.5-flash-latest'
+        ];
+        
+        console.log('🔄 Using fallback models:', fallbackModels);
+        return fallbackModels;
+    }
+
+    async callGeminiAPI(userData, modelName) {
+        const geminiApiKey = process.env.GEMINI_API_KEY;
+        if (!geminiApiKey) {
+            throw new Error('Gemini API key not configured');
+        }
+
+        // Build the analysis prompt
+        const prompt = this.buildAnalysisPrompt(userData);
+        
+        const requestBody = {
+            contents: [{
+                parts: [{ text: prompt }]
+            }],
+            generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8000,
+                topP: 0.8,
+                topK: 10
+            }
+        };
+        
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestBody)
+            }
+        );
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
+        }
+        
+        const data = await response.json();
+        
+        // Parse response
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const content = data.candidates[0].content.parts[0].text;
+            
+            return {
+                success: true,
+                content: content,
+                model: modelName,
+                usage: data.usageMetadata || {}
+            };
+        } else {
+            throw new Error('No valid content in response');
+        }
+    }
+
+    async analyzeUserDataOld(userData) {
+        if (!this.available) {
+            throw new Error('Gemini engine is not available. Please check your API key configuration.');
+        }
+
+        try {
             // Set model based on user selection
             const selectedModel = userData.ai_model || 'gemini-2.5-flash-preview-05-20';
             this.model = this.genAI.getGenerativeModel({ model: selectedModel });

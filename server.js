@@ -134,6 +134,81 @@ app.get('/api/engines', async (req, res) => {
     }
 });
 
+// Get available Gemini models dynamically
+app.get('/api/models/available', async (req, res) => {
+    try {
+        const geminiApiKey = process.env.GEMINI_API_KEY;
+        if (!geminiApiKey) {
+            return res.json({
+                success: false,
+                error: 'Gemini API key not configured',
+                models: []
+            });
+        }
+
+        let availableModels = [];
+        try {
+            console.log('🔍 Fetching available models from Gemini API...');
+            const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+            if (modelsResponse.ok) {
+                const modelsData = await modelsResponse.json();
+                availableModels = modelsData.models
+                    ?.filter(model => model.supportedGenerationMethods?.includes('generateContent'))
+                    ?.map(model => ({
+                        name: model.name.replace('models/', ''),
+                        displayName: model.displayName || model.name.replace('models/', ''),
+                        description: model.description || '',
+                        available: true
+                    })) || [];
+                console.log('✅ Available models from API:', availableModels.map(m => m.name));
+            }
+        } catch (error) {
+            console.log('⚠️ Could not fetch models from API:', error.message);
+        }
+
+        // Fallback models for 2025
+        const fallbackModels = [
+            { name: 'gemini-2.5-pro', displayName: 'Gemini 2.5 Pro', description: 'Latest advanced reasoning model (2025)', available: true },
+            { name: 'gemini-2.5-flash', displayName: 'Gemini 2.5 Flash', description: 'Latest fast and efficient model (2025)', available: true },
+            { name: 'gemini-2.5-flash-8b', displayName: 'Gemini 2.5 Flash 8B', description: 'Latest lightweight model (2025)', available: true },
+            { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash (Legacy 2024)', description: 'Previous generation model', available: false },
+            { name: 'gemini-1.5-flash-latest', displayName: 'Gemini 1.5 Flash (Deprecated 2024)', description: 'Deprecated - use Gemini 2.5 instead', available: false }
+        ];
+
+        if (availableModels.length > 0) {
+            const apiModelNames = availableModels.map(m => m.name);
+            const combinedModels = [...availableModels];
+            
+            fallbackModels.forEach(fallback => {
+                if (!apiModelNames.includes(fallback.name)) {
+                    combinedModels.push({ ...fallback, available: false });
+                }
+            });
+            
+            res.json({
+                success: true,
+                models: combinedModels.sort((a, b) => {
+                    if (a.available && !b.available) return -1;
+                    if (!a.available && b.available) return 1;
+                    return a.displayName.localeCompare(b.displayName);
+                })
+            });
+        } else {
+            res.json({
+                success: true,
+                models: fallbackModels
+            });
+        }
+    } catch (error) {
+        console.error('Error fetching available models:', error);
+        res.json({
+            success: false,
+            error: error.message,
+            models: []
+        });
+    }
+});
+
 // Single engine analysis
 app.post('/api/analyze', securityConfig.analysis, securityConfig.sanitizeInput, async (req, res) => {
     const startTime = Date.now();
