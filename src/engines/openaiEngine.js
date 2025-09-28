@@ -132,20 +132,20 @@ Be thorough, analytical, and provide clear reasoning for all conclusions.`;
         return `Please analyze this entrepreneur's acquisition profile:
 
 COMPETENCY EVIDENCE:
-Sales & Marketing (Rating: ${userData.sales_marketing.rating}/5):
-"${userData.sales_marketing.evidence}"
+Sales & Marketing (Rating: ${userData.competencies?.sales_marketing?.rating || 0}/5):
+"${userData.competencies?.sales_marketing?.evidence || 'None'}"
 
-Operations & Systems (Rating: ${userData.operations_systems.rating}/5):
-"${userData.operations_systems.evidence}"
+Operations & Systems (Rating: ${userData.competencies?.operations_systems?.rating || 0}/5):
+"${userData.competencies?.operations_systems?.evidence || 'None'}"
 
-Finance & Analytics (Rating: ${userData.finance_analytics.rating}/5):
-"${userData.finance_analytics.evidence}"
+Finance & Analytics (Rating: ${userData.competencies?.finance_analytics?.rating || 0}/5):
+"${userData.competencies?.finance_analytics?.evidence || 'None'}"
 
-Team & Culture (Rating: ${userData.team_culture.rating}/5):
-"${userData.team_culture.evidence}"
+Team & Culture (Rating: ${userData.competencies?.team_culture?.rating || 0}/5):
+"${userData.competencies?.team_culture?.evidence || 'None'}"
 
-Product & Technology (Rating: ${userData.product_technology.rating}/5):
-"${userData.product_technology.evidence}"
+Product & Technology (Rating: ${userData.competencies?.product_technology?.rating || 0}/5):
+"${userData.competencies?.product_technology?.evidence || 'None'}"
 
 INDUSTRY INTERESTS:
 Topics/Industries of Interest: "${userData.interests_topics}"

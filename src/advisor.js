@@ -47,12 +47,13 @@ class AcquisitionAdvisor {
     validateInput(userData) {
         const errors = [];
 
-        // Module A validation
+        // Module A validation - check competencies in nested structure
         const requiredCompetencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
         for (const comp of requiredCompetencies) {
-            if (!userData[comp] || !userData[comp].rating || !userData[comp].evidence) {
+            const competency = userData.competencies?.[comp];
+            if (!competency || !competency.rating || !competency.evidence) {
                 errors.push(`Missing ${comp} rating or evidence`);
-            } else if (userData[comp].evidence.length < 200) {
+            } else if (competency.evidence.length < 200) {
                 errors.push(`${comp} evidence must be at least 200 characters`);
             }
         }
@@ -140,11 +141,11 @@ class AcquisitionAdvisor {
 
     determineOperatorArchetype(userData) {
         const competencies = {
-            sales_marketing: userData.sales_marketing.rating,
-            operations_systems: userData.operations_systems.rating,
-            finance_analytics: userData.finance_analytics.rating,
-            team_culture: userData.team_culture.rating,
-            product_technology: userData.product_technology.rating
+            sales_marketing: userData.competencies?.sales_marketing?.rating || 0,
+            operations_systems: userData.competencies?.operations_systems?.rating || 0,
+            finance_analytics: userData.competencies?.finance_analytics?.rating || 0,
+            team_culture: userData.competencies?.team_culture?.rating || 0,
+            product_technology: userData.competencies?.product_technology?.rating || 0
         };
 
         // Find highest rated competency
