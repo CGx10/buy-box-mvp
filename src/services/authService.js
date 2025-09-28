@@ -6,8 +6,8 @@ import {
   onAuthStateChanged,
   updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db } from './firebaseConfig.js';
+const { doc, setDoc, getDoc } = require('firebase/firestore');
+const { auth, db } = require('./firebaseConfig.js');
 
 class AuthService {
   constructor() {
@@ -137,4 +137,4 @@ class AuthService {
 }
 
 // Export singleton instance
-export default new AuthService();
+module.exports = new AuthService();

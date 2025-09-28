@@ -12,7 +12,7 @@ import {
   orderBy, 
   limit 
 } from 'firebase/firestore';
-import { db } from './firebaseConfig.js';
+const { db } = require('./firebaseConfig.js');
 
 class ReportService {
   constructor() {
@@ -218,4 +218,4 @@ class ReportService {
 }
 
 // Export singleton instance
-export default new ReportService();
+module.exports = new ReportService();

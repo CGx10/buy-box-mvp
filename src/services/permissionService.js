@@ -1,6 +1,6 @@
 // Permission Service for Role-Based Access Control
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from './firebaseConfig.js';
+const { doc, getDoc, updateDoc } = require('firebase/firestore');
+const { db } = require('./firebaseConfig.js');
 
 class PermissionService {
   constructor() {
@@ -321,4 +321,4 @@ class PermissionService {
   }
 }
 
-export default PermissionService;
+module.exports = PermissionService;
