@@ -11,14 +11,14 @@ class GeminiAnalysisEngine {
         console.log('GEMINI_API_KEY exists:', !!process.env.GEMINI_API_KEY);
         console.log('ENABLE_GEMINI value:', process.env.ENABLE_GEMINI);
         console.log('ENABLE_GEMINI === "true":', process.env.ENABLE_GEMINI === 'true');
-        console.log('🚀 Using model: gemini-1.5-flash (TESTING BASIC MODEL)');
+        console.log('🚀 Using model: gemini-2.5-flash (CURRENT MODEL)');
         
         if (process.env.GEMINI_API_KEY && (process.env.ENABLE_GEMINI === 'true' || process.env.ENABLE_GEMINI === undefined)) {
             try {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+                this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
                 this.available = true;
-                console.log('✅ Gemini engine initialized successfully with model: gemini-1.5-flash');
+                console.log('✅ Gemini engine initialized successfully with model: gemini-2.5-flash');
             } catch (error) {
                 console.error('❌ Failed to initialize Gemini engine:', error.message);
                 this.available = false;
