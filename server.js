@@ -148,7 +148,7 @@ app.get('/api/models/available', async (req, res) => {
 
         let availableModels = [];
         try {
-            console.log('🔍 Fetching available models from Gemini API...');
+            console.log('🔍 Fetching available models from Gemini API... v2.6');
             const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
             if (modelsResponse.ok) {
                 const modelsData = await modelsResponse.json();
