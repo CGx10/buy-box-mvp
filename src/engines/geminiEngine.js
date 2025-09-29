@@ -110,13 +110,11 @@ class GeminiAnalysisEngine {
             console.log('⚠️ Could not fetch models from API:', error.message);
         }
         
-        // Fallback models for 2025
+        // Fallback models for 2025 - using stable identifiers
         const fallbackModels = [
             'gemini-2.5-pro',
             'gemini-2.5-flash',
-            'gemini-2.5-flash-8b',
-            'gemini-2.0-flash-exp',
-            'gemini-1.5-flash-latest'
+            'gemini-2.5-flash-lite'
         ];
         
         console.log('🔄 Using fallback models:', fallbackModels);
@@ -132,6 +130,7 @@ class GeminiAnalysisEngine {
         // Build the analysis prompt
         const prompt = this.buildAnalysisPrompt(userData);
         
+        // Use the correct Gemini 2.5 API request format
         const requestBody = {
             contents: [{
                 parts: [{ text: prompt }]
@@ -144,6 +143,9 @@ class GeminiAnalysisEngine {
             }
         };
         
+        console.log(`🚀 Making API call to Gemini 2.5 model: ${modelName}`);
+        console.log(`📝 Request body structure:`, JSON.stringify(requestBody, null, 2));
+        
         const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiApiKey}`,
             {
@@ -155,12 +157,16 @@ class GeminiAnalysisEngine {
             }
         );
         
+        console.log(`📊 API Response Status: ${response.status}`);
+        
         if (!response.ok) {
             const errorText = await response.text();
+            console.error(`❌ API Error Response:`, errorText);
             throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         
         const data = await response.json();
+        console.log(`✅ API Response received successfully`);
         
         // Parse response
         if (data.candidates && data.candidates[0] && data.candidates[0].content) {

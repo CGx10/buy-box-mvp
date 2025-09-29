@@ -166,13 +166,11 @@ app.get('/api/models/available', async (req, res) => {
             console.log('⚠️ Could not fetch models from API:', error.message);
         }
 
-        // Fallback models for 2025
+        // Fallback models for 2025 - using stable identifiers
         const fallbackModels = [
-            { name: 'gemini-2.5-pro', displayName: 'Gemini 2.5 Pro', description: 'Latest advanced reasoning model (2025)', available: true },
-            { name: 'gemini-2.5-flash', displayName: 'Gemini 2.5 Flash', description: 'Latest fast and efficient model (2025)', available: true },
-            { name: 'gemini-2.5-flash-8b', displayName: 'Gemini 2.5 Flash 8B', description: 'Latest lightweight model (2025)', available: true },
-            { name: 'gemini-2.0-flash-exp', displayName: 'Gemini 2.0 Flash (Legacy 2024)', description: 'Previous generation model', available: false },
-            { name: 'gemini-1.5-flash-latest', displayName: 'Gemini 1.5 Flash (Deprecated 2024)', description: 'Deprecated - use Gemini 2.5 instead', available: false }
+            { name: 'gemini-2.5-pro', displayName: 'Gemini 2.5 Pro', description: 'Most powerful model for complex reasoning and analysis (2025)', available: true },
+            { name: 'gemini-2.5-flash', displayName: 'Gemini 2.5 Flash', description: 'Balanced model with best performance, cost, and speed (2025)', available: true },
+            { name: 'gemini-2.5-flash-lite', displayName: 'Gemini 2.5 Flash Lite', description: 'Fastest and most cost-effective model (2025)', available: true }
         ];
 
         if (availableModels.length > 0) {
