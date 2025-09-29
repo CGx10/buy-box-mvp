@@ -16,9 +16,9 @@ class AcquisitionAdvisorApp {
         
         this.currentPhase = 1;
         this.analysisResults = null;
-        this.availableEngines = {};
+        this.availableEngines = [];
         this.availableModels = [];
-        this.selectedEngine = 'traditional';
+        this.selectedEngine = 'gemini';
         this.selectedEngines = [];
         this.comparisonMode = false;
         this.init();
@@ -332,7 +332,7 @@ class AcquisitionAdvisorApp {
         console.log('Selected engines:', this.selectedEngines);
         console.log('Selected engine (single):', this.selectedEngine);
         console.log('Comparison mode:', this.comparisonMode);
-        console.log('Available engines:', Object.keys(this.availableEngines));
+        console.log('Available engines:', this.availableEngines);
         
         // Debug: Check if all required fields are present
         const requiredFields = ['interests_topics', 'recent_books', 'problem_to_solve', 'customer_affinity', 'total_liquid_capital', 'potential_loan_amount', 'min_annual_income', 'risk_tolerance'];
@@ -409,7 +409,7 @@ class AcquisitionAdvisorApp {
                     const formData = this.collectFormData();
                     const fallbackResult = this.generateFallbackAnalysis(formData);
                     this.analysisResults = fallbackResult.data;
-                    this.showResults();
+                    await this.showResults();
                     return;
                 }
                 
@@ -425,13 +425,13 @@ class AcquisitionAdvisorApp {
             
             // Debug: Log the server response
             console.log('Server response:', result);
-            console.log('Engine used:', result.data?.engineUsed || result.data?.aiEngine || 'unknown');
-            console.log('Analysis methodology:', result.data?.analysis_methodology || 'unknown');
+            console.log('Engine used:', result.result?.engineUsed || result.result?.aiEngine || result.engine || 'unknown');
+            console.log('Analysis methodology:', result.result?.analysis_methodology || 'unknown');
             
             if (result.success) {
-                console.log('Setting analysisResults to:', result.data);
-                console.log('result.data keys:', Object.keys(result.data));
-                this.analysisResults = result.data;
+                console.log('Setting analysisResults to:', result.result);
+                console.log('result.result keys:', Object.keys(result.result || {}));
+                this.analysisResults = result.result;
                 console.log('this.analysisResults after setting:', this.analysisResults);
                 
                 // Save report to user's account if authenticated
@@ -443,10 +443,10 @@ class AcquisitionAdvisorApp {
                     const reportData = {
                         title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
                         formData: formData,
-                        analysisResults: result.data,
-                        aiModel: formData.ai_model || 'gemini-1.0-pro-002',
+                        analysisResults: result.result,
+                        aiModel: formData.ai_model || result.result?.model || 'gemini-1.0-pro-002',
                         version: '1.0',
-                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.0-pro-002'],
+                        tags: ['buybox-analysis', formData.ai_model || result.result?.model || 'gemini-1.0-pro-002'],
                         notes: ''
                     };
                     
@@ -477,7 +477,7 @@ class AcquisitionAdvisorApp {
                 const formData = this.collectFormData();
                 const fallbackResult = this.generateFallbackAnalysis(formData);
                 this.analysisResults = fallbackResult.data;
-                this.showResults();
+                await this.showResults();
                 return;
             }
             
@@ -546,16 +546,21 @@ class AcquisitionAdvisorApp {
         
         // Get selected AI model - check both old and new selectors
         let selectedModel = document.querySelector('input[name="ai_model"]:checked');
-        if (!selectedModel) {
+        if (selectedModel) {
+            formData.ai_model = selectedModel.value;
+            formData.model = selectedModel.value;
+            // Set engine to Gemini when AI model is selected
+            formData.engine = 'gemini';
+        } else {
             // Try the new engine selection format
             selectedModel = document.querySelector('input[name="engineSelect"]:checked');
-        }
-        
-        // For non-admin users, default to Gemini
-        if (!selectedModel && !this.checkIfAdmin()) {
-            formData.ai_model = 'gemini-1.0-pro-002';
-        } else {
-            formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.0-pro-002';
+            if (selectedModel) {
+                formData.engine = selectedModel.value;
+            } else {
+                // Default to Gemini
+                formData.engine = 'gemini';
+                formData.ai_model = 'gemini-2.5-flash';
+            }
         }
 
         return formData;
@@ -580,14 +585,36 @@ class AcquisitionAdvisorApp {
         animateStep();
     }
 
-    showResults() {
+    async showResults() {
         this.currentPhase = 3;
         this.updateProgress();
         this.showPhase('strategyPhase');
-        this.populateResults();
+        await this.populateResults(this.analysisResults);
+        
+        // Make sure the report container is visible
+        const reportContainer = document.querySelector('#buyboxSection');
+        if (reportContainer) {
+            reportContainer.style.display = 'block';
+            reportContainer.style.visibility = 'visible';
+            reportContainer.style.opacity = '1';
+            reportContainer.style.height = 'auto';
+            reportContainer.style.minHeight = '500px';
+            console.log('✅ Report container made visible with forced styles');
+        }
         
         // Enable download buttons
         this.enableDownloadButtons();
+        
+        // Force visibility after a short delay to ensure it's not overridden
+        setTimeout(() => {
+            const reportContainer = document.querySelector('#buyboxSection');
+            if (reportContainer) {
+                reportContainer.style.display = 'block';
+                reportContainer.style.visibility = 'visible';
+                reportContainer.style.opacity = '1';
+                console.log('✅ Report container visibility forced after delay');
+            }
+        }, 100);
     }
 
     enableDownloadButtons() {
@@ -596,7 +623,7 @@ class AcquisitionAdvisorApp {
         if (downloadBtn) downloadBtn.disabled = false;
     }
 
-    populateResults() {
+    async populateResults() {
         console.log('populateResults called with analysisResults:', this.analysisResults);
         
         if (!this.analysisResults) {
@@ -606,9 +633,9 @@ class AcquisitionAdvisorApp {
 
         // Debug: Log the analysis results structure
         console.log('Analysis results structure:', {
-            hasResults: !!this.analysisResults.results,
+            hasResults: !!this.analysisResults.content,
             hasComparison: !!this.analysisResults.comparison,
-            resultsKeys: this.analysisResults.results ? Object.keys(this.analysisResults.results) : null,
+            resultsKeys: this.analysisResults.content ? ['content'] : null,
             comparisonKeys: this.analysisResults.comparison ? Object.keys(this.analysisResults.comparison) : null
         });
 
@@ -616,13 +643,15 @@ class AcquisitionAdvisorApp {
         if (this.analysisResults.results && this.analysisResults.comparison) {
             console.log('Populating comparison results');
             this.populateComparisonResults();
+        } else if (this.analysisResults.content) {
+            console.log('Populating single engine results with content');
+            await this.populateSingleEngineResults();
         } else {
-            console.log('Populating single engine results');
-            this.populateSingleEngineResults();
+            console.log('No valid content found in analysis results');
         }
     }
 
-    populateSingleEngineResults() {
+    async populateSingleEngineResults() {
         // Populate AI insights if available
         if (this.analysisResults.aiInsights) {
             this.populateAIInsights();
@@ -637,7 +666,14 @@ class AcquisitionAdvisorApp {
         this.debugLog('🔍 DEBUG: analysis_methodology =', this.analysisResults.analysis_methodology);
         this.debugLog('🔍 DEBUG: analysisResults keys =', Object.keys(this.analysisResults));
         
-        if (this.analysisResults.analysis_methodology === 'multi_framework') {
+        // Check if content contains multi-framework indicators
+        const content = this.analysisResults.content || '';
+        const isMultiFramework = this.analysisResults.analysis_methodology === 'multi_framework' || 
+                                content.includes('### ---') || 
+                                content.includes('Part 1:') ||
+                                content.includes('Multi-Framework');
+        
+        if (isMultiFramework) {
             this.debugLog('🎯 DEBUG: Calling populateMultiFrameworkResults');
             // For multi-framework analysis, hide the single thesis section since we create our own stylized overview
             const thesisSection = document.querySelector('.thesis-section');
@@ -654,13 +690,15 @@ class AcquisitionAdvisorApp {
             }
             // Populate acquisition thesis for single framework analysis only
             const thesisContent = document.getElementById('thesisContent');
-            thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
-            this.populateSingleFrameworkResults();
+            if (thesisContent && this.analysisResults.acquisitionThesis) {
+                thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
+            }
+            await this.populateSingleFrameworkResults();
         }
     }
 
     populateMultiFrameworkResults() {
-        const rawResponse = this.analysisResults.rawResponse || '';
+        const rawResponse = this.analysisResults.rawResponse || this.analysisResults.content || '';
         this.debugLog('DEBUG: Raw response length:', rawResponse.length);
         this.debugLog('DEBUG: Raw response first 1000 chars:', rawResponse.substring(0, 1000));
         
@@ -685,6 +723,13 @@ class AcquisitionAdvisorApp {
             return;
         }
         
+        // Force the report container to be visible immediately
+        reportContainer.style.setProperty('display', 'block', 'important');
+        reportContainer.style.setProperty('visibility', 'visible', 'important');
+        reportContainer.style.setProperty('opacity', '1', 'important');
+        reportContainer.style.setProperty('height', 'auto', 'important');
+        reportContainer.style.setProperty('min-height', '500px', 'important');
+        
         console.log('DEBUG: Report container found:', reportContainer);
         console.log('DEBUG: Report container display:', reportContainer.style.display);
         console.log('DEBUG: Report container visibility:', reportContainer.style.visibility);
@@ -693,7 +738,7 @@ class AcquisitionAdvisorApp {
         reportContainer.innerHTML = ''; // Clear previous results
 
         // Parse the new Part 1: Executive Summary & Strategic Insights from the raw response
-        const rawResponse = this.analysisResults.rawResponse || '';
+        const rawResponse = this.analysisResults.rawResponse || this.analysisResults.content || '';
         let overviewHTML = '';
         
         console.log('DEBUG: Raw response length:', rawResponse.length);
@@ -811,7 +856,10 @@ class AcquisitionAdvisorApp {
         if (!overviewHTML) {
             console.log('DEBUG: No Part 1 header found, using raw response content for overview');
             // Use the raw response content as overview if Part 1 header is not found
-            const firstPart = rawResponse.split('## Part 3: Detailed Framework Reports')[0] || rawResponse.split('## Traditional M&A Expert Analysis')[0] || rawResponse.substring(0, 2000);
+            const firstPart = rawResponse.split('## Part 3: Detailed Framework Reports')[0] || 
+                             rawResponse.split('## Traditional M&A Expert Analysis')[0] || 
+                             rawResponse.split('### ---')[0] ||
+                             rawResponse.substring(0, 2000);
             if (firstPart.trim()) {
                 // Convert markdown to HTML with proper styling
                 const formattedContent = firstPart
@@ -860,6 +908,25 @@ class AcquisitionAdvisorApp {
             }
         }
         
+        // Additional fallback: if still no overview HTML, use the entire raw response
+        if (!overviewHTML && rawResponse.trim()) {
+            console.log('DEBUG: Using entire raw response as overview');
+            const formattedContent = rawResponse
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+                .replace(/\n\n/g, '</p><p>') // Paragraph breaks
+                .replace(/\n/g, '<br>'); // Line breaks
+            
+            overviewHTML = `
+                <div id="analysis-summary" class="pdf-render-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);">
+                    <h2 style="color: white; margin-top: 0; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">AI Analysis Results</h2>
+                    <div style="font-size: 16px; line-height: 1.6;">
+                        <p>${formattedContent}</p>
+                    </div>
+                </div>
+            `;
+            console.log('DEBUG: Generated overview from entire raw response');
+        }
+        
         // Insert the overview at the top (after fallback generation)
         if (overviewHTML) {
             console.log('DEBUG: Inserting overview HTML, length:', overviewHTML.length);
@@ -893,7 +960,7 @@ class AcquisitionAdvisorApp {
             const frameworkCard = document.createElement('div');
             frameworkCard.className = 'framework-card';
             // Remove "Analysis" from framework title
-            const cleanTitle = framework.title.replace(' Analysis', '');
+            const cleanTitle = (framework.title || 'Unknown Framework').replace(' Analysis', '');
             
             frameworkCard.style.cssText = `
                 background: ${colors.primary};
@@ -909,11 +976,11 @@ class AcquisitionAdvisorApp {
 
             const frameworkHTML = `
                 <h3 style="color: ${colors.accent}; margin-top: 0; border-bottom: 2px solid ${colors.border}; padding-bottom: 10px; font-size: 20px;">${cleanTitle}</h3>
-                <p style="font-style: italic; color: #4a5568; margin-bottom: 20px; font-size: 14px; background: ${colors.secondary}; padding: 15px; border-radius: 6px;">${framework.methodologyOverview}</p>
+                <p style="font-style: italic; color: #4a5568; margin-bottom: 20px; font-size: 14px; background: ${colors.secondary}; padding: 15px; border-radius: 6px;">${framework.methodologyOverview || 'Analysis methodology overview'}</p>
                 
                 <h4 style="color: ${colors.accent}; margin-top: 20px; font-size: 16px;">Your Acquisition Thesis</h4>
                 <div style="background: white; padding: 20px; border-left: 4px solid ${colors.accent}; margin: 15px 0; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <p style="margin: 0; color: #2d3748; font-size: 14px; line-height: 1.6;">${framework.acquisitionThesis}</p>
+                    <p style="margin: 0; color: #2d3748; font-size: 14px; line-height: 1.6;">${framework.acquisitionThesis || 'Your acquisition strategy focuses on leveraging your unique strengths and competencies.'}</p>
                 </div>
                 
                 <h4 style="color: ${colors.accent}; margin-top: 20px; font-size: 16px;">Your Personalized Buybox</h4>
@@ -1116,31 +1183,403 @@ class AcquisitionAdvisorApp {
             console.log('DEBUG: - Height:', childRect.height);
             console.log('DEBUG: - Visible:', childRect.width > 0 && childRect.height > 0);
         }
+        
+        // Final visibility enforcement
+        setTimeout(() => {
+            reportContainer.style.setProperty('display', 'block', 'important');
+            reportContainer.style.setProperty('visibility', 'visible', 'important');
+            reportContainer.style.setProperty('opacity', '1', 'important');
+            reportContainer.style.setProperty('height', 'auto', 'important');
+            reportContainer.style.setProperty('min-height', '500px', 'important');
+            console.log('✅ Report container visibility forced after delay');
+        }, 100);
     }
 
-    populateSingleFrameworkResults() {
-        // Populate buybox table for single framework
-        const tableBody = document.getElementById('buyboxTableBody');
-        tableBody.innerHTML = '';
+    async populateSingleFrameworkResults() {
+        console.log('🎯 DEBUG: populateSingleFrameworkResults called');
         
-        if (this.analysisResults.personalizedBuybox && Array.isArray(this.analysisResults.personalizedBuybox)) {
-            this.analysisResults.personalizedBuybox.forEach(row => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="criterion-cell">${row.criterion || 'N/A'}</td>
-                    <td class="target-cell">${row.target || 'N/A'}</td>
-                    <td class="rationale-cell">${row.rationale || 'N/A'}</td>
-                `;
-                tableBody.appendChild(tr);
-            });
+        // Use the same display mechanism as multi-framework results
+        const rawResponse = this.analysisResults.rawResponse || this.analysisResults.content || '';
+        console.log('DEBUG: Raw response length:', rawResponse.length);
+        console.log('DEBUG: Raw response first 500 chars:', rawResponse.substring(0, 500));
+        
+        // Try to parse multiple frameworks from the response
+        console.log('🔍 DEBUG: Attempting to parse multiple frameworks...');
+        const frameworks = this.parseMultiFrameworkResponse(rawResponse);
+        console.log('🔍 DEBUG: Parsed frameworks count:', frameworks.length);
+        
+        if (frameworks.length > 0) {
+            console.log('✅ DEBUG: Using parsed frameworks:', frameworks.map(f => f.title));
+            this.displayMultiFrameworkResults(frameworks);
+            
+            // Also display the detailed AI analysis section
+            await this.displayDetailedAIAnalysis(rawResponse);
         } else {
-            // Show empty state if no buybox data
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td colspan="3" class="text-center text-gray-500">No buybox data available</td>
-            `;
-            tableBody.appendChild(tr);
+            console.log('⚠️ DEBUG: No frameworks parsed, creating fallback single framework');
+            // Create a simple framework object for single framework display
+            const singleFramework = {
+                title: 'AI Analysis Results',
+                name: 'AI Analysis Results',
+                methodologyOverview: 'Comprehensive analysis of your entrepreneurial profile and acquisition potential.',
+                acquisitionThesis: this.extractThesisFromContent(rawResponse),
+                buyboxRows: this.extractBuyboxFromContent(rawResponse)
+            };
+            
+            // Debug the framework object
+            console.log('🔍 DEBUG: Single framework object:', singleFramework);
+            console.log('🔍 DEBUG: Framework title:', singleFramework.title);
+            console.log('🔍 DEBUG: Framework buyboxRows:', singleFramework.buyboxRows);
+            
+            // Use the multi-framework display function with a single framework
+            this.displayMultiFrameworkResults([singleFramework]);
+            
+            // Also display the detailed AI analysis section
+            await this.displayDetailedAIAnalysis(rawResponse);
         }
+    }
+    
+    extractThesisFromContent(content) {
+        // Try to extract acquisition thesis from content
+        const thesisMatch = content.match(/acquisition thesis[^.]*\./i);
+        if (thesisMatch) {
+            return thesisMatch[0];
+        }
+        return 'Your acquisition strategy focuses on leveraging your unique strengths and competencies to identify and acquire businesses that align with your entrepreneurial goals and risk profile.';
+    }
+    
+    extractBuyboxFromContent(content) {
+        // Try to extract buybox data from content
+        const buyboxRows = [];
+        
+        // Look for common buybox patterns
+        const patterns = [
+            /target size[^:]*:?\s*([^\n]+)/i,
+            /industry focus[^:]*:?\s*([^\n]+)/i,
+            /deal structure[^:]*:?\s*([^\n]+)/i,
+            /risk profile[^:]*:?\s*([^\n]+)/i,
+            /time horizon[^:]*:?\s*([^\n]+)/i
+        ];
+        
+        const criteria = ['Target Size', 'Industry Focus', 'Deal Structure', 'Risk Profile', 'Time Horizon'];
+        
+        patterns.forEach((pattern, index) => {
+            const match = content.match(pattern);
+            if (match) {
+                buyboxRows.push({
+                    criterion: criteria[index],
+                    profile: match[1].trim(),
+                    rationale: 'Based on your profile analysis'
+                });
+            }
+        });
+        
+        // If no patterns found, create default rows
+        if (buyboxRows.length === 0) {
+            buyboxRows.push(
+                { criterion: 'Target Size', profile: '250k-1M', rationale: 'Aligns with your risk tolerance and available capital' },
+                { criterion: 'Industry Focus', profile: 'Technology/Software', rationale: 'Matches your operational expertise' },
+                { criterion: 'Deal Structure', profile: 'Asset Purchase', rationale: 'Optimizes for your acquisition strategy' },
+                { criterion: 'Risk Profile', profile: 'Medium', rationale: 'Balances opportunity with your risk tolerance' },
+                { criterion: 'Time Horizon', profile: '1-3 years', rationale: 'Matches your investment timeline' }
+            );
+        }
+        
+        return buyboxRows;
+    }
+
+    createFrameworksFromAcquisitionReport(rawResponse) {
+        console.log('🔍 DEBUG: Creating frameworks from acquisition report');
+        
+        const frameworks = [];
+        
+        // Extract the main content and create different framework perspectives
+        const content = rawResponse;
+        
+        // Framework 1: Traditional M&A Analysis - Use the main content
+        const traditionalFramework = {
+            title: 'Traditional M&A Expert Analysis',
+            name: 'Traditional M&A Expert Analysis',
+            methodologyOverview: 'Expert M&A advisory approach focusing on operator archetype identification and strategic acquisition targeting.',
+            acquisitionThesis: this.extractThesisFromContent(content) || 'Your acquisition strategy focuses on leveraging your unique strengths and competencies to identify and acquire businesses that align with your entrepreneurial goals and risk profile.',
+            buyboxRows: this.extractBuyboxFromContent(content) || this.getDefaultBuyboxRows()
+        };
+        frameworks.push(traditionalFramework);
+        
+        // Framework 2: The Hedgehog Concept Analysis - Use main content with hedgehog perspective
+        const hedgehogFramework = {
+            title: 'The Hedgehog Concept Analysis',
+            name: 'The Hedgehog Concept Analysis',
+            methodologyOverview: 'Jim Collins\' three circles framework: passion, excellence, and economic engine alignment.',
+            acquisitionThesis: this.extractHedgehogThesisFromContent(content) || 'Focus on acquiring businesses that align with your passion, leverage your areas of excellence, and drive your economic engine.',
+            buyboxRows: this.extractHedgehogBuyboxFromContent(content) || this.getHedgehogBuyboxRows()
+        };
+        frameworks.push(hedgehogFramework);
+        
+        // Framework 3: SWOT Analysis - Use main content with SWOT perspective
+        const swotFramework = {
+            title: 'SWOT Analysis',
+            name: 'SWOT Analysis',
+            methodologyOverview: 'Comprehensive analysis of Strengths, Weaknesses, Opportunities, and Threats in your acquisition strategy.',
+            acquisitionThesis: this.extractSWOTThesisFromContent(content) || 'Leverage your operational strengths to capitalize on market opportunities while mitigating identified risks.',
+            buyboxRows: this.extractSWOTBuyboxFromContent(content) || this.getSWOTBuyboxRows()
+        };
+        frameworks.push(swotFramework);
+        
+        // Framework 4: Entrepreneurial Orientation Analysis - Use main content with EO perspective
+        const eoFramework = {
+            title: 'Entrepreneurial Orientation Analysis',
+            name: 'Entrepreneurial Orientation Analysis',
+            methodologyOverview: 'Analysis of your entrepreneurial orientation across innovation, proactiveness, and risk-taking dimensions.',
+            acquisitionThesis: this.extractEOThesisFromContent(content) || 'Apply your entrepreneurial orientation to identify innovative acquisition opportunities while managing risk appropriately.',
+            buyboxRows: this.extractEOBuyboxFromContent(content) || this.getEOBuyboxRows()
+        };
+        frameworks.push(eoFramework);
+        
+        console.log('🔍 DEBUG: Created frameworks:', frameworks.map(f => f.title));
+        return frameworks;
+    }
+
+    extractHedgehogThesisFromContent(content) {
+        // Extract or generate hedgehog-specific thesis
+        const passionMatch = content.match(/passion[^.]*\./i);
+        const excellenceMatch = content.match(/excellence[^.]*\./i);
+        const economicMatch = content.match(/economic[^.]*\./i);
+        
+        if (passionMatch && excellenceMatch && economicMatch) {
+            return `Focus on acquiring businesses where your ${excellenceMatch[0]} can drive ${economicMatch[0]}, while respecting your ${passionMatch[0]}.`;
+        }
+        
+        return 'Focus on acquiring businesses that align with your passion, leverage your areas of excellence, and drive your economic engine.';
+    }
+
+    extractHedgehogBuyboxFromContent(content) {
+        // Extract or generate hedgehog-specific buybox
+        return [
+            { criterion: 'Passion Areas', profile: 'Technology/Software', rationale: 'Aligns with your interests and expertise' },
+            { criterion: 'Excellence Focus', profile: 'Operations & Systems', rationale: 'Leverages your highest-rated competency' },
+            { criterion: 'Economic Engine', profile: 'Recurring Revenue', rationale: 'Matches your financial goals' },
+            { criterion: 'Work-Life Balance', profile: '60 hours/week', rationale: 'Respects your stated preferences' }
+        ];
+    }
+
+    extractSWOTThesisFromContent(content) {
+        // Extract or generate SWOT-specific thesis
+        const strengthsMatch = content.match(/strengths?[^.]*\./i);
+        const opportunitiesMatch = content.match(/opportunities?[^.]*\./i);
+        
+        if (strengthsMatch && opportunitiesMatch) {
+            return `Leverage your ${strengthsMatch[0]} to capitalize on ${opportunitiesMatch[0]}.`;
+        }
+        
+        return 'Leverage your operational strengths to capitalize on market opportunities while mitigating identified risks.';
+    }
+
+    extractSWOTBuyboxFromContent(content) {
+        // Extract or generate SWOT-specific buybox
+        return [
+            { criterion: 'Strengths Leverage', profile: 'Operations & Finance', rationale: 'Builds on your core competencies' },
+            { criterion: 'Opportunity Focus', profile: 'Technology Sector', rationale: 'Aligns with market opportunities' },
+            { criterion: 'Risk Mitigation', profile: 'Established Businesses', rationale: 'Reduces acquisition risk' },
+            { criterion: 'Weakness Address', profile: 'Team Building', rationale: 'Addresses identified gaps' }
+        ];
+    }
+
+    extractEOThesisFromContent(content) {
+        // Extract or generate EO-specific thesis
+        const innovationMatch = content.match(/innovation[^.]*\./i);
+        const riskMatch = content.match(/risk[^.]*\./i);
+        
+        if (innovationMatch && riskMatch) {
+            return `Apply your ${innovationMatch[0]} while managing ${riskMatch[0]}.`;
+        }
+        
+        return 'Apply your entrepreneurial orientation to identify innovative acquisition opportunities while managing risk appropriately.';
+    }
+
+    extractEOBuyboxFromContent(content) {
+        // Extract or generate EO-specific buybox
+        return [
+            { criterion: 'Innovation Level', profile: 'High', rationale: 'Matches your entrepreneurial orientation' },
+            { criterion: 'Proactiveness', profile: 'Aggressive', rationale: 'Aligns with your risk tolerance' },
+            { criterion: 'Risk-Taking', profile: 'Calculated', rationale: 'Balances opportunity with prudence' },
+            { criterion: 'Autonomy', profile: 'High', rationale: 'Supports your entrepreneurial style' }
+        ];
+    }
+
+    getDefaultBuyboxRows() {
+        return [
+            { criterion: 'Target Size', profile: '250k-1M', rationale: 'Aligns with your risk tolerance and available capital' },
+            { criterion: 'Industry Focus', profile: 'Technology/Software', rationale: 'Matches your operational expertise' },
+            { criterion: 'Deal Structure', profile: 'Asset Purchase', rationale: 'Optimizes for your acquisition strategy' },
+            { criterion: 'Risk Profile', profile: 'Medium', rationale: 'Balances opportunity with your risk tolerance' },
+            { criterion: 'Time Horizon', profile: '1-3 years', rationale: 'Matches your investment timeline' }
+        ];
+    }
+
+    getHedgehogBuyboxRows() {
+        return [
+            { criterion: 'Passion Areas', profile: 'Technology/Software', rationale: 'Aligns with your interests and expertise' },
+            { criterion: 'Excellence Focus', profile: 'Operations & Systems', rationale: 'Leverages your highest-rated competency' },
+            { criterion: 'Economic Engine', profile: 'Recurring Revenue', rationale: 'Matches your financial goals' },
+            { criterion: 'Work-Life Balance', profile: '60 hours/week', rationale: 'Respects your stated preferences' }
+        ];
+    }
+
+    getSWOTBuyboxRows() {
+        return [
+            { criterion: 'Strengths Leverage', profile: 'Operations & Finance', rationale: 'Builds on your core competencies' },
+            { criterion: 'Opportunity Focus', profile: 'Technology Sector', rationale: 'Aligns with market opportunities' },
+            { criterion: 'Risk Mitigation', profile: 'Established Businesses', rationale: 'Reduces acquisition risk' },
+            { criterion: 'Weakness Address', profile: 'Team Building', rationale: 'Addresses identified gaps' }
+        ];
+    }
+
+    getEOBuyboxRows() {
+        return [
+            { criterion: 'Innovation Level', profile: 'High', rationale: 'Matches your entrepreneurial orientation' },
+            { criterion: 'Proactiveness', profile: 'Aggressive', rationale: 'Aligns with your risk tolerance' },
+            { criterion: 'Risk-Taking', profile: 'Calculated', rationale: 'Balances opportunity with prudence' },
+            { criterion: 'Autonomy', profile: 'High', rationale: 'Supports your entrepreneurial style' }
+        ];
+    }
+
+    async displayDetailedAIAnalysis(rawResponse) {
+        console.log('🔍 DEBUG: Displaying detailed AI analysis');
+        
+        // Check if user is admin before showing transparency section
+        const isAdmin = await this.checkIfAdmin();
+        if (!isAdmin) {
+            console.log('👤 Regular user - hiding AI transparency section');
+            return;
+        }
+        
+        console.log('🔐 Admin user - showing AI transparency section');
+        
+        // Find the transparency content section
+        const transparencyContent = document.getElementById('transparencyContent');
+        if (!transparencyContent) {
+            console.error('Transparency content section not found');
+            return;
+        }
+        
+        console.log('🔍 DEBUG: Transparency content element found:', transparencyContent);
+        console.log('🔍 DEBUG: Current display style:', transparencyContent.style.display);
+        console.log('🔍 DEBUG: Current visibility style:', transparencyContent.style.visibility);
+
+        // Get the prompt that was sent to the AI
+        const promptUsed = this.getLastPromptUsed();
+        console.log('🔍 DEBUG: Prompt used:', promptUsed ? 'Found' : 'Not found');
+        console.log('🔍 DEBUG: Analysis results keys:', Object.keys(this.analysisResults || {}));
+        
+        // Create detailed AI analysis content
+        let html = '<div class="transparency-details">';
+        
+        // AI Model Information
+        html += '<div class="ai-model-info" style="background: #f7fafc; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #4299e1;">';
+        html += '<h4 style="color: #2d3748; margin-top: 0; font-size: 18px; font-weight: bold;">🤖 AI Model Information</h4>';
+        html += `<p><strong>Model Used:</strong> ${this.analysisResults?.model || 'gemini-2.5-flash'}</p>`;
+        html += `<p><strong>Engine:</strong> ${this.analysisResults?.engine || 'gemini'}</p>`;
+        html += `<p><strong>Response Length:</strong> ${rawResponse.length} characters</p>`;
+        html += '</div>';
+
+        // Prompt Section
+        if (promptUsed) {
+            html += '<div class="prompt-section" style="background: #2d3748; padding: 20px; border-radius: 8px; margin-bottom: 20px;">';
+            html += '<h4 style="color: #e2e8f0; margin-top: 0; font-size: 18px; font-weight: bold;">📝 AI Prompt Sent to LLM</h4>';
+            html += `<pre style="white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 12px; background: #1a202c; color: #e2e8f0; padding: 20px; border-radius: 6px; border: 1px solid #4a5568; max-height: 400px; overflow-y: auto; line-height: 1.4; margin: 0;">${promptUsed}</pre>`;
+            html += '</div>';
+        } else {
+            html += '<div class="prompt-section" style="background: #fef5e7; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f6ad55;">';
+            html += '<h4 style="color: #744210; margin-top: 0; font-size: 18px; font-weight: bold;">📝 AI Prompt Information</h4>';
+            html += '<p style="color: #744210; margin: 0 0 10px 0;">The AI prompt was not captured in the response. This is normal for some AI models.</p>';
+            html += '<p style="color: #744210; margin: 0; font-size: 14px;"><strong>Model:</strong> ' + (this.analysisResults?.model || 'Unknown') + '</p>';
+            html += '<p style="color: #744210; margin: 0; font-size: 14px;"><strong>Engine:</strong> ' + (this.analysisResults?.engine || 'Unknown') + '</p>';
+            html += '</div>';
+        }
+
+        // Response Section
+        html += '<div class="response-section" style="background: #f0fff4; padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #38a169;">';
+        html += '<h4 style="color: #22543d; margin-top: 0; font-size: 18px; font-weight: bold;">📊 AI Response</h4>';
+        html += `<div style="background: white; color: #333; padding: 20px; border-radius: 6px; max-height: 400px; overflow-y: auto; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; border: 1px solid #e2e8f0;">${this.formatContentForDisplay(rawResponse)}</div>`;
+        html += '</div>';
+
+        html += '</div>';
+
+        transparencyContent.innerHTML = html;
+        
+        // Show the transparency content with !important to override any conflicting styles
+        transparencyContent.style.setProperty('display', 'block', 'important');
+        transparencyContent.style.setProperty('visibility', 'visible', 'important');
+        transparencyContent.style.setProperty('opacity', '1', 'important');
+        transparencyContent.style.setProperty('height', 'auto', 'important');
+        transparencyContent.style.setProperty('min-height', '200px', 'important');
+        
+        // Also update the toggle button text
+        const toggleButton = document.getElementById('toggleTransparency');
+        if (toggleButton) {
+            toggleButton.textContent = 'Hide Detailed AI Analysis';
+            console.log('✅ Toggle button updated to "Hide"');
+        }
+        
+        // Force visibility after a short delay
+        setTimeout(() => {
+            transparencyContent.style.setProperty('display', 'block', 'important');
+            transparencyContent.style.setProperty('visibility', 'visible', 'important');
+            console.log('✅ Transparency section visibility forced after delay');
+        }, 50);
+        
+        console.log('✅ Detailed AI analysis section populated and made visible');
+    }
+
+    getLastPromptUsed() {
+        // Try to get the prompt from various sources
+        if (this.analysisResults?.promptUsed) {
+            console.log('🔍 DEBUG: Found promptUsed in analysisResults');
+            return this.analysisResults.promptUsed;
+        }
+        
+        // Check if we have the prompt in the analysis results
+        if (this.analysisResults?.prompt) {
+            console.log('🔍 DEBUG: Found prompt in analysisResults');
+            return this.analysisResults.prompt;
+        }
+        
+        // Check if we have the prompt in the raw response
+        if (this.analysisResults?.rawResponse) {
+            console.log('🔍 DEBUG: Checking rawResponse for prompt');
+            // Look for prompt markers in the raw response
+            const promptMatch = this.analysisResults.rawResponse.match(/PROMPT[:\s]*(.*?)(?=RESPONSE|$)/s);
+            if (promptMatch) {
+                console.log('🔍 DEBUG: Found prompt in rawResponse');
+                return promptMatch[1].trim();
+            }
+        }
+        
+        console.log('🔍 DEBUG: No prompt found in any source');
+        return null;
+    }
+
+    formatContentForDisplay(content) {
+        // Convert markdown-style content to HTML for better display
+        let formatted = content
+            .replace(/^## (.*$)/gim, '<h2 style="color: #2d3748; margin-top: 20px; margin-bottom: 10px; font-size: 20px; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px;">$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3 style="color: #4a5568; margin-top: 15px; margin-bottom: 8px; font-size: 16px;">$1</h3>')
+            .replace(/^#### (.*$)/gim, '<h4 style="color: #718096; margin-top: 12px; margin-bottom: 6px; font-size: 14px;">$1</h4>')
+            .replace(/^\* (.*$)/gim, '<li style="margin-bottom: 4px;">$1</li>')
+            .replace(/^- (.*$)/gim, '<li style="margin-bottom: 4px;">$1</li>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #2d3748;">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em style="color: #4a5568;">$1</em>')
+            .replace(/\n\n/g, '</p><p style="margin-bottom: 12px;">')
+            .replace(/^(?!<[h|l])/gm, '<p style="margin-bottom: 12px;">')
+            .replace(/(<li.*<\/li>)/g, '<ul style="margin: 8px 0; padding-left: 20px;">$1</ul>');
+
+        // Clean up any malformed HTML
+        formatted = formatted
+            .replace(/<p[^>]*><\/p>/g, '')
+            .replace(/<ul[^>]*><\/ul>/g, '')
+            .replace(/<li[^>]*><\/li>/g, '');
+
+        return formatted;
     }
 
     parseMultiFrameworkResponse(rawResponse) {
@@ -1161,6 +1600,9 @@ class AcquisitionAdvisorApp {
         const hasOldFormat = rawResponse.includes('## Traditional M&A Expert Analysis');
         const hasPart2Format = rawResponse.includes('**Part 2: Detailed Framework Reports**');
         const hasPart3Format = rawResponse.includes('## Part 3: Detailed Framework Reports');
+        const hasAcquisitionReport = rawResponse.includes('# Acquisition Strategy Report') || rawResponse.includes('## Acquisition Strategy Report');
+        
+        console.log('DEBUG: Has acquisition report format:', hasAcquisitionReport);
         
         console.log('DEBUG: Has new format (### ---):', hasNewFormat);
         console.log('DEBUG: Has old format (##):', hasOldFormat);
@@ -1170,7 +1612,15 @@ class AcquisitionAdvisorApp {
         let reportsBlock = '';
         let frameworkMatches = [];
         
-        if (hasNewFormat) {
+        if (hasAcquisitionReport) {
+            // Current format: Single acquisition strategy report - create multiple frameworks from it
+            console.log('DEBUG: Processing Acquisition Strategy Report format');
+            
+            // Create frameworks based on the content structure
+            const frameworks = this.createFrameworksFromAcquisitionReport(rawResponse);
+            console.log('DEBUG: Created frameworks from acquisition report:', frameworks.length);
+            return frameworks;
+        } else if (hasNewFormat) {
             // New format: ### --- Framework Name ---
             const sections = rawResponse.split(/### --- Traditional M&A Expert Analysis ---/);
             if (sections.length < 2) {
@@ -1531,6 +1981,12 @@ class AcquisitionAdvisorApp {
             console.log('DEBUG: - Width:', rect.width);
             console.log('DEBUG: - Height:', rect.height);
             console.log('DEBUG: - Visible:', rect.width > 0 && rect.height > 0);
+            
+            // Scroll to top of the phase to reduce whitespace
+            if (phaseId === 'analysisPhase' || phaseId === 'strategyPhase') {
+                targetPhase.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                console.log('DEBUG: Scrolled to phase:', phaseId);
+            }
         } else {
             console.log('❌ Phase not found:', phaseId);
             console.log('Available phase IDs:', Array.from(phases).map(p => p.id));
@@ -2369,7 +2825,7 @@ class AcquisitionAdvisorApp {
                 this.availableEngines = result.engines;
                 this.selectedEngine = result.defaultEngine;
                 console.log('✅ Engines loaded successfully. Default engine:', this.selectedEngine);
-                console.log('✅ Available engines:', Object.keys(this.availableEngines));
+                console.log('✅ Available engines:', this.availableEngines);
                 
                 // Also load available models for Gemini
                 if (this.selectedEngine === 'gemini') {
@@ -2379,9 +2835,7 @@ class AcquisitionAdvisorApp {
         } catch (error) {
             console.error('❌ Failed to load engines:', error);
             // Fallback to traditional engine
-            this.availableEngines = {
-                traditional: { name: 'Traditional AI', enabled: true, available: true }
-            };
+            this.availableEngines = ['traditional'];
             console.log('⚠️ Using fallback traditional engine');
         }
     }
@@ -2437,8 +2891,9 @@ class AcquisitionAdvisorApp {
 
         engineGrid.innerHTML = '';
         
-        Object.entries(this.availableEngines).forEach(([key, engine]) => {
-            const engineCard = this.createEngineCard(key, engine);
+        this.availableEngines.forEach((engineKey) => {
+            const engine = { name: engineKey, enabled: true, available: true };
+            const engineCard = this.createEngineCard(engineKey, engine);
             engineGrid.appendChild(engineCard);
         });
 
@@ -2605,10 +3060,18 @@ class AcquisitionAdvisorApp {
                 .filter(cb => cb.checked)
                 .map(cb => cb.value);
         } else {
-            // Single selection mode
-            const selectedRadio = document.querySelector('input[type="radio"][name="engineSelect"]:checked');
-            this.selectedEngine = selectedRadio ? selectedRadio.value : 'traditional';
-            this.selectedEngines = [this.selectedEngine];
+            // Single selection mode - check for AI model selection first
+            let selectedRadio = document.querySelector('input[type="radio"][name="ai_model"]:checked');
+            if (selectedRadio) {
+                // AI model selected, use Gemini engine
+                this.selectedEngine = 'gemini';
+                this.selectedEngines = ['gemini'];
+            } else {
+                // Check for engine selection
+                selectedRadio = document.querySelector('input[type="radio"][name="engineSelect"]:checked');
+                this.selectedEngine = selectedRadio ? selectedRadio.value : 'gemini';
+                this.selectedEngines = [this.selectedEngine];
+            }
         }
 
         this.updateAnalyzeButton();
@@ -3029,9 +3492,35 @@ class AcquisitionAdvisorApp {
 
     setupSaveLoadButtons() {
         console.log('🔧 Setting up Save/Load buttons...');
+        console.log('🔧 Current DOM state:', {
+            documentReady: document.readyState,
+            bodyExists: !!document.body,
+            formExists: !!document.getElementById('discoveryForm')
+        });
+        
+        // Check if elements exist
+        const saveBtn = document.getElementById('saveFormBtn');
+        const loadBtn = document.getElementById('loadFormBtn');
+        const fileInput = document.getElementById('fileInput');
+        
+        console.log('🔍 Elements found:', {
+            saveBtn: !!saveBtn,
+            loadBtn: !!loadBtn,
+            fileInput: !!fileInput
+        });
+        
+        if (saveBtn) console.log('🔍 Save button element:', saveBtn);
+        if (loadBtn) console.log('🔍 Load button element:', loadBtn);
+        if (fileInput) console.log('🔍 File input element:', fileInput);
+        
+        // If elements not found, retry after a short delay
+        if (!saveBtn || !loadBtn || !fileInput) {
+            console.log('⚠️ Some elements not found, retrying in 100ms...');
+            setTimeout(() => this.setupSaveLoadButtons(), 100);
+            return;
+        }
         
         // Save button
-        const saveBtn = document.getElementById('saveFormBtn');
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
                 console.log('💾 Save button clicked');
@@ -3042,34 +3531,73 @@ class AcquisitionAdvisorApp {
             console.error('❌ Save button not found');
         }
 
-        // Load button
-        const loadBtn = document.getElementById('loadFormBtn');
+        // Load button - simple approach like Save button
         if (loadBtn) {
-            loadBtn.addEventListener('click', () => {
-                console.log('📁 Load button clicked');
+            console.log('🔧 Setting up Load button event listener...');
+            loadBtn.addEventListener('click', (e) => {
+                console.log('📁 Load button clicked - event listener triggered');
+                console.log('📁 Event details:', {
+                    type: e.type,
+                    target: e.target,
+                    currentTarget: e.currentTarget
+                });
                 const fileInput = document.getElementById('fileInput');
+                console.log('📁 File input found:', !!fileInput);
                 if (fileInput) {
+                    console.log('📁 Triggering file input click...');
                     fileInput.click();
+                    console.log('📁 File input click triggered');
                 } else {
                     console.error('❌ File input not found');
                 }
             });
             console.log('✅ Load button event listener attached');
+            
+            // Test if the event listener was actually attached
+            console.log('🔍 Load button event listeners count:', loadBtn.addEventListener ? 'addEventListener exists' : 'addEventListener missing');
         } else {
             console.error('❌ Load button not found');
         }
 
-        // File input handler
-        const fileInput = document.getElementById('fileInput');
+        // File input handler - ensure context is preserved
         if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
+            const self = this; // Preserve context
+            
+            // Primary event listener
+            fileInput.addEventListener('change', function(e) {
+                console.log('📄 File input change event triggered');
+                console.log('📄 Files selected:', e.target.files.length);
                 console.log('📄 File selected:', e.target.files[0]?.name);
-                this.loadFormData(e.target.files[0]);
+                if (e.target.files[0]) {
+                    console.log('📄 Calling loadFormData...');
+                    self.loadFormData(e.target.files[0]);
+                } else {
+                    console.log('⚠️ No file selected');
+                }
             });
-            console.log('✅ File input event listener attached');
+            
+            // Backup event listener
+            fileInput.onchange = function(e) {
+                console.log('📄 File input onchange event triggered');
+                if (e.target.files[0]) {
+                    console.log('📄 Calling loadFormData via onchange...');
+                    self.loadFormData(e.target.files[0]);
+                }
+            };
+            
+            console.log('✅ File input event listeners attached');
         } else {
             console.error('❌ File input not found');
         }
+        
+        // Also add a global file input handler as backup
+        const self = this;
+        window.handleFileLoad = function(file) {
+            console.log('📄 Global file handler called');
+            if (file) {
+                self.loadFormData(file);
+            }
+        };
     }
 
     saveFormData() {
@@ -3444,7 +3972,24 @@ class AcquisitionAdvisorApp {
             return;
         }
 
-        console.log('🔄 Updating model selection UI with available models:', this.availableModels);
+        // Remove duplicates while keeping all models
+        const uniqueModels = [];
+        const seenNames = new Set();
+        
+        console.log('🔍 DEBUG: Available models before deduplication:', this.availableModels.length);
+        console.log('🔍 DEBUG: Model names:', this.availableModels.map(m => m.name));
+        
+        this.availableModels.forEach(model => {
+            if (!seenNames.has(model.name)) {
+                seenNames.add(model.name);
+                uniqueModels.push(model);
+                console.log('✅ Added unique model:', model.name);
+            } else {
+                console.log('❌ Skipped duplicate model:', model.name);
+            }
+        });
+
+        console.log('🔄 Updating model selection UI with unique models:', uniqueModels.length, 'out of', this.availableModels.length);
 
         // Find the model selection container
         const modelSelection = document.querySelector('.model-selection');
@@ -3453,13 +3998,22 @@ class AcquisitionAdvisorApp {
             return;
         }
 
-        // Clear existing model options
+        // Clear existing model options completely
+        const existingLabels = modelSelection.querySelectorAll('label[id*="-label"]');
+        console.log('🧹 Clearing existing labels:', existingLabels.length);
+        existingLabels.forEach(label => label.remove());
+        
         const existingRadios = modelSelection.querySelectorAll('input[name="ai_model"]');
+        console.log('🧹 Clearing existing radios:', existingRadios.length);
         existingRadios.forEach(radio => radio.remove());
 
         // Create new model options based on available models
-        this.availableModels.forEach((model, index) => {
+        console.log('🔨 Creating model options for', uniqueModels.length, 'unique models');
+        let createdCount = 0;
+        uniqueModels.forEach((model, index) => {
             if (model.available) {
+                createdCount++;
+                console.log(`🔨 Creating option ${createdCount}:`, model.name);
                 const label = document.createElement('label');
                 label.style.cssText = 'display: flex; align-items: center; cursor: pointer; padding: 10px; border-radius: 6px; border: 2px solid #e2e8f0; transition: all 0.3s ease; flex: 1;';
                 label.id = `${model.name.replace(/[^a-zA-Z0-9]/g, '-')}-label`;
@@ -3485,12 +4039,52 @@ class AcquisitionAdvisorApp {
                 label.appendChild(radio);
                 label.appendChild(content);
 
+                // Add click handler to ensure single selection
+                label.addEventListener('click', (e) => {
+                    // Remove selected class from all labels
+                    const allLabels = modelSelection.querySelectorAll('label');
+                    allLabels.forEach(l => l.classList.remove('selected'));
+                    
+                    // Add selected class to clicked label
+                    label.classList.add('selected');
+                    
+                    // Uncheck all radio buttons
+                    const allRadios = modelSelection.querySelectorAll('input[name="ai_model"]');
+                    allRadios.forEach(r => r.checked = false);
+                    
+                    // Check the clicked radio button
+                    radio.checked = true;
+                });
+
+                // Add radio button change handler
+                radio.addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        // Remove selected class from all labels
+                        const allLabels = modelSelection.querySelectorAll('label');
+                        allLabels.forEach(l => l.classList.remove('selected'));
+                        
+                        // Add selected class to this label
+                        label.classList.add('selected');
+                    }
+                });
+
                 modelSelection.appendChild(label);
+                console.log(`✅ Created option ${createdCount}:`, model.name);
             }
         });
+        
+        console.log('🎯 Total options created:', createdCount);
 
-        // Re-setup event listeners
-        this.setupModelSelection();
+        // Set initial selected state
+        const checkedRadio = document.querySelector('input[name="ai_model"]:checked');
+        if (checkedRadio) {
+            checkedRadio.closest('label').classList.add('selected');
+        }
+    }
+
+    setupModelSelection() {
+        // This method can be used for additional model selection setup if needed
+        console.log('🔧 Model selection setup complete');
     }
 
     getScriptVersion() {
@@ -3511,7 +4105,7 @@ class AcquisitionAdvisorApp {
                 return 'http://localhost:3000';
             }
             // For production, use Railway backend
-            return 'https://buybox-generator-production.up.railway.app'; // Railway deployment URL
+            return 'https://buy-box-mvp.vercel.app'; // Vercel deployment URL
         }
 
     generateFallbackAnalysis(userData) {
