@@ -902,12 +902,16 @@ class AuthDashboardManager {
     }
     
     formatReportContent(analysisResults) {
-        if (!analysisResults || !analysisResults.rawResponse) {
+        if (!analysisResults) {
             return '<p>Report content not available.</p>';
         }
         
-        // Use the raw response which contains the full formatted report
-        let content = analysisResults.rawResponse;
+        // Try multiple possible content properties
+        let content = analysisResults.rawResponse || analysisResults.content || analysisResults.response;
+        
+        if (!content) {
+            return '<p>Report content not available.</p>';
+        }
         
         // Convert markdown-style formatting to HTML
         content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');

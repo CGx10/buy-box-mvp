@@ -9,8 +9,8 @@ class AcquisitionAdvisorApp {
         this.apiBaseUrl = this.getApiBaseUrl();
         
         if (this.debugMode) {
-            console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
-            console.log(`🔥 CACHE BUSTING TEST - VERSION ${this.scriptVersion} - MULTI-FRAMEWORK TABLES READY!`);
+        console.log('🚀 NEW SCRIPT VERSION LOADED - Multi-Framework Analysis Ready!');
+        console.log(`🔥 CACHE BUSTING TEST - VERSION ${this.scriptVersion} - MULTI-FRAMEWORK TABLES READY!`);
             console.log(`🌐 API Base URL: ${this.apiBaseUrl}`);
         }
         
@@ -420,7 +420,7 @@ class AcquisitionAdvisorApp {
                 console.warn('API not returning JSON, using fallback mode');
                 result = this.generateFallbackAnalysis(formData);
             } else {
-                result = await response.json();
+            result = await response.json();
             }
             
             // Debug: Log the server response
@@ -691,7 +691,7 @@ class AcquisitionAdvisorApp {
             // Populate acquisition thesis for single framework analysis only
             const thesisContent = document.getElementById('thesisContent');
             if (thesisContent && this.analysisResults.acquisitionThesis) {
-                thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
+            thesisContent.innerHTML = this.formatThesis(this.analysisResults.acquisitionThesis);
             }
             await this.populateSingleFrameworkResults();
         }
@@ -734,7 +734,7 @@ class AcquisitionAdvisorApp {
         console.log('DEBUG: Report container display:', reportContainer.style.display);
         console.log('DEBUG: Report container visibility:', reportContainer.style.visibility);
         console.log('DEBUG: Report container height:', reportContainer.style.height);
-        
+
         reportContainer.innerHTML = ''; // Clear previous results
 
         // Parse the new Part 1: Executive Summary & Strategic Insights from the raw response
@@ -900,8 +900,8 @@ class AcquisitionAdvisorApp {
                         <div style="font-size: 16px; line-height: 1.6;">
                             <p>${formattedContent}</p>
                         </div>
-                    </div>
-                `;
+                </div>
+            `;
                 console.log('DEBUG: Generated styled overview from raw response content');
             } else {
                 console.log('DEBUG: No overview HTML to insert');
@@ -2676,12 +2676,12 @@ class AcquisitionAdvisorApp {
         
         if (content && button) {
             if (content.style.display === 'none' || content.style.display === '') {
-                content.style.display = 'block';
-                button.textContent = 'Hide Detailed AI Analysis';
+            content.style.display = 'block';
+            button.textContent = 'Hide Detailed AI Analysis';
                 console.log('✅ Showing transparency content');
-            } else {
-                content.style.display = 'none';
-                button.textContent = 'Show Detailed AI Analysis';
+        } else {
+            content.style.display = 'none';
+            button.textContent = 'Show Detailed AI Analysis';
                 console.log('✅ Hiding transparency content');
             }
         } else {
@@ -3070,7 +3070,7 @@ class AcquisitionAdvisorApp {
                 // Check for engine selection
                 selectedRadio = document.querySelector('input[type="radio"][name="engineSelect"]:checked');
                 this.selectedEngine = selectedRadio ? selectedRadio.value : 'gemini';
-                this.selectedEngines = [this.selectedEngine];
+            this.selectedEngines = [this.selectedEngine];
             }
         }
 
@@ -3524,8 +3524,8 @@ class AcquisitionAdvisorApp {
         if (saveBtn) {
             saveBtn.addEventListener('click', () => {
                 console.log('💾 Save button clicked');
-                this.saveFormData();
-            });
+            this.saveFormData();
+        });
             console.log('✅ Save button event listener attached');
         } else {
             console.error('❌ Save button not found');
