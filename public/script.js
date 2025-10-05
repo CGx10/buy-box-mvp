@@ -238,7 +238,7 @@ class AcquisitionAdvisorApp {
         try {
             let response, result;
             
-            const API_BASE_URL = 'https://buy-box-jr8ljrqbg-capitalgainsx10-5113s-projects.vercel.app';
+            const API_BASE_URL = 'http://localhost:3000';
             
             if (this.comparisonMode && this.selectedEngines.length > 1) {
                 // Multi-engine comparison
@@ -2567,7 +2567,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
     // Engine Management Methods
     async loadAvailableEngines() {
         try {
-            const API_BASE_URL = 'https://buy-box-jr8ljrqbg-capitalgainsx10-5113s-projects.vercel.app';
+            const API_BASE_URL = 'http://localhost:3000';
             const response = await fetch(`${API_BASE_URL}/api/engines`);
             const result = await response.json();
             
@@ -3410,7 +3410,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
      */
     async callGeminiForExtraction(rawPdfText) {
         try {
-            const API_BASE_URL = 'https://buy-box-jr8ljrqbg-capitalgainsx10-5113s-projects.vercel.app';
+            const API_BASE_URL = 'http://localhost:3000';
             const response = await fetch(`${API_BASE_URL}/api/extract-linkedin-data`, {
                 method: 'POST',
                 headers: {
