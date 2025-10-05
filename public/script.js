@@ -224,10 +224,9 @@ class AcquisitionAdvisorApp {
         const formData = this.collectFormData();
         
         // Debug: Log the form data and selected engines
-        console.log('🔍 DEBUG: Form data collected:', formData);
-        console.log('🔍 DEBUG: Selected engine:', this.selectedEngine);
-        console.log('🔍 DEBUG: Selected engines:', this.selectedEngines);
-        console.log('🔍 DEBUG: AI model from form:', formData.ai_model);
+        console.log('🔍 Form data collected:', formData);
+        console.log('🔍 Selected engine:', this.selectedEngine);
+        console.log('🔍 AI model from form:', formData.ai_model);
         
         // Store form data for later use in display functions
         this.currentFormData = formData;
@@ -264,7 +263,7 @@ class AcquisitionAdvisorApp {
                     userData: formData,
                     engine: this.selectedEngine
                 };
-                console.log('🔍 DEBUG: Sending request body:', requestBody);
+                console.log('🔍 Sending request body:', requestBody);
                 
                 response = await fetch(`${API_BASE_URL}/api/analyze`, {
                     method: 'POST',
@@ -457,11 +456,10 @@ class AcquisitionAdvisorApp {
         }
 
         // Check if this is multi-framework analysis
-        console.log('🔍 DEBUG: analysis_methodology =', this.analysisResults.analysis_methodology);
-        console.log('🔍 DEBUG: analysisResults keys =', Object.keys(this.analysisResults));
+        console.log('🔍 Analysis methodology:', this.analysisResults.analysis_methodology);
         
         if (this.analysisResults.analysis_methodology === 'multi_framework') {
-            console.log('🎯 DEBUG: Calling populateMultiFrameworkResults');
+            console.log('🎯 Calling populateMultiFrameworkResults');
             // For multi-framework analysis, hide the single thesis section since we create our own stylized overview
             const thesisSection = document.querySelector('.thesis-section');
             if (thesisSection) {
@@ -469,7 +467,7 @@ class AcquisitionAdvisorApp {
             }
             this.populateMultiFrameworkResults();
         } else {
-            console.log('🎯 DEBUG: Calling populateSingleFrameworkResults');
+            console.log('🎯 Calling populateSingleFrameworkResults');
             // Show the thesis section for single framework analysis
             const thesisSection = document.querySelector('.thesis-section');
             if (thesisSection) {
@@ -484,8 +482,7 @@ class AcquisitionAdvisorApp {
 
     populateMultiFrameworkResults() {
         const rawResponse = this.analysisResults.rawResponse || '';
-        console.log('DEBUG: Raw response length:', rawResponse.length);
-        console.log('DEBUG: Raw response first 1000 chars:', rawResponse.substring(0, 1000));
+        console.log('📊 Raw response length:', rawResponse.length);
         
         // Parse the multi-framework response
         const frameworks = this.parseMultiFrameworkResponse(rawResponse);
@@ -603,19 +600,14 @@ class AcquisitionAdvisorApp {
 
         // Insert the overview at the top
         if (overviewHTML) {
-            console.log('DEBUG: Inserting overview HTML, length:', overviewHTML.length);
+            console.log('📊 Inserting overview HTML');
             reportContainer.insertAdjacentHTML('afterbegin', overviewHTML);
-            console.log('DEBUG: Overview HTML inserted successfully');
             
             // Confirm the overview element is in the DOM
             const overviewElement = reportContainer.querySelector('#analysis-summary');
             if (overviewElement) {
-                console.log('DEBUG: Overview element successfully inserted into DOM');
-            } else {
-                console.log('DEBUG: Overview element NOT found in DOM');
+                console.log('📊 Overview element inserted successfully');
             }
-        } else {
-            console.log('DEBUG: No overview HTML to insert');
         }
 
         // Create individual framework cards with subtle colors
@@ -626,9 +618,9 @@ class AcquisitionAdvisorApp {
             { primary: '#faf5ff', secondary: '#e9d8fd', accent: '#805ad5', border: '#6b46c1' }  // Light Purple
         ];
 
-        console.log('DEBUG: Starting to create framework cards, count:', frameworks.length);
+        console.log('📊 Creating framework cards:', frameworks.length);
         frameworks.forEach((framework, index) => {
-            console.log(`DEBUG: Creating framework card ${index + 1}/${frameworks.length}: ${framework.title}`);
+            console.log(`📊 Creating card ${index + 1}/${frameworks.length}: ${framework.title}`);
             const colors = frameworkColors[index % frameworkColors.length];
             const frameworkCard = document.createElement('div');
             frameworkCard.className = 'framework-card';
@@ -681,7 +673,7 @@ class AcquisitionAdvisorApp {
 
             frameworkCard.innerHTML = frameworkHTML;
             reportContainer.appendChild(frameworkCard);
-            console.log(`DEBUG: Framework card ${index + 1} appended successfully`);
+            console.log(`📊 Card ${index + 1} created successfully`);
         });
 
         reportContainer.style.display = 'block';
@@ -716,23 +708,19 @@ class AcquisitionAdvisorApp {
         const frameworks = [];
 
         // Debug: Log the raw response to see what we're actually getting
-        console.log("DEBUG: Raw response length:", rawResponse.length);
-        console.log("DEBUG: Raw response first 1000 chars:", rawResponse.substring(0, 1000));
-        console.log("DEBUG: Raw response contains 'Part 2':", rawResponse.includes('Part 2'));
-        console.log("DEBUG: Raw response contains 'Detailed Framework Reports':", rawResponse.includes('Detailed Framework Reports'));
+        console.log("📊 Raw response length:", rawResponse.length);
+        console.log("📊 Contains 'Part 2':", rawResponse.includes('Part 2'));
         
         // Debug: Look for all headers in the response
         const headerMatches = rawResponse.match(/^#{1,6} .*$/gm);
-        console.log("DEBUG: All headers found:", headerMatches);
+        console.log("📊 Headers found:", headerMatches?.length || 0);
 
         // Check for different header formats
         const hasNewFormat = rawResponse.includes('### --- Traditional M&A Expert Analysis ---');
         const hasOldFormat = rawResponse.includes('## Traditional M&A Expert Analysis');
         const hasPart2Format = rawResponse.includes('**Part 2: Detailed Framework Reports**');
         
-        console.log('DEBUG: Has new format (### ---):', hasNewFormat);
-        console.log('DEBUG: Has old format (##):', hasOldFormat);
-        console.log('DEBUG: Has Part 2 format:', hasPart2Format);
+        console.log('📊 Format check - New:', hasNewFormat, 'Old:', hasOldFormat, 'Part2:', hasPart2Format);
         
         let reportsBlock = '';
         let frameworkMatches = [];
@@ -769,7 +757,7 @@ class AcquisitionAdvisorApp {
             return frameworks;
         }
         
-        console.log('DEBUG: Framework matches length:', frameworkMatches.length);
+        console.log('📊 Processing frameworks:', frameworkMatches.length / 2);
         
         for (let i = 1; i < frameworkMatches.length; i += 2) {
             let frameworkName = frameworkMatches[i];
@@ -782,7 +770,7 @@ class AcquisitionAdvisorApp {
                 frameworkName = frameworkName.replace(/## /g, '').trim();
             }
             
-            console.log(`DEBUG: Processing ${frameworkName}, content length:`, frameworkContent ? frameworkContent.length : 0);
+            console.log(`📊 Processing: ${frameworkName}`);
             
             if (!frameworkContent) continue;
             
@@ -792,15 +780,14 @@ class AcquisitionAdvisorApp {
             }
         }
 
-        console.log(`DEBUG: Final parsed frameworks array:`, frameworks);
+        console.log(`📊 Final frameworks:`, frameworks.length);
         return frameworks;
     }
     
     parseFrameworkContent(frameworkName, content) {
         const lines = content.split('\n');
         
-        console.log(`DEBUG: ${frameworkName} - Content length:`, content.length);
-        console.log(`DEBUG: ${frameworkName} - First 300 chars:`, content.substring(0, 300));
+        console.log(`📊 ${frameworkName} - Content length:`, content.length);
         
         let framework = {
             title: frameworkName,
@@ -820,34 +807,19 @@ class AcquisitionAdvisorApp {
         const thesisMatch = content.match(/<thesis_start>\s*\n(.+?)\s*\n<thesis_end>/s);
         if (thesisMatch) {
             framework.acquisitionThesis = thesisMatch[1].trim();
-            console.log(`DEBUG: ${frameworkName} - Found acquisition thesis (markers):`, framework.acquisitionThesis.substring(0, 100) + '...');
+            console.log(`📊 ${frameworkName} - Found acquisition thesis`);
         } else {
-            console.log(`DEBUG: ${frameworkName} - No thesis markers found`);
-            console.log(`DEBUG: ${frameworkName} - Content contains '<thesis_start>':`, content.includes('<thesis_start>'));
-            console.log(`DEBUG: ${frameworkName} - Content contains '<thesis_end>':`, content.includes('<thesis_end>'));
+            console.log(`📊 ${frameworkName} - No thesis markers found`);
         }
         
         // Extract table rows - look for the table after the buybox header (handle both with and without colons)
         const buyboxHeaderRegex = /\*\*Your Personalized Buybox\*\*:?\s*\n/;
         let buyboxHeaderMatch = content.match(buyboxHeaderRegex);
         
-        console.log(`DEBUG: ${frameworkName} - Using fixed regex:`, buyboxHeaderMatch ? 'Found' : 'Not Found');
-        
-        console.log(`DEBUG: ${frameworkName} - buyboxHeaderMatch:`, buyboxHeaderMatch ? 'Found' : 'Not Found');
-        console.log(`DEBUG: ${frameworkName} - Looking for pattern:`, buyboxHeaderRegex);
-        console.log(`DEBUG: ${frameworkName} - Content contains 'Your Buybox':`, content.includes('Your Buybox'));
+        console.log(`📊 ${frameworkName} - Buybox header:`, buyboxHeaderMatch ? 'Found' : 'Not Found');
         
         // Debug: Show the actual content around "Your Buybox"
         const buyboxIndex = content.indexOf('Your Buybox');
-        if (buyboxIndex !== -1) {
-            const start = Math.max(0, buyboxIndex - 50);
-            const end = Math.min(content.length, buyboxIndex + 100);
-            console.log(`DEBUG: ${frameworkName} - Content around 'Your Buybox':`, content.substring(start, end));
-        }
-        
-        // Debug: Show the full content for this framework
-        console.log(`DEBUG: ${frameworkName} - Full content length:`, content.length);
-        console.log(`DEBUG: ${frameworkName} - Full content:`, content);
 
         if (buyboxHeaderMatch) {
             const tableStart = buyboxHeaderMatch.index + buyboxHeaderMatch[0].length;
@@ -859,15 +831,10 @@ class AcquisitionAdvisorApp {
             const tableEnd = tableEndMatch ? tableEndMatch.index : remainingContent.length;
             const tableContent = remainingContent.substring(0, tableEnd);
             
-            console.log(`DEBUG: ${frameworkName} - tableStart:`, tableStart);
-            console.log(`DEBUG: ${frameworkName} - tableEndMatch:`, tableEndMatch ? 'Found' : 'Not Found');
-            console.log(`DEBUG: ${frameworkName} - tableEnd:`, tableEnd);
-            console.log(`DEBUG: ${frameworkName} - Extracted table content (first 200 chars):`, tableContent.substring(0, 200) + '...');
-            
             framework.buyboxRows = this.parseTableRows(tableContent);
-            console.log(`DEBUG: Parsed ${framework.buyboxRows.length} rows for ${frameworkName}`);
+            console.log(`📊 ${frameworkName} - Parsed ${framework.buyboxRows.length} rows`);
         } else {
-            console.log(`DEBUG: No buybox header match found for ${frameworkName}`);
+            console.log(`📊 ${frameworkName} - No buybox table found`);
         }
         
         return framework;
@@ -1094,7 +1061,7 @@ class AcquisitionAdvisorApp {
         }
 
         console.log("🚀 PDF Generation v64 - Reverted to Working Version");
-        console.log("DEBUG: Starting PDF generation with analysis results:", this.analysisResults);
+        console.log("📄 Starting PDF generation");
         
         try {
             // Show loading state
@@ -1215,7 +1182,7 @@ class AcquisitionAdvisorApp {
             }
 
             pdf.save('Buybox-Generator-Report-Definitive.pdf');
-            console.log("DEBUG: Definitive PDF generation with enhanced styling complete.");
+            console.log("📄 PDF generation complete");
 
             // Reset button state
             downloadBtn.textContent = originalText;
@@ -2887,7 +2854,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
             
             this.selectedEngines = [this.selectedEngine];
             
-            console.log('🔍 DEBUG: updateEngineSelection - AI model:', modelValue, '-> Engine:', this.selectedEngine);
+            console.log('🔍 Engine selection:', modelValue, '->', this.selectedEngine);
         }
 
         this.updateAnalyzeButton();
