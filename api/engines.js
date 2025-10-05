@@ -1,4 +1,4 @@
-const { MultiEngineManager } = require('../src/multiEngineManager');
+const MultiEngineManager = require('../src/multiEngineManager');
 
 module.exports = async (req, res) => {
   // Set CORS headers - specifically allow Firebase hosting
@@ -23,9 +23,11 @@ module.exports = async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching engines:', error);
+    console.error('Error details:', error.message, error.stack);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch available engines'
+      error: 'Failed to fetch available engines',
+      details: error.message
     });
   }
 };

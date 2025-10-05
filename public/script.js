@@ -223,6 +223,12 @@ class AcquisitionAdvisorApp {
         
         const formData = this.collectFormData();
         
+        // Debug: Log the form data and selected engines
+        console.log('🔍 DEBUG: Form data collected:', formData);
+        console.log('🔍 DEBUG: Selected engine:', this.selectedEngine);
+        console.log('🔍 DEBUG: Selected engines:', this.selectedEngines);
+        console.log('🔍 DEBUG: AI model from form:', formData.ai_model);
+        
         // Store form data for later use in display functions
         this.currentFormData = formData;
         
@@ -254,15 +260,18 @@ class AcquisitionAdvisorApp {
                 });
             } else {
                 // Single engine analysis
+                const requestBody = {
+                    userData: formData,
+                    engine: this.selectedEngine
+                };
+                console.log('🔍 DEBUG: Sending request body:', requestBody);
+                
                 response = await fetch(`${API_BASE_URL}/api/analyze`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({
-                        userData: formData,
-                        engine: this.selectedEngine
-                    })
+                    body: JSON.stringify(requestBody)
                 });
             }
 
@@ -272,9 +281,9 @@ class AcquisitionAdvisorApp {
             console.log('Server response:', result);
             
             if (result.success) {
-                console.log('Setting analysisResults to:', result.data);
-                console.log('result.data keys:', Object.keys(result.data));
-                this.analysisResults = result.data;
+                console.log('Setting analysisResults to:', result.analysisResult);
+                console.log('result.analysisResult keys:', Object.keys(result.analysisResult || {}));
+                this.analysisResults = result.analysisResult;
                 console.log('this.analysisResults after setting:', this.analysisResults);
                 
                 // Save report to user's account if authenticated
@@ -286,7 +295,7 @@ class AcquisitionAdvisorApp {
                     const reportData = {
                         title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
                         formData: formData,
-                        analysisResults: result.data,
+                        analysisResults: result.analysisResult,
                         aiModel: formData.ai_model || 'gemini-1.5-flash-latest',
                         version: '1.0',
                         tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash-latest'],
@@ -370,7 +379,7 @@ class AcquisitionAdvisorApp {
         
         // Get selected AI model
         const selectedModel = document.querySelector('input[name="ai_model"]:checked');
-        formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.5-flash-latest';
+        formData.ai_model = selectedModel ? selectedModel.value : 'gemini-2.5-flash';
 
         return formData;
     }
@@ -2756,10 +2765,24 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
                 .filter(cb => cb.checked)
                 .map(cb => cb.value);
         } else {
-            // Single selection mode
-            const selectedRadio = document.querySelector('input[type="radio"][name="engineSelect"]:checked');
-            this.selectedEngine = selectedRadio ? selectedRadio.value : 'traditional';
+            // Single selection mode - map AI model selection to engine selection
+            const selectedModel = document.querySelector('input[name="ai_model"]:checked');
+            const modelValue = selectedModel ? selectedModel.value : 'gemini-2.5-flash';
+            
+            // Map AI model names to engine names
+            if (modelValue.includes('gemini')) {
+                this.selectedEngine = 'gemini';
+            } else if (modelValue.includes('gpt')) {
+                this.selectedEngine = 'openai';
+            } else if (modelValue.includes('claude')) {
+                this.selectedEngine = 'claude';
+            } else {
+                this.selectedEngine = 'traditional';
+            }
+            
             this.selectedEngines = [this.selectedEngine];
+            
+            console.log('🔍 DEBUG: updateEngineSelection - AI model:', modelValue, '-> Engine:', this.selectedEngine);
         }
 
         this.updateAnalyzeButton();
