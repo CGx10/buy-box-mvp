@@ -213,6 +213,9 @@ class AcquisitionAdvisorApp {
     async handleFormSubmit(e) {
         e.preventDefault();
         
+        // Reset timer if it exists
+        this.stopAnalysisTimer();
+        
         if (!this.validateForm()) {
             alert('Please fill in all required fields correctly.');
             return;
@@ -312,6 +315,9 @@ class AcquisitionAdvisorApp {
                     console.log('⚠️ User not authenticated, skipping report save');
                 }
                 
+                // Stop the timer
+                this.stopAnalysisTimer();
+                
                 setTimeout(() => {
                     this.showResults();
                 }, 3000); // Show results after animation completes
@@ -321,6 +327,8 @@ class AcquisitionAdvisorApp {
             }
         } catch (error) {
             console.error('Analysis error:', error);
+            // Stop the timer on error
+            this.stopAnalysisTimer();
             alert(`Sorry, there was an error analyzing your profile: ${error.message}`);
             this.currentPhase = 1;
             this.updateProgress();
@@ -387,6 +395,9 @@ class AcquisitionAdvisorApp {
         const steps = document.querySelectorAll('.step');
         let currentStep = 0;
 
+        // Start the timer
+        this.startAnalysisTimer();
+
         const animateStep = () => {
             if (currentStep > 0) {
                 steps[currentStep - 1].classList.remove('active');
@@ -400,6 +411,30 @@ class AcquisitionAdvisorApp {
         };
 
         animateStep();
+    }
+
+    startAnalysisTimer() {
+        this.analysisStartTime = Date.now();
+        this.timerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.analysisStartTime) / 1000);
+            const timerDisplay = document.getElementById('analysisTimer');
+            if (timerDisplay) {
+                if (elapsed < 60) {
+                    timerDisplay.textContent = `${elapsed}s`;
+                } else {
+                    const minutes = Math.floor(elapsed / 60);
+                    const seconds = elapsed % 60;
+                    timerDisplay.textContent = `${minutes}m ${seconds}s`;
+                }
+            }
+        }, 1000);
+    }
+
+    stopAnalysisTimer() {
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
     }
 
     showResults() {
