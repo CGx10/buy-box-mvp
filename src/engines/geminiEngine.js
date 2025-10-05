@@ -10,7 +10,7 @@ class GeminiAnalysisEngine {
         if (process.env.GEMINI_API_KEY && process.env.ENABLE_GEMINI === 'true') {
             try {
                 this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-                this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+                this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
                 this.available = true;
                 console.log('✅ Gemini engine initialized successfully');
             } catch (error) {
@@ -39,7 +39,7 @@ class GeminiAnalysisEngine {
 
         try {
             // Set model based on user selection
-            const selectedModel = userData.ai_model || 'gemini-2.5-flash';
+            const selectedModel = userData.ai_model || 'gemini-1.5-flash-latest';
             this.model = this.genAI.getGenerativeModel({ model: selectedModel });
             console.log(`🤖 Using Gemini model: ${selectedModel}`);
             console.log(`🔍 UserData.ai_model: ${userData.ai_model}`);

@@ -238,7 +238,7 @@ class AcquisitionAdvisorApp {
         try {
             let response, result;
             
-            const API_BASE_URL = 'http://localhost:3000';
+            const API_BASE_URL = 'https://buy-box-mvp.vercel.app';
             
             if (this.comparisonMode && this.selectedEngines.length > 1) {
                 // Multi-engine comparison
@@ -287,9 +287,9 @@ class AcquisitionAdvisorApp {
                         title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
                         formData: formData,
                         analysisResults: result.data,
-                        aiModel: formData.ai_model || 'gemini-2.5-flash',
+                        aiModel: formData.ai_model || 'gemini-1.5-flash-latest',
                         version: '1.0',
-                        tags: ['buybox-analysis', formData.ai_model || 'gemini-2.5-flash'],
+                        tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash-latest'],
                         notes: ''
                     };
                     
@@ -370,7 +370,7 @@ class AcquisitionAdvisorApp {
         
         // Get selected AI model
         const selectedModel = document.querySelector('input[name="ai_model"]:checked');
-        formData.ai_model = selectedModel ? selectedModel.value : 'gemini-2.5-flash';
+        formData.ai_model = selectedModel ? selectedModel.value : 'gemini-1.5-flash-latest';
 
         return formData;
     }
@@ -2567,7 +2567,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
     // Engine Management Methods
     async loadAvailableEngines() {
         try {
-            const API_BASE_URL = 'http://localhost:3000';
+            const API_BASE_URL = 'https://buy-box-mvp.vercel.app';
             const response = await fetch(`${API_BASE_URL}/api/engines`);
             const result = await response.json();
             
@@ -2904,7 +2904,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
                 if (engineName === 'gemini') {
                     html += `<div class="engine-config">`;
                     html += `<h6>Configuration:</h6>`;
-                    html += `<p><strong>Model:</strong> gemini-2.5-flash</p>`;
+                    html += `<p><strong>Model:</strong> gemini-1.5-flash-latest</p>`;
                     html += `<p><strong>API Version:</strong> v1beta</p>`;
                     html += `<p><strong>Max Tokens:</strong> 8,192</p>`;
                     html += `<p><strong>Temperature:</strong> 0.7</p>`;
@@ -2922,7 +2922,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
                 html += '<div class="transparency-section-item">';
                 html += '<h4>🔍 Gemini Debug Information</h4>';
                 html += '<div class="debug-info">';
-                html += '<p><strong>Model Used:</strong> gemini-2.5-flash</p>';
+                html += '<p><strong>Model Used:</strong> gemini-1.5-flash-latest</p>';
                 html += '<p><strong>Prompt Methodology:</strong> Same as Traditional AI (Multi-Factor Scoring)</p>';
                 html += '<p><strong>Archetype Detection:</strong> Weighted composite scoring with key phrase analysis</p>';
                 html += '<p><strong>Key Phrases Analyzed:</strong> efficiency, process, systems, automation, workflow, optimization, streamline, cost reduction, scalability, operations</p>';
@@ -3410,7 +3410,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
      */
     async callGeminiForExtraction(rawPdfText) {
         try {
-            const API_BASE_URL = 'http://localhost:3000';
+            const API_BASE_URL = 'https://buy-box-mvp.vercel.app';
             const response = await fetch(`${API_BASE_URL}/api/extract-linkedin-data`, {
                 method: 'POST',
                 headers: {
