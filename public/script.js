@@ -1087,27 +1087,41 @@ class AcquisitionAdvisorApp {
     }
 
     async downloadPDF() {
-        if (!this.analysisResults) return;
+        if (!this.analysisResults) {
+            console.error('No analysis results available for PDF generation');
+            alert('No analysis results available. Please run an analysis first.');
+            return;
+        }
 
-        console.log("🚀 NEW PDF VERSION LOADED - Enhanced Styling v61!");
-        console.log("DEBUG: Starting definitive PDF generation with enhanced styling...");
+        console.log("🚀 PDF Generation v63 - Back to Working Version");
+        console.log("DEBUG: Starting PDF generation with analysis results:", this.analysisResults);
         
         try {
             // Show loading state
             const downloadBtn = document.getElementById('downloadBtn');
-            const originalText = downloadBtn.textContent;
-            downloadBtn.textContent = '🔄 Generating PDF...';
-            downloadBtn.disabled = true;
+            const originalText = downloadBtn ? downloadBtn.textContent : 'Download Report';
+            if (downloadBtn) {
+                downloadBtn.textContent = '🔄 Generating PDF...';
+                downloadBtn.disabled = true;
+            }
 
             const pdf = new jspdf.jsPDF({
                 orientation: 'portrait',
                 unit: 'pt',
                 format: 'a4'
             });
+            
+            // Add a test rectangle to verify PDF is working
+            pdf.setFillColor(255, 0, 0);
+            pdf.rect(40, 40, 100, 20, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(12);
+            pdf.text('PDF Test', 45, 55);
 
-            // The selector is changed to be more robust.
+            // Look for elements to render
             const elementsToRender = document.querySelectorAll('.pdf-render-section, .pdf-framework-section');
             console.log('PDF Generation: Found elements to render:', elementsToRender.length);
+            console.log('PDF Generation: Elements found:', elementsToRender);
             
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
@@ -1157,26 +1171,64 @@ class AcquisitionAdvisorApp {
                 tempContainer.appendChild(clonedElement);
                 document.body.appendChild(tempContainer);
                 
+                console.log('About to render element with html2canvas...');
+                console.log('Element to render:', tempContainer);
+                console.log('Element HTML:', tempContainer.innerHTML.substring(0, 200) + '...');
+                
                 const canvas = await html2canvas(tempContainer, {
                     scale: 2,
                     useCORS: true,
                     logging: true,
-                    backgroundColor: '#ffffff'
+                    backgroundColor: '#ffffff',
+                    allowTaint: true,
+                    foreignObjectRendering: true
                 });
+                
+                console.log('html2canvas completed successfully');
+                console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
+                
+                // Check if canvas has content
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+                let hasContent = false;
+                for (let i = 0; i < data.length; i += 4) {
+                    if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255) {
+                        hasContent = true;
+                        break;
+                    }
+                }
+                console.log('Canvas has content:', hasContent);
                 
                 document.body.removeChild(tempContainer);
 
                 const imgData = canvas.toDataURL('image/png');
+                console.log('Image data length:', imgData.length);
                 const canvasWidth = canvas.width;
                 const canvasHeight = canvas.height;
                 const ratio = canvasWidth / canvasHeight;
-                const imgWidth = contentWidth;
-                const imgHeight = imgWidth / ratio;
+                
+                // Ensure image fits within content area
+                let imgWidth = contentWidth;
+                let imgHeight = imgWidth / ratio;
+                
+                // If image is too tall, scale it down to fit
+                if (imgHeight > contentHeight) {
+                    imgHeight = contentHeight;
+                    imgWidth = imgHeight * ratio;
+                }
+                
+                console.log('Image dimensions for PDF:', imgWidth, 'x', imgHeight);
 
                 // --- Smart Page Breaking Logic ---
+                console.log('Adding image to PDF with dimensions:', imgWidth, 'x', imgHeight);
+                console.log('PDF page dimensions:', pdfWidth, 'x', pdfHeight);
+                console.log('Content area:', contentWidth, 'x', contentHeight);
+                
                 let position = 0;
                 if (imgHeight > contentHeight) {
                     let pageCount = Math.ceil(imgHeight / contentHeight);
+                    console.log('Image too tall, splitting into', pageCount, 'pages');
                     for (let j = 0; j < pageCount; j++) {
                         if (j > 0) {
                            pdf.addPage();
@@ -1199,11 +1251,13 @@ class AcquisitionAdvisorApp {
                         pageCtx.drawImage(img, 0, canvasSourceY, canvasWidth, canvasSourceHeight, 0, 0, canvasWidth, canvasSourceHeight);
                         const pageImgData = pageCanvas.toDataURL('image/png');
 
+                        console.log('Adding page', j + 1, 'at position', pageMargin, pageMargin, 'with size', imgWidth, sourceHeight);
                         pdf.addImage(pageImgData, 'PNG', pageMargin, pageMargin, imgWidth, sourceHeight);
                         position += sourceHeight;
                     }
                 } else {
-                     pdf.addImage(imgData, 'PNG', pageMargin, pageMargin, imgWidth, imgHeight);
+                    console.log('Adding single page image at position', pageMargin, pageMargin, 'with size', imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'PNG', pageMargin, pageMargin, imgWidth, imgHeight);
                 }
             }
 
@@ -1216,12 +1270,110 @@ class AcquisitionAdvisorApp {
 
         } catch (error) {
             console.error('Error generating PDF:', error);
-            alert('Error generating PDF. Please try again or use the Markdown download instead.');
+            console.error('Error details:', error.message, error.stack);
+            
+            // Try fallback PDF generation
+            try {
+                console.log('Attempting fallback PDF generation...');
+                await this.generateFallbackPDF();
+            } catch (fallbackError) {
+                console.error('Fallback PDF generation also failed:', fallbackError);
+                alert(`Error generating PDF: ${error.message}\n\nPlease try refreshing the page and running the analysis again.`);
+            }
+            
             // Reset button state
             const downloadBtn = document.getElementById('downloadBtn');
+            if (downloadBtn) {
             downloadBtn.textContent = 'Download Report';
             downloadBtn.disabled = false;
+            }
         }
+    }
+
+    async generateFallbackPDF() {
+        console.log('Generating fallback PDF with text content...');
+        
+        if (typeof jspdf === 'undefined') {
+            throw new Error('jsPDF library not available for fallback');
+        }
+        
+        const pdf = new jspdf.jsPDF({
+            orientation: 'portrait',
+            unit: 'pt',
+            format: 'a4'
+        });
+        
+        const results = this.analysisResults;
+        if (!results) {
+            throw new Error('No analysis results available');
+        }
+        
+        let yPosition = 40;
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 40;
+        const lineHeight = 16;
+        
+        // Helper function to add text with page breaks
+        const addText = (text, fontSize = 12, isBold = false) => {
+            if (yPosition > pageHeight - 40) {
+                pdf.addPage();
+                yPosition = 40;
+            }
+            
+            pdf.setFontSize(fontSize);
+            pdf.setFont('helvetica', isBold ? 'bold' : 'normal');
+            const lines = pdf.splitTextToSize(text, pdf.internal.pageSize.getWidth() - (margin * 2));
+            pdf.text(lines, margin, yPosition);
+            yPosition += lines.length * lineHeight + 10;
+        };
+        
+        // Add content
+        addText('Buybox Generator Report', 20, true);
+        addText(`Generated on: ${new Date().toLocaleDateString()}`, 12);
+        addText('', 12);
+        
+        addText('AI Analysis Summary', 16, true);
+        addText(`Analysis Methodology: ${results.analysis_methodology || 'Multi-Framework Analysis'}`, 12);
+        addText(`AI Engine: ${results.aiEngine || 'Not specified'}`, 12);
+        addText(`Confidence Score: ${results.confidenceScores?.overall || 'Not available'}`, 12);
+        addText('', 12);
+        
+        addText('Multi-Framework Analysis Overview', 16, true);
+        addText(results.acquisitionThesis || 'No overview available', 12);
+        addText('', 12);
+        
+        // Add framework analyses
+        const frameworks = this.parsedFrameworks || [];
+        frameworks.forEach((framework, index) => {
+            addText(`${framework.title}`, 14, true);
+            addText(framework.methodologyOverview || 'No methodology overview', 12);
+            addText('', 12);
+            
+            addText('Acquisition Thesis', 12, true);
+            addText(framework.acquisitionThesis || 'No thesis available', 12);
+            addText('', 12);
+            
+            addText('Personalized Buybox', 12, true);
+            if (framework.buyboxRows && framework.buyboxRows.length > 0) {
+                framework.buyboxRows.forEach(row => {
+                    addText(`${row.criterion}: ${row.target}`, 12);
+                    addText(`Rationale: ${row.rationale}`, 10);
+                    addText('', 8);
+                });
+            } else {
+                addText('No buybox data available', 12);
+            }
+            addText('', 12);
+        });
+        
+        // Add AI Transparency if available
+        if (results.aiTransparency) {
+            addText('AI Transparency & Methodology', 16, true);
+            addText(results.aiTransparency, 12);
+        }
+        
+        pdf.save('Buybox-Generator-Report-Fallback.pdf');
+        console.log('Fallback PDF generated successfully');
     }
 
     async generatePDFFromRenderedContent(pdf, contentWidth, contentHeight, pageMargin) {
