@@ -1093,7 +1093,7 @@ class AcquisitionAdvisorApp {
             return;
         }
 
-        console.log("🚀 PDF Generation v63 - Back to Working Version");
+        console.log("🚀 PDF Generation v64 - Reverted to Working Version");
         console.log("DEBUG: Starting PDF generation with analysis results:", this.analysisResults);
         
         try {
@@ -1101,8 +1101,8 @@ class AcquisitionAdvisorApp {
             const downloadBtn = document.getElementById('downloadBtn');
             const originalText = downloadBtn ? downloadBtn.textContent : 'Download Report';
             if (downloadBtn) {
-                downloadBtn.textContent = '🔄 Generating PDF...';
-                downloadBtn.disabled = true;
+            downloadBtn.textContent = '🔄 Generating PDF...';
+            downloadBtn.disabled = true;
             }
 
             const pdf = new jspdf.jsPDF({
@@ -1110,13 +1110,6 @@ class AcquisitionAdvisorApp {
                 unit: 'pt',
                 format: 'a4'
             });
-            
-            // Add a test rectangle to verify PDF is working
-            pdf.setFillColor(255, 0, 0);
-            pdf.rect(40, 40, 100, 20, 'F');
-            pdf.setTextColor(255, 255, 255);
-            pdf.setFontSize(12);
-            pdf.text('PDF Test', 45, 55);
 
             // Look for elements to render
             const elementsToRender = document.querySelectorAll('.pdf-render-section, .pdf-framework-section');
@@ -1171,64 +1164,26 @@ class AcquisitionAdvisorApp {
                 tempContainer.appendChild(clonedElement);
                 document.body.appendChild(tempContainer);
                 
-                console.log('About to render element with html2canvas...');
-                console.log('Element to render:', tempContainer);
-                console.log('Element HTML:', tempContainer.innerHTML.substring(0, 200) + '...');
-                
                 const canvas = await html2canvas(tempContainer, {
                     scale: 2,
                     useCORS: true,
                     logging: true,
-                    backgroundColor: '#ffffff',
-                    allowTaint: true,
-                    foreignObjectRendering: true
+                    backgroundColor: '#ffffff'
                 });
-                
-                console.log('html2canvas completed successfully');
-                console.log('Canvas dimensions:', canvas.width, 'x', canvas.height);
-                
-                // Check if canvas has content
-                const ctx = canvas.getContext('2d');
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                const data = imageData.data;
-                let hasContent = false;
-                for (let i = 0; i < data.length; i += 4) {
-                    if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255) {
-                        hasContent = true;
-                        break;
-                    }
-                }
-                console.log('Canvas has content:', hasContent);
                 
                 document.body.removeChild(tempContainer);
 
                 const imgData = canvas.toDataURL('image/png');
-                console.log('Image data length:', imgData.length);
                 const canvasWidth = canvas.width;
                 const canvasHeight = canvas.height;
                 const ratio = canvasWidth / canvasHeight;
-                
-                // Ensure image fits within content area
-                let imgWidth = contentWidth;
-                let imgHeight = imgWidth / ratio;
-                
-                // If image is too tall, scale it down to fit
-                if (imgHeight > contentHeight) {
-                    imgHeight = contentHeight;
-                    imgWidth = imgHeight * ratio;
-                }
-                
-                console.log('Image dimensions for PDF:', imgWidth, 'x', imgHeight);
+                const imgWidth = contentWidth;
+                const imgHeight = imgWidth / ratio;
 
                 // --- Smart Page Breaking Logic ---
-                console.log('Adding image to PDF with dimensions:', imgWidth, 'x', imgHeight);
-                console.log('PDF page dimensions:', pdfWidth, 'x', pdfHeight);
-                console.log('Content area:', contentWidth, 'x', contentHeight);
-                
                 let position = 0;
                 if (imgHeight > contentHeight) {
                     let pageCount = Math.ceil(imgHeight / contentHeight);
-                    console.log('Image too tall, splitting into', pageCount, 'pages');
                     for (let j = 0; j < pageCount; j++) {
                         if (j > 0) {
                            pdf.addPage();
@@ -1251,13 +1206,11 @@ class AcquisitionAdvisorApp {
                         pageCtx.drawImage(img, 0, canvasSourceY, canvasWidth, canvasSourceHeight, 0, 0, canvasWidth, canvasSourceHeight);
                         const pageImgData = pageCanvas.toDataURL('image/png');
 
-                        console.log('Adding page', j + 1, 'at position', pageMargin, pageMargin, 'with size', imgWidth, sourceHeight);
                         pdf.addImage(pageImgData, 'PNG', pageMargin, pageMargin, imgWidth, sourceHeight);
                         position += sourceHeight;
                     }
                 } else {
-                    console.log('Adding single page image at position', pageMargin, pageMargin, 'with size', imgWidth, imgHeight);
-                    pdf.addImage(imgData, 'PNG', pageMargin, pageMargin, imgWidth, imgHeight);
+                     pdf.addImage(imgData, 'PNG', pageMargin, pageMargin, imgWidth, imgHeight);
                 }
             }
 
