@@ -128,14 +128,46 @@ class AcquisitionAdvisor {
             userData
         });
 
-        return {
+        const result = {
             operatorArchetype,
             leverageThesis,
             targetIndustries,
             financialAnalysis,
             acquisitionThesis,
-            personalizedBuybox
+            personalizedBuybox,
+            aiEngine: 'Traditional AI Analysis',
+            promptUsed: this.generateAnalysisPrompt(userData),
+            analysisTimestamp: new Date().toISOString()
         };
+        
+        console.log('Traditional engine returning result with keys:', Object.keys(result));
+        console.log('promptUsed length:', result.promptUsed ? result.promptUsed.length : 'undefined');
+        
+        return result;
+    }
+
+    generateAnalysisPrompt(userData) {
+        return `Traditional AI Analysis Prompt:
+
+Analysis Method: Multi-Algorithm NLP Processing
+User Data Structure: ${JSON.stringify(userData, null, 2)}
+
+Processing Steps:
+1. Competency Analysis: Analyzing user self-ratings and evidence text
+2. Sentiment Analysis: Processing tone and confidence indicators
+3. Keyword Extraction: Identifying domain expertise markers
+4. Pattern Recognition: Matching against known operator archetypes
+5. Financial Modeling: Calculating acquisition parameters
+6. Industry Mapping: Determining target opportunities
+
+Algorithms Used:
+- Natural Language Processing (NLP) for text analysis
+- Sentiment analysis for confidence scoring
+- Keyword relevance matching
+- Statistical pattern recognition
+- Financial modeling algorithms
+
+This analysis uses local processing without external AI APIs, providing transparent and explainable results.`;
     }
 
     determineOperatorArchetype(userData) {

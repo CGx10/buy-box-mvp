@@ -26,6 +26,7 @@ class MultiEngineManager {
         
         for (const [name, engine] of Object.entries(this.engines)) {
             try {
+                console.log(`Checking engine: ${name}, type: ${typeof engine}, has getEngineInfo: ${typeof engine.getEngineInfo === 'function'}`);
                 if (name === 'traditional') {
                     engineInfo[name] = {
                         name: "Traditional AI",
@@ -84,6 +85,7 @@ class MultiEngineManager {
             return {
                 ...result,
                 engineUsed: engineName,
+                aiEngine: result.aiEngine || engineName, // Ensure aiEngine is available for frontend
                 processingTimeMs: processingTime,
                 timestamp: new Date().toISOString()
             };

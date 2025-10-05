@@ -226,10 +226,6 @@ class AcquisitionAdvisorApp {
         // Store form data for later use in display functions
         this.currentFormData = formData;
         
-        // Debug: Log the form data being sent
-        console.log('Form data being sent:', formData);
-        console.log('Selected engines:', this.selectedEngines);
-        console.log('Comparison mode:', this.comparisonMode);
         
         // Move to analysis phase
         this.currentPhase = 2;
@@ -242,9 +238,11 @@ class AcquisitionAdvisorApp {
         try {
             let response, result;
             
+            const API_BASE_URL = 'http://localhost:3000';
+            
             if (this.comparisonMode && this.selectedEngines.length > 1) {
                 // Multi-engine comparison
-                response = await fetch('/api/analyze/compare', {
+                response = await fetch(`${API_BASE_URL}/api/analyze/compare`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -256,7 +254,7 @@ class AcquisitionAdvisorApp {
                 });
             } else {
                 // Single engine analysis
-                response = await fetch('/api/analyze', {
+                response = await fetch(`${API_BASE_URL}/api/analyze`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -331,12 +329,6 @@ class AcquisitionAdvisorApp {
             const ratingElement = document.getElementById(`${competency}_rating`);
             const evidenceElement = document.getElementById(`${competency}_evidence`);
             
-            console.log(`Collecting ${competency}:`, {
-                ratingElement: ratingElement,
-                evidenceElement: evidenceElement,
-                ratingValue: ratingElement ? ratingElement.value : 'NOT FOUND',
-                evidenceValue: evidenceElement ? evidenceElement.value : 'NOT FOUND'
-            });
             
             formData[competency] = {
                 rating: ratingElement ? parseInt(ratingElement.value) : 0,
@@ -1060,9 +1052,19 @@ class AcquisitionAdvisorApp {
     }
 
     downloadReport() {
-        if (!this.analysisResults) return;
+        if (!this.analysisResults) {
+            console.error('No analysis results available for download');
+            alert('No analysis results available. Please run an analysis first.');
+            return;
+        }
 
         const reportContent = this.generateMarkdownReport();
+        if (!reportContent || reportContent.trim().length === 0) {
+            console.error('Generated markdown report is empty');
+            alert('Error generating report. Please try again.');
+            return;
+        }
+
         const blob = new Blob([reportContent], { type: 'text/markdown' });
         const url = URL.createObjectURL(blob);
         
@@ -1096,11 +1098,20 @@ class AcquisitionAdvisorApp {
 
             // The selector is changed to be more robust.
             const elementsToRender = document.querySelectorAll('.pdf-render-section, .pdf-framework-section');
+            console.log('PDF Generation: Found elements to render:', elementsToRender.length);
+            
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();
             const pageMargin = 40;
             const contentWidth = pdfWidth - (pageMargin * 2);
             const contentHeight = pdfHeight - (pageMargin * 2);
+
+            // If no elements found, try to capture the actual displayed content
+            if (elementsToRender.length === 0) {
+                console.log('No PDF elements found, trying to capture displayed content');
+                await this.generatePDFFromRenderedContent(pdf, contentWidth, contentHeight, pageMargin);
+                return;
+            }
 
             for (let i = 0; i < elementsToRender.length; i++) {
                 const originalElement = elementsToRender[i];
@@ -1202,6 +1213,681 @@ class AcquisitionAdvisorApp {
             downloadBtn.textContent = 'Download Report';
             downloadBtn.disabled = false;
         }
+    }
+
+    async generatePDFFromRenderedContent(pdf, contentWidth, contentHeight, pageMargin) {
+        const results = this.analysisResults;
+        if (!results) {
+            console.error('No analysis results available for PDF generation');
+            return;
+        }
+
+        console.log('Generating PDF from rendered content:', results);
+
+        try {
+            // Create a temporary container with the actual HTML content
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.width = '800px';
+            tempContainer.style.backgroundColor = 'white';
+            tempContainer.style.color = '#333';
+            tempContainer.style.fontFamily = 'Arial, sans-serif';
+            tempContainer.style.padding = '20px';
+
+            // Generate the HTML content that matches the webpage
+            const htmlContent = this.generateReportHTML(results);
+            tempContainer.innerHTML = htmlContent;
+
+            // Add styles
+            const style = document.createElement('style');
+            style.innerHTML = `
+                .pdf-container { font-family: Arial, sans-serif; }
+                .pdf-header { font-size: 24px; font-weight: bold; margin-bottom: 20px; }
+                .pdf-section { margin-bottom: 30px; }
+                .pdf-section h2 { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #333; }
+                .pdf-section h3 { font-size: 16px; font-weight: bold; margin-bottom: 10px; color: #555; }
+                .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                .pdf-table th, .pdf-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                .pdf-table th { background-color: #f5f5f5; font-weight: bold; }
+                .pdf-table tr:nth-child(even) { background-color: #f9f9f9; }
+                .pdf-list { margin: 10px 0; }
+                .pdf-list li { margin: 5px 0; }
+                .pdf-text { line-height: 1.6; margin: 10px 0; }
+            `;
+            tempContainer.appendChild(style);
+
+            document.body.appendChild(tempContainer);
+
+            // Capture the content as canvas
+            const canvas = await html2canvas(tempContainer, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                backgroundColor: '#ffffff',
+                width: 800,
+                height: tempContainer.scrollHeight
+            });
+
+            // Convert canvas to image and add to PDF
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = contentWidth;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Add header
+            pdf.setFontSize(20);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Buybox Generator Report', pageMargin, pageMargin + 20);
+            
+            pdf.setFontSize(12);
+            pdf.setFont(undefined, 'normal');
+            pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pageMargin, pageMargin + 40);
+            pdf.text(`Analysis Engine: ${results.aiEngine || 'Not specified'}`, pageMargin, pageMargin + 55);
+
+            // Add the captured content
+            pdf.addImage(imgData, 'PNG', pageMargin, pageMargin + 80, imgWidth, imgHeight);
+
+            // Clean up
+            document.body.removeChild(tempContainer);
+
+            // Save the PDF
+            pdf.save('buybox-generator-report.pdf');
+
+        } catch (error) {
+            console.error('Error generating PDF from rendered content:', error);
+            // Fallback to text-based generation
+            this.generatePDFFromHTMLContent(pdf, contentWidth, contentHeight, pageMargin);
+        }
+    }
+
+    generateReportHTML(results) {
+        return `
+            <div class="pdf-container">
+                <div class="pdf-header">Buybox Generator Report</div>
+                
+                <div class="pdf-section">
+                    <h2>🤖 AI Analysis Summary</h2>
+                    
+                    <h3>Analysis Confidence</h3>
+                    <div class="pdf-text">
+                        Overall: ${Math.round((results.confidenceScores?.overall || 0) * 100)}% confident<br>
+                        Archetype: ${Math.round((results.confidenceScores?.archetype || 0) * 100)}% | 
+                        Industry: ${Math.round((results.confidenceScores?.industry || 0) * 100)}% | 
+                        Data Quality: ${Math.round((results.confidenceScores?.dataQuality || 0) * 100)}%
+                    </div>
+
+                    <h3>Key Strengths</h3>
+                    <ul class="pdf-list">
+                        ${(results.aiInsights?.keyStrengths || []).map(strength => `<li>${strength}</li>`).join('')}
+                    </ul>
+
+                    <h3>AI Recommendations</h3>
+                    <ul class="pdf-list">
+                        ${(results.aiInsights?.recommendations || []).map(rec => `<li>${rec}</li>`).join('')}
+                    </ul>
+                </div>
+
+                <div class="pdf-section">
+                    <h2>Multi-Framework Analysis Overview</h2>
+                    <div class="pdf-text">
+                        ${this.generateMultiFrameworkOverviewText(results)}
+                    </div>
+                </div>
+
+                <div class="pdf-section">
+                    <h2>Your Personalized Buybox</h2>
+                    <table class="pdf-table">
+                        <thead>
+                            <tr>
+                                <th>Criterion</th>
+                                <th>Your Target Profile</th>
+                                <th>Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${(results.personalizedBuybox || []).map(item => `
+                                <tr>
+                                    <td><strong>${item.criterion || 'N/A'}</strong></td>
+                                    <td>${item.target || 'N/A'}</td>
+                                    <td>${item.rationale || 'N/A'}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                ${results.transparencyReport ? `
+                <div class="pdf-section">
+                    <h2>AI Transparency & Methodology</h2>
+                    <h3>Executive Summary</h3>
+                    <div class="pdf-text">
+                        ${results.transparencyReport.executiveSummary?.primaryArchetype ? `
+                            Primary Archetype: ${results.transparencyReport.executiveSummary.primaryArchetype.type}<br>
+                            Confidence: ${results.transparencyReport.executiveSummary.primaryArchetype.confidence}<br>
+                            Composite Score: ${results.transparencyReport.executiveSummary.primaryArchetype.compositeScore}
+                        ` : 'No executive summary available'}
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+
+    async generatePDFFromHTMLContent(pdf, contentWidth, contentHeight, pageMargin) {
+        const results = this.analysisResults;
+        if (!results) {
+            console.error('No analysis results available for PDF generation');
+            return;
+        }
+
+        console.log('Generating PDF from HTML content:', results);
+
+        // Add header
+        pdf.setFontSize(20);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Buybox Generator Report', pageMargin, pageMargin + 20);
+        
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pageMargin, pageMargin + 40);
+        pdf.text(`Analysis Engine: ${results.aiEngine || 'Not specified'}`, pageMargin, pageMargin + 55);
+
+        let yPosition = pageMargin + 80;
+
+        // AI Analysis Summary with proper formatting
+        yPosition = this.addAIAnalysisSummaryToPDF(pdf, results, pageMargin, yPosition, contentWidth);
+
+        // Multi-Framework Analysis Overview
+        yPosition = this.addMultiFrameworkOverviewToPDF(pdf, results, pageMargin, yPosition, contentWidth);
+
+        // Personalized Buybox with proper table formatting
+        yPosition = this.addPersonalizedBuyboxToPDF(pdf, results, pageMargin, yPosition, contentWidth, contentHeight);
+
+        // AI Transparency section
+        yPosition = this.addAITransparencyToPDF(pdf, results, pageMargin, yPosition, contentWidth);
+
+        // Save the PDF
+        pdf.save('buybox-generator-report.pdf');
+    }
+
+    addAIAnalysisSummaryToPDF(pdf, results, pageMargin, yPosition, contentWidth) {
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('🤖 AI Analysis Summary', pageMargin, yPosition);
+        yPosition += 25;
+
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        // Analysis Confidence
+        if (results.confidenceScores?.overall) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Analysis Confidence:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            pdf.text(`Overall: ${Math.round(results.confidenceScores.overall * 100)}% confident`, pageMargin + 10, yPosition);
+            yPosition += 12;
+            pdf.text(`Archetype: ${Math.round((results.confidenceScores.archetype || 0) * 100)}% | Industry: ${Math.round((results.confidenceScores.industry || 0) * 100)}% | Data Quality: ${Math.round((results.confidenceScores.dataQuality || 0) * 100)}%`, pageMargin + 10, yPosition);
+            yPosition += 20;
+        }
+
+        // Key Strengths
+        if (results.aiInsights?.keyStrengths) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Key Strengths:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            results.aiInsights.keyStrengths.forEach(strength => {
+                pdf.text(`• ${strength}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+            });
+            yPosition += 10;
+        }
+
+        // AI Recommendations
+        if (results.aiInsights?.recommendations) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('AI Recommendations:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            results.aiInsights.recommendations.forEach(rec => {
+                pdf.text(`• ${rec}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+            });
+            yPosition += 10;
+        }
+
+        return yPosition;
+    }
+
+    addMultiFrameworkOverviewToPDF(pdf, results, pageMargin, yPosition, contentWidth) {
+        yPosition += 10;
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Multi-Framework Analysis Overview', pageMargin, yPosition);
+        yPosition += 20;
+        
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        // Generate the same content as displayed on webpage
+        const overviewText = this.generateMultiFrameworkOverviewText(results);
+        const overviewLines = pdf.splitTextToSize(overviewText, contentWidth);
+        pdf.text(overviewLines, pageMargin, yPosition);
+        yPosition += (overviewLines.length * 12) + 20;
+
+        return yPosition;
+    }
+
+    addPersonalizedBuyboxToPDF(pdf, results, pageMargin, yPosition, contentWidth, contentHeight) {
+        if (!results.personalizedBuybox || results.personalizedBuybox.length === 0) {
+            return yPosition;
+        }
+
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Your Personalized Buybox', pageMargin, yPosition);
+        yPosition += 20;
+        
+        // Create a proper table structure
+        const tableData = results.personalizedBuybox;
+        const colWidths = [80, 200, 200]; // Criterion, Target, Rationale
+        const startX = pageMargin;
+        const lineHeight = 15;
+        const cellPadding = 5;
+
+        // Table header
+        pdf.setFontSize(9);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Criterion', startX, yPosition);
+        pdf.text('Your Target Profile', startX + colWidths[0] + cellPadding, yPosition);
+        pdf.text('Rationale', startX + colWidths[0] + colWidths[1] + cellPadding * 2, yPosition);
+        yPosition += lineHeight;
+
+        // Draw header line
+        pdf.setDrawColor(0, 0, 0);
+        pdf.line(startX, yPosition - 5, startX + colWidths[0] + colWidths[1] + colWidths[2] + cellPadding * 3, yPosition - 5);
+        yPosition += 5;
+
+        // Table rows
+        pdf.setFont(undefined, 'normal');
+        tableData.forEach((item, index) => {
+            if (yPosition > contentHeight - 100) {
+                pdf.addPage();
+                yPosition = pageMargin + 20;
+            }
+
+            const rowHeight = Math.max(
+                pdf.getTextWidth(item.criterion) / colWidths[0] * lineHeight,
+                pdf.getTextWidth(item.target) / colWidths[1] * lineHeight,
+                pdf.getTextWidth(item.rationale) / colWidths[2] * lineHeight
+            ) + cellPadding;
+
+            // Criterion
+            pdf.setFont(undefined, 'bold');
+            const criterionLines = pdf.splitTextToSize(item.criterion, colWidths[0]);
+            pdf.text(criterionLines, startX, yPosition);
+            
+            // Target
+            pdf.setFont(undefined, 'normal');
+            const targetLines = pdf.splitTextToSize(item.target, colWidths[1]);
+            pdf.text(targetLines, startX + colWidths[0] + cellPadding, yPosition);
+            
+            // Rationale
+            const rationaleLines = pdf.splitTextToSize(item.rationale, colWidths[2]);
+            pdf.text(rationaleLines, startX + colWidths[0] + colWidths[1] + cellPadding * 2, yPosition);
+
+            yPosition += Math.max(criterionLines.length, targetLines.length, rationaleLines.length) * lineHeight + cellPadding;
+        });
+
+        return yPosition + 20;
+    }
+
+    addAITransparencyToPDF(pdf, results, pageMargin, yPosition, contentWidth) {
+        if (!results.transparencyReport) {
+            return yPosition;
+        }
+
+        yPosition += 10;
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('AI Transparency & Methodology', pageMargin, yPosition);
+        yPosition += 20;
+        
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        // Executive Summary
+        if (results.transparencyReport.executiveSummary) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Executive Summary:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            
+            const execSum = results.transparencyReport.executiveSummary;
+            if (execSum.primaryArchetype) {
+                pdf.text(`Primary Archetype: ${execSum.primaryArchetype.type}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+                pdf.text(`Confidence: ${execSum.primaryArchetype.confidence}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+                pdf.text(`Composite Score: ${execSum.primaryArchetype.compositeScore}`, pageMargin + 10, yPosition);
+                yPosition += 15;
+            }
+        }
+
+        return yPosition;
+    }
+
+    generatePDFFromDisplayedContent(pdf, contentWidth, contentHeight, pageMargin) {
+        const results = this.analysisResults;
+        if (!results) {
+            console.error('No analysis results available for PDF generation');
+            return;
+        }
+
+        console.log('Generating PDF from displayed content:', results);
+
+        // Add header
+        pdf.setFontSize(20);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Buybox Generator Report', pageMargin, pageMargin + 20);
+        
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pageMargin, pageMargin + 40);
+        pdf.text(`Analysis Engine: ${results.aiEngine || 'Not specified'}`, pageMargin, pageMargin + 55);
+
+        let yPosition = pageMargin + 80;
+
+        // AI Analysis Summary (matching the webpage display)
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('🤖 AI Analysis Summary', pageMargin, yPosition);
+        yPosition += 25;
+
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        // Analysis Confidence
+        if (results.confidenceScores?.overall) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Analysis Confidence:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            pdf.text(`Overall: ${Math.round(results.confidenceScores.overall * 100)}% confident`, pageMargin + 10, yPosition);
+            yPosition += 12;
+            pdf.text(`Archetype: ${Math.round((results.confidenceScores.archetype || 0) * 100)}% | Industry: ${Math.round((results.confidenceScores.industry || 0) * 100)}% | Data Quality: ${Math.round((results.confidenceScores.dataQuality || 0) * 100)}%`, pageMargin + 10, yPosition);
+            yPosition += 20;
+        }
+
+        // Key Strengths
+        if (results.aiInsights?.keyStrengths) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Key Strengths:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            results.aiInsights.keyStrengths.forEach(strength => {
+                pdf.text(`• ${strength}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+            });
+            yPosition += 10;
+        }
+
+        // AI Recommendations
+        if (results.aiInsights?.recommendations) {
+            pdf.setFont(undefined, 'bold');
+            pdf.text('AI Recommendations:', pageMargin, yPosition);
+            yPosition += 15;
+            pdf.setFont(undefined, 'normal');
+            results.aiInsights.recommendations.forEach(rec => {
+                pdf.text(`• ${rec}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+            });
+            yPosition += 10;
+        }
+
+        // Multi-Framework Analysis Overview (matching webpage)
+        yPosition += 10;
+        pdf.setFontSize(14);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Multi-Framework Analysis Overview', pageMargin, yPosition);
+        yPosition += 20;
+        
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        // Generate the same content as displayed on webpage
+        const overviewText = this.generateMultiFrameworkOverviewText(results);
+        const overviewLines = pdf.splitTextToSize(overviewText, contentWidth);
+        pdf.text(overviewLines, pageMargin, yPosition);
+        yPosition += (overviewLines.length * 12) + 20;
+
+        // Personalized Buybox (matching webpage table format)
+        if (results.personalizedBuybox && results.personalizedBuybox.length > 0) {
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Your Personalized Buybox', pageMargin, yPosition);
+            yPosition += 20;
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            
+            results.personalizedBuybox.forEach((item, index) => {
+                if (yPosition > contentHeight - 80) {
+                    pdf.addPage();
+                    yPosition = pageMargin + 20;
+                }
+                
+                pdf.setFont(undefined, 'bold');
+                pdf.text(`${item.criterion}:`, pageMargin, yPosition);
+                yPosition += 12;
+                
+                pdf.setFont(undefined, 'normal');
+                pdf.text(`Target: ${item.target}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+                
+                pdf.text(`Rationale: ${item.rationale}`, pageMargin + 10, yPosition);
+                yPosition += 20;
+            });
+        }
+
+        // AI Transparency section
+        if (results.transparencyReport) {
+            yPosition += 10;
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('AI Transparency & Methodology', pageMargin, yPosition);
+            yPosition += 20;
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            
+            // Executive Summary
+            if (results.transparencyReport.executiveSummary) {
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Executive Summary:', pageMargin, yPosition);
+                yPosition += 15;
+                pdf.setFont(undefined, 'normal');
+                
+                const execSum = results.transparencyReport.executiveSummary;
+                if (execSum.primaryArchetype) {
+                    pdf.text(`Primary Archetype: ${execSum.primaryArchetype.type}`, pageMargin + 10, yPosition);
+                    yPosition += 12;
+                    pdf.text(`Confidence: ${execSum.primaryArchetype.confidence}`, pageMargin + 10, yPosition);
+                    yPosition += 12;
+                    pdf.text(`Composite Score: ${execSum.primaryArchetype.compositeScore}`, pageMargin + 10, yPosition);
+                    yPosition += 15;
+                }
+            }
+        }
+
+        // Save the PDF
+        pdf.save('buybox-generator-report.pdf');
+    }
+
+    generateMultiFrameworkOverviewText(results) {
+        const archetype = results.operatorArchetype;
+        const confidence = results.confidenceScores?.overall || 0;
+        const industries = results.targetIndustries || [];
+        const industryNames = industries.map(ind => ind.industry).join(', ');
+        const industryConfidence = Math.round((results.confidenceScores?.industry || 0) * 100);
+        
+        return `Based on our AI analysis with ${confidence >= 0.8 ? 'high' : confidence >= 0.6 ? 'medium' : 'low'} confidence (${Math.round(confidence * 100)}%), you are a **${archetype?.title || 'Unknown Archetype'}**. Your greatest strength lies in ${this.getArchetypeDescription(archetype?.key)}, as evidenced by your ${archetype?.compositeScore || 'N/A'}/5.0 composite expertise score.
+
+The ideal business for you is one that has already achieved product-market fit but has stagnated due to ${results.leverageThesis || 'operational inefficiencies'}. Our AI identified ${industries.length} priority industries where your skills would create maximum value: ${industryNames}. These sectors show strong alignment with your demonstrated interests and expertise (industry confidence: ${industryConfidence}%).
+
+Your acquisition strategy should focus on the "fit-first" approach, targeting businesses where your unique ${archetype?.title || 'archetype'} capabilities can unlock immediate value. The AI analysis suggests you're particularly well-suited for businesses requiring ${this.getArchetypeCapabilities(archetype?.key)}, giving you a distinct competitive advantage in the acquisition process.`;
+    }
+
+    getArchetypeDescription(key) {
+        const descriptions = {
+            'sales_marketing': 'sales and marketing excellence, customer acquisition, and revenue growth',
+            'operations_systems': 'operational efficiency, process optimization, and systems improvement',
+            'finance_analytics': 'financial analysis, strategic planning, and data-driven decision making',
+            'team_culture': 'leadership, team building, and organizational culture development',
+            'product_technology': 'product development, technological innovation, and digital transformation'
+        };
+        return descriptions[key] || 'strategic business development';
+    }
+
+    getArchetypeCapabilities(key) {
+        const capabilities = {
+            'sales_marketing': 'marketing transformation, customer acquisition optimization, and revenue growth strategies',
+            'operations_systems': 'process optimization, cost reduction, and scalability improvements',
+            'finance_analytics': 'financial restructuring, strategic planning, and performance optimization',
+            'team_culture': 'cultural transformation, leadership development, and organizational effectiveness',
+            'product_technology': 'digital transformation, product innovation, and technical modernization'
+        };
+        return capabilities[key] || 'strategic business transformation';
+    }
+
+    generatePDFFromResults(pdf, contentWidth, contentHeight, pageMargin) {
+        const results = this.analysisResults;
+        if (!results) {
+            console.error('No analysis results available for PDF generation');
+            return;
+        }
+
+        console.log('Generating PDF from analysis results:', results);
+
+        // Add header
+        pdf.setFontSize(20);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Buybox Generator Report', pageMargin, pageMargin + 20);
+        
+        pdf.setFontSize(12);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pageMargin, pageMargin + 40);
+        pdf.text(`Analysis Engine: ${results.aiEngine || 'Not specified'}`, pageMargin, pageMargin + 55);
+
+        let yPosition = pageMargin + 80;
+
+        // AI Analysis Summary
+        pdf.setFontSize(16);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('🤖 AI Analysis Summary', pageMargin, yPosition);
+        yPosition += 25;
+
+        pdf.setFontSize(10);
+        pdf.setFont(undefined, 'normal');
+        
+        if (results.operatorArchetype) {
+            pdf.text(`Primary Archetype: ${results.operatorArchetype.title || results.operatorArchetype.key || 'Not identified'}`, pageMargin, yPosition);
+            yPosition += 15;
+        }
+        
+        if (results.leverageThesis) {
+            pdf.text(`Leverage Thesis: ${results.leverageThesis}`, pageMargin, yPosition);
+            yPosition += 15;
+        }
+        
+        if (results.confidenceScores?.overall) {
+            pdf.text(`Confidence Score: ${Math.round(results.confidenceScores.overall * 100)}%`, pageMargin, yPosition);
+            yPosition += 15;
+        }
+
+        // Acquisition Thesis
+        if (results.acquisitionThesis) {
+            yPosition += 10;
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Your Acquisition Thesis', pageMargin, yPosition);
+            yPosition += 20;
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            const thesisLines = pdf.splitTextToSize(results.acquisitionThesis, contentWidth);
+            pdf.text(thesisLines, pageMargin, yPosition);
+            yPosition += (thesisLines.length * 12) + 20;
+        }
+
+        // Personalized Buybox
+        if (results.personalizedBuybox && results.personalizedBuybox.length > 0) {
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Your Personalized Buybox', pageMargin, yPosition);
+            yPosition += 20;
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            
+            results.personalizedBuybox.forEach((item, index) => {
+                if (yPosition > contentHeight - 50) {
+                    pdf.addPage();
+                    yPosition = pageMargin + 20;
+                }
+                
+                pdf.setFont(undefined, 'bold');
+                pdf.text(`${item.criterion}:`, pageMargin, yPosition);
+                yPosition += 12;
+                
+                pdf.setFont(undefined, 'normal');
+                pdf.text(`Target: ${item.target}`, pageMargin + 10, yPosition);
+                yPosition += 12;
+                
+                pdf.text(`Rationale: ${item.rationale}`, pageMargin + 10, yPosition);
+                yPosition += 20;
+            });
+        }
+
+        // AI Insights
+        if (results.aiInsights) {
+            yPosition += 10;
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('AI Insights', pageMargin, yPosition);
+            yPosition += 20;
+            
+            pdf.setFontSize(10);
+            pdf.setFont(undefined, 'normal');
+            
+            if (results.aiInsights.keyStrengths) {
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Key Strengths:', pageMargin, yPosition);
+                yPosition += 12;
+                pdf.setFont(undefined, 'normal');
+                results.aiInsights.keyStrengths.forEach(strength => {
+                    pdf.text(`• ${strength}`, pageMargin + 10, yPosition);
+                    yPosition += 12;
+                });
+                yPosition += 10;
+            }
+            
+            if (results.aiInsights.recommendations) {
+                pdf.setFont(undefined, 'bold');
+                pdf.text('Recommendations:', pageMargin, yPosition);
+                yPosition += 12;
+                pdf.setFont(undefined, 'normal');
+                results.aiInsights.recommendations.forEach(rec => {
+                    pdf.text(`• ${rec}`, pageMargin + 10, yPosition);
+                    yPosition += 12;
+                });
+                yPosition += 10;
+            }
+        }
+
+        // Save the PDF
+        pdf.save('buybox-generator-report.pdf');
     }
 
     buildPDFContentWithStyles() {
@@ -1841,16 +2527,26 @@ class AcquisitionAdvisorApp {
         html += '</div>';
         }
         
-        // Add Gemini Debug Information for single engine results
-        if (this.analysisResults.aiEngine === 'Google Gemini' && this.analysisResults.promptUsed) {
-            html += '<div class="gemini-debug-simple">';
-            html += '<h4>🔍 Gemini Debug Information</h4>';
+        // Add AI Debug Information for all engines
+        if (this.analysisResults.promptUsed) {
+            html += '<div class="ai-debug-info">';
+            html += '<h4>🔍 AI Analysis Debug Information</h4>';
             html += '<div class="debug-meta">';
-            html += '<span><strong>Model:</strong> gemini-1.5-flash</span>';
+            html += '<span><strong>Engine:</strong> ' + (this.analysisResults.aiEngine || 'Not specified') + '</span>';
             html += '<span><strong>Processing Time:</strong> ' + (this.analysisResults.processingTimeMs || 'N/A') + 'ms</span>';
             html += '</div>';
-            html += '<h5>📝 Actual AI Prompt Sent to Gemini:</h5>';
+            html += '<h5>📝 Actual AI Prompt Sent to LLM:</h5>';
             html += `<pre class="prompt-code">${this.analysisResults.promptUsed}</pre>`;
+            html += '</div>';
+        } else {
+            // Show a message if no prompt is available
+            html += '<div class="ai-debug-info">';
+            html += '<h4>🔍 AI Analysis Debug Information</h4>';
+            html += '<div class="debug-meta">';
+            html += '<span><strong>Engine:</strong> ' + (this.analysisResults.aiEngine || 'Not specified') + '</span>';
+            html += '<span><strong>Processing Time:</strong> ' + (this.analysisResults.processingTimeMs || 'N/A') + 'ms</span>';
+            html += '</div>';
+            html += '<p><em>AI prompt information not available for this engine type.</em></p>';
             html += '</div>';
         }
         
@@ -1871,7 +2567,8 @@ class AcquisitionAdvisorApp {
     // Engine Management Methods
     async loadAvailableEngines() {
         try {
-            const response = await fetch('/api/engines');
+            const API_BASE_URL = 'http://localhost:3000';
+            const response = await fetch(`${API_BASE_URL}/api/engines`);
             const result = await response.json();
             
             if (result.success) {
@@ -1912,8 +2609,6 @@ class AcquisitionAdvisorApp {
         this.updateEngineSelection();
         
         // Debug: Check initial state
-        console.log('Initial comparison mode:', this.comparisonMode);
-        console.log('Available engines:', this.availableEngines);
     }
 
     createEngineCard(engineKey, engine) {
@@ -2536,7 +3231,6 @@ class AcquisitionAdvisorApp {
         reader.onload = (e) => {
             try {
                 const data = JSON.parse(e.target.result);
-                
                 // Validate the data structure - handle both formats
                 const formData = data.formData || data.userData;
                 if (!formData) {
@@ -2571,24 +3265,27 @@ class AcquisitionAdvisorApp {
     }
 
     populateForm(formData) {
+        // Handle both data structures: direct competencies or nested under 'competencies'
+        const competenciesData = formData.competencies || formData;
+        
         // Populate competency ratings and evidence
         const competencies = ['sales_marketing', 'operations_systems', 'finance_analytics', 'team_culture', 'product_technology'];
         competencies.forEach(competency => {
-            if (formData[competency]) {
+            if (competenciesData[competency]) {
                 // Set rating
                 const ratingSlider = document.getElementById(`${competency}_rating`);
-                if (ratingSlider && formData[competency].rating) {
-                    ratingSlider.value = formData[competency].rating;
+                if (ratingSlider && competenciesData[competency].rating) {
+                    ratingSlider.value = competenciesData[competency].rating;
                     const valueDisplay = document.getElementById(`${competency}_value`);
                     if (valueDisplay) {
-                        valueDisplay.textContent = formData[competency].rating;
+                        valueDisplay.textContent = competenciesData[competency].rating;
                     }
                 }
 
                 // Set evidence
                 const evidenceTextarea = document.getElementById(`${competency}_evidence`);
-                if (evidenceTextarea && formData[competency].evidence) {
-                    evidenceTextarea.value = formData[competency].evidence;
+                if (evidenceTextarea && competenciesData[competency].evidence) {
+                    evidenceTextarea.value = competenciesData[competency].evidence;
                 }
             }
         });
@@ -2713,7 +3410,8 @@ class AcquisitionAdvisorApp {
      */
     async callGeminiForExtraction(rawPdfText) {
         try {
-            const response = await fetch('/api/extract-linkedin-data', {
+            const API_BASE_URL = 'http://localhost:3000';
+            const response = await fetch(`${API_BASE_URL}/api/extract-linkedin-data`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

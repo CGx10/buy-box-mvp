@@ -1,0 +1,31 @@
+{
+  "userData": {
+    "sales_marketing": {"rating": 3, "evidence": "I have extensive experience in digital marketing, having managed multiple successful campaigns across various platforms including Google Ads, Facebook, and LinkedIn. I've consistently achieved above-average conversion rates and have deep knowledge of customer acquisition strategies, A/B testing methodologies, and marketing automation tools. My experience spans both B2B and B2C markets, with particular expertise in lead generation and nurturing campaigns."},
+    "operations_systems": {"rating": 4, "evidence": "I have a strong background in operations management, having implemented several process improvement initiatives that resulted in 30% efficiency gains. I'm experienced with various project management methodologies including Agile and Lean Six Sigma. I've successfully managed cross-functional teams and have hands-on experience with CRM systems, workflow automation, and data analysis tools. My operational expertise includes supply chain optimization and quality control processes."},
+    "finance_analytics": {"rating": 3, "evidence": "I have solid financial analysis skills developed through my MBA and practical experience in budgeting, forecasting, and financial modeling. I'm proficient in Excel, financial statement analysis, and have experience with various accounting software. I understand key financial metrics and ratios, and have been involved in several business valuation projects. My analytical skills include data interpretation and trend analysis for business decision-making."},
+    "team_culture": {"rating": 2, "evidence": "While I have some experience managing small teams, I recognize this as an area for growth. I've led a few small projects with 2-3 team members and have basic understanding of team dynamics and communication. I'm working on developing my leadership skills through courses and mentorship. I understand the importance of company culture but have limited hands-on experience in building and maintaining strong team cultures."},
+    "product_technology": {"rating": 4, "evidence": "I have strong technical skills and product development experience, having worked on several software products from concept to launch. I'm proficient in multiple programming languages and have experience with product management methodologies. I understand user experience design principles and have successfully managed product roadmaps. My technical background includes both front-end and back-end development, and I stay current with emerging technologies and industry trends."},
+    "top_motivators": "test motivators",
+    "ideal_work_life_balance": "test balance",
+    "values_alignment": "critical",
+    "interests_topics": "test interests",
+    "recent_books": "test books",
+    "problem_to_solve": "test problem",
+    "customer_affinity": "small_business_owners",
+    "total_liquid_capital": 50000,
+    "potential_loan_amount": 500000,
+    "min_annual_income": 100000,
+    "time_commitment": 40,
+    "location_preference": "fully_remote",
+    "location_regions": "",
+    "risk_tolerance": "high",
+    "target_revenue_range": "500K-1M",
+    "target_ebitda_margin": "10-15%",
+    "preferred_valuation_range": "3x-4x",
+    "ownership_style": "hands_on",
+    "management_team_importance": "critical",
+    "analysis_methodology": "multi_framework",
+    "ai_model": "gemini-1.5-flash"
+  },
+  "engine": "traditional"
+}

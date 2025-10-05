@@ -5,6 +5,7 @@ const vaderSentiment = require('vader-sentiment');
 const keyword = require('keyword-extractor');
 const { Matrix } = require('ml-matrix');
 const AITransparencyEngine = require('./aiTransparency');
+const GeminiAnalysisEngine = require('./engines/geminiEngine');
 
 class AIEnhancedAcquisitionAdvisor {
     constructor() {
@@ -14,6 +15,7 @@ class AIEnhancedAcquisitionAdvisor {
         this.stemmer = natural.PorterStemmer;
         this.tfidf = new natural.TfIdf();
         this.transparencyEngine = new AITransparencyEngine();
+        this.geminiEngine = new GeminiAnalysisEngine();
         
         // Enhanced industry knowledge base with semantic vectors
         this.industrySemantics = this.buildIndustrySemantics();
@@ -226,8 +228,36 @@ class AIEnhancedAcquisitionAdvisor {
             acquisitionThesis,
             personalizedBuybox,
             aiInsights: this.generateAIInsights(operatorArchetype, targetIndustries, confidenceScores),
-            transparencyReport
+            transparencyReport,
+            aiEngine: 'AI-Enhanced Traditional Analysis',
+            promptUsed: this.generateAnalysisPrompt(userData),
+            analysisTimestamp: new Date().toISOString()
         };
+    }
+
+    generateAnalysisPrompt(userData) {
+        return `AI-Enhanced Traditional Analysis Prompt:
+
+Analysis Method: Hybrid AI + Traditional NLP Processing
+User Data Structure: ${JSON.stringify(userData, null, 2)}
+
+Processing Steps:
+1. AI-Powered Competency Analysis: Advanced NLP processing of user self-ratings and evidence text
+2. Enhanced Sentiment Analysis: Multi-algorithm sentiment processing with confidence scoring
+3. Semantic Keyword Extraction: AI-powered domain expertise identification
+4. Pattern Recognition: Machine learning-based archetype matching
+5. Financial Modeling: AI-enhanced acquisition parameter calculation
+6. Industry Mapping: Semantic analysis for target opportunity identification
+
+AI Algorithms Used:
+- Natural Language Processing (NLP) with advanced tokenization
+- Multi-algorithm sentiment analysis (AFINN + VADER)
+- TF-IDF keyword extraction and relevance scoring
+- Machine learning pattern recognition
+- Semantic vector analysis for industry mapping
+- Advanced confidence scoring algorithms
+
+This analysis combines traditional NLP techniques with modern AI approaches, providing transparent and explainable results while leveraging advanced language processing capabilities.`;
     }
 
     async determineOperatorArchetypeAI(userData) {

@@ -1,0 +1,12 @@
+{
+  "success": true,
+  "engines": {
+    "traditional": {
+      "name": "traditional",
+      "available": true,
+      "enabled": true,
+      "description": "Traditional M&A Analysis Engine"
+    }
+  },
+  "defaultEngine": "traditional"
+}
