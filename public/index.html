@@ -369,25 +369,154 @@
                         </div>
                     </section>
 
-                    <!-- AI Engine Selection -->
-                    <section class="ai-engine-selection">
-                        <h2>🤖 Choose Your AI Analysis Method</h2>
+                    <!-- Analysis Method Selection -->
+                    <section class="analysis-method-selection">
+                        <h2>🤖 Choose Your Analysis Method</h2>
                         <p class="selection-description">Select how you want your profile to be analyzed. Each method offers different strengths and capabilities.</p>
+
+                        <!-- Method Selection -->
+                        <div class="method-selection">
+                            <h3>Analysis Method</h3>
+                            <div class="method-grid">
+                                <div class="method-card" data-method="traditional">
+                                    <div class="method-header">
+                                        <span class="method-icon">🔧</span>
+                                        <h4>Traditional Analysis</h4>
+                                    </div>
+                                    <p class="method-description">Classic NLP processing</p>
+                                    <div class="method-features">
+                                        <span class="feature-tag">Local</span>
+                                        <span class="feature-tag">No API costs</span>
+                                        <span class="feature-tag">Privacy focused</span>
+                                    </div>
+                                    <span class="method-badge local">Local</span>
+                                </div>
+                                
+                                <div class="method-card" data-method="single_stage">
+                                    <div class="method-header">
+                                        <span class="method-icon">⚡</span>
+                                        <h4>Single-Stage Analysis</h4>
+                                    </div>
+                                    <p class="method-description">Comprehensive prompt in one pass</p>
+                                    <div class="method-features">
+                                        <span class="feature-tag">Fast processing</span>
+                                        <span class="feature-tag">Comprehensive output</span>
+                                        <span class="feature-tag">Single API call</span>
+                                    </div>
+                                    <span class="method-badge comprehensive">Comprehensive</span>
+                                </div>
+                                
+                                <div class="method-card active" data-method="two_stage_optimized">
+                                    <div class="method-header">
+                                        <span class="method-icon">🚀</span>
+                                        <h4>Two-Stage Optimized</h4>
+                                    </div>
+                                    <p class="method-description">Quick overview → Detailed analysis</p>
+                                    <div class="method-features">
+                                        <span class="feature-tag">Balanced speed/quality</span>
+                                        <span class="feature-tag">Cost effective</span>
+                                        <span class="feature-tag">Structured output</span>
+                                    </div>
+                                    <span class="method-badge optimized">Optimized</span>
+                                </div>
+                                
+                                <div class="method-card" data-method="hybrid_staged">
+                                    <div class="method-header">
+                                        <span class="method-icon">🔄</span>
+                                        <h4>Hybrid Staged</h4>
+                                    </div>
+                                    <p class="method-description">Different models for different stages</p>
+                                    <div class="method-features">
+                                        <span class="feature-tag">Multi-model approach</span>
+                                        <span class="feature-tag">Optimized for each stage</span>
+                                        <span class="feature-tag">Advanced reasoning</span>
+                                    </div>
+                                    <span class="method-badge hybrid">Hybrid</span>
+                                </div>
+                                
+                                <div class="method-card" data-method="progressive_refinement">
+                                    <div class="method-header">
+                                        <span class="method-icon">🎯</span>
+                                        <h4>Progressive Refinement</h4>
+                                    </div>
+                                    <p class="method-description">Iterative analysis with feedback loops</p>
+                                    <div class="method-features">
+                                        <span class="feature-tag">Iterative improvement</span>
+                                        <span class="feature-tag">High accuracy</span>
+                                        <span class="feature-tag">Advanced reasoning</span>
+                                    </div>
+                                    <span class="method-badge advanced">Advanced</span>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <div class="engine-options">
-                            <div class="engine-grid" id="engineGrid">
-                                <!-- Engine options will be populated by JavaScript -->
+                        <!-- AI Model Selection (only shown if method requires LLM) -->
+                        <div class="model-selection" id="modelSelection">
+                            <h3>AI Model</h3>
+                            <div class="model-grid">
+                                <div class="model-card active" data-model="gemini-2.5-flash">
+                                    <div class="model-header">
+                                        <span class="model-icon">⚡</span>
+                                        <h4>Gemini 2.5 Flash</h4>
+                                    </div>
+                                    <p class="model-description">Fast • Low Cost • General Analysis</p>
+                                    <div class="model-specs">
+                                        <span class="speed">⚡ Fast</span>
+                                        <span class="cost">💰 Low</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="model-card" data-model="gemini-2.5-pro">
+                                    <div class="model-header">
+                                        <span class="model-icon">🧠</span>
+                                        <h4>Gemini 2.5 Pro</h4>
+                                    </div>
+                                    <p class="model-description">Medium Speed • Medium Cost • High Accuracy</p>
+                                    <div class="model-specs">
+                                        <span class="speed">⚡ Medium</span>
+                                        <span class="cost">💰 Medium</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="model-card" data-model="gpt-4">
+                                    <div class="model-header">
+                                        <span class="model-icon">🤖</span>
+                                        <h4>GPT-4</h4>
+                                    </div>
+                                    <p class="model-description">Advanced reasoning • Complex analysis • High accuracy</p>
+                                    <div class="model-specs">
+                                        <span class="speed">⚡ Medium</span>
+                                        <span class="cost">💰 High</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="model-card" data-model="claude-3.5-sonnet">
+                                    <div class="model-header">
+                                        <span class="model-icon">🎭</span>
+                                        <h4>Claude 3.5 Sonnet</h4>
+                                    </div>
+                                    <p class="model-description">Balanced performance • Good reasoning • Cost-effective</p>
+                                    <div class="model-specs">
+                                        <span class="speed">⚡ Fast</span>
+                                        <span class="cost">💰 Medium</span>
+                                    </div>
+                                </div>
+                            </div>
                             </div>
                             
-                            <div class="comparison-option">
-                                <div class="comparison-toggle">
-                                    <label class="toggle-switch">
-                                        <input type="checkbox" id="enableComparison">
-                                        <span class="toggle-slider"></span>
-                                    </label>
-                                    <span class="toggle-label">Compare Multiple AI Methods</span>
+                        <!-- Selected Configuration Display -->
+                        <div class="selected-config">
+                            <h3>Selected Configuration</h3>
+                            <div class="config-display">
+                                <div class="method-display">
+                                    <span class="method-icon">🚀</span>
+                                    <span class="method-name">Two-Stage Optimized</span>
                                 </div>
-                                <p class="comparison-description">Get insights from multiple AI engines and see how they compare</p>
+                                <span class="separator">+</span>
+                                <div class="model-display">
+                                    <span class="model-icon">⚡</span>
+                                    <span class="model-name">Gemini 2.5 Flash</span>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -428,29 +557,6 @@
                             <input type="file" id="fileInput" accept=".json" style="display: none;">
                         </div>
                         
-                        <!-- Model Selection -->
-                        <div class="model-selection" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 20px 0;">
-                            <h4 style="color: #1e293b; margin-bottom: 15px; font-size: 16px;">🤖 AI Model Selection</h4>
-                            <p style="color: #64748b; margin-bottom: 15px; font-size: 14px;">Choose the AI model for analysis. Flash is faster and cheaper, Pro is more capable and accurate.</p>
-                            
-                            <div class="model-options" style="display: flex; gap: 20px; align-items: center;">
-                                <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; border-radius: 6px; border: 2px solid #e2e8f0; transition: all 0.3s ease; flex: 1;" id="flash-label">
-                                    <input type="radio" name="ai_model" value="gemini-2.5-flash" checked style="margin-right: 10px;">
-                                    <div>
-                                        <div style="font-weight: 600; color: #1e293b;">⚡ Gemini 2.5 Flash</div>
-                                        <div style="font-size: 12px; color: #64748b;">Faster • Cheaper • Good for most cases</div>
-                                    </div>
-                                </label>
-                                
-                                <label style="display: flex; align-items: center; cursor: pointer; padding: 10px; border-radius: 6px; border: 2px solid #e2e8f0; transition: all 0.3s ease; flex: 1;" id="pro-label">
-                                    <input type="radio" name="ai_model" value="gemini-2.5-pro" style="margin-right: 10px;">
-                                    <div>
-                                        <div style="font-weight: 600; color: #1e293b;">🎯 Gemini 2.5 Pro</div>
-                                        <div style="font-size: 12px; color: #64748b;">More capable • Higher cost • Best accuracy</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
                         
                         <button type="submit" class="btn-primary" id="analyzeBtn">
                             <span id="analyzeButtonText">Analyze My Profile</span>
@@ -577,6 +683,10 @@
     <div id="dashboardContainer"></div>
     
     <script src="auth-dashboard-manager.js"></script>
-    <script src="script.js?v=152"></script>
+    <script type="module">
+        import { AnalysisMethodManager } from './src/analysisMethodManager.js';
+        window.AnalysisMethodManager = AnalysisMethodManager;
+    </script>
+    <script src="script.js?v=154"></script>
 </body>
 </html>

@@ -47,7 +47,7 @@ class GeminiAnalysisEngine {
             console.log(`🔍 UserData.ai_model: ${userData.ai_model}`);
             
             // Add Flash-specific reinforcement
-            if (selectedModel === 'gemini-1.5-flash') {
+            if (selectedModel === 'gemini-2.5-flash') {
                 console.log('⚡ FLASH MODEL DETECTED - Using enhanced instructions for better compliance');
             }
             
@@ -55,10 +55,10 @@ class GeminiAnalysisEngine {
             
             // Stage 1: Executive Summary & Strategic Insights
             console.log('📊 Stage 1: Generating Executive Summary & Strategic Insights...');
-            const stage1Prompt = selectedModel === 'gemini-1.5-flash' 
+            const stage1Prompt = selectedModel === 'gemini-2.5-flash' 
                 ? this.buildFlashStage1Prompt(userData)
                 : this.buildStage1Prompt(userData);
-            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 1 prompt`);
+            console.log(`🔍 Using ${selectedModel === 'gemini-2.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 1 prompt`);
             const stage1Result = await this.model.generateContent(stage1Prompt);
             const stage1Response = await stage1Result.response;
             const stage1Text = stage1Response.text();
@@ -67,10 +67,10 @@ class GeminiAnalysisEngine {
             
             // Stage 2: Detailed Framework Reports
             console.log('📋 Stage 2: Generating Detailed Framework Reports...');
-            const stage2Prompt = selectedModel === 'gemini-1.5-flash' 
+            const stage2Prompt = selectedModel === 'gemini-2.5-flash' 
                 ? this.buildFlashStage2Prompt(userData, stage1Text)
                 : this.buildStage2Prompt(userData, stage1Text);
-            console.log(`🔍 Using ${selectedModel === 'gemini-1.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 2 prompt`);
+            console.log(`🔍 Using ${selectedModel === 'gemini-2.5-flash' ? 'FLASH-SPECIFIC' : 'REGULAR'} Stage 2 prompt`);
             const stage2Result = await this.model.generateContent(stage2Prompt);
             const stage2Response = await stage2Result.response;
             const stage2Text = stage2Response.text();
@@ -1100,7 +1100,7 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
                 },
                 aiTransparency: aiTransparency || 'Transparency data not available',
                 analysis_methodology: userData.analysis_methodology || 'hedgehog_concept',
-                aiEngine: 'Google Gemini',
+                aiEngine: `Google Gemini (${userData.ai_model || 'gemini-2.5-flash'})`,
                 analysisTimestamp: new Date().toISOString(),
                 rawResponse: responseText,
                 promptUsed: prompt
@@ -1146,7 +1146,7 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
                     financial: 0.7
                 },
                 aiTransparency: 'Transparency data not available due to parsing error',
-                aiEngine: 'Google Gemini',
+                aiEngine: `Google Gemini (${userData.ai_model || 'gemini-2.5-flash'})`,
                 analysisTimestamp: new Date().toISOString(),
                 rawResponse: responseText,
                 promptUsed: 'Fallback prompt due to parsing error',
@@ -1159,7 +1159,7 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
         return {
             name: "Google Gemini",
             type: "Expert M&A Advisor",
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             provider: "Google",
             capabilities: [
                 "Expert M&A analysis and strategy",
@@ -1172,7 +1172,7 @@ This analysis was conducted using a comprehensive multi-framework AI approach. F
             enabled: this.available,
             available: this.available,
             configuration: {
-                model: "gemini-1.5-flash",
+                model: "gemini-2.5-flash",
                 apiVersion: "v1beta",
                 maxTokens: 8192,
                 temperature: 0.7,

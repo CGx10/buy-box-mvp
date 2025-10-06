@@ -138,7 +138,7 @@ app.get('/api/engines', async (req, res) => {
 app.post('/api/analyze', securityConfig.analysis, securityConfig.sanitizeInput, async (req, res) => {
     const startTime = Date.now();
     try {
-        const { userData, engine = engineManager.getDefaultEngine() } = req.body;
+        const { userData, engine = engineManager.getDefaultEngine(), analysisConfig } = req.body;
         
         // Validate required fields
         const validationResult = engineManager.validateInput(userData);
@@ -150,13 +150,26 @@ app.post('/api/analyze', securityConfig.analysis, securityConfig.sanitizeInput, 
             });
         }
 
-        // Process with specified engine
-        const analysis = await engineManager.processWithEngine(engine, userData);
+        let analysis;
+
+        // Use new configuration-based processing if available
+        if (analysisConfig && analysisConfig.method) {
+            console.log('🔍 Using new analysis configuration:', analysisConfig);
+            analysis = await engineManager.processWithConfiguration(analysisConfig, userData);
+        } else {
+            // Fallback to legacy engine processing
+            console.log('🔍 Using legacy engine processing:', engine);
+            analysis = await engineManager.processWithEngine(engine, userData);
+        }
         
         // Record successful request
         const responseTime = Date.now() - startTime;
         monitoring.performanceMonitor.recordRequest(responseTime);
-        monitoring.logger.info('Analysis completed', { engine, responseTime });
+        monitoring.logger.info('Analysis completed', { 
+            engine: analysisConfig?.method || engine, 
+            model: analysisConfig?.model,
+            responseTime 
+        });
         
         res.json({
             success: true,

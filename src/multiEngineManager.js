@@ -125,6 +125,61 @@ class MultiEngineManager {
         return this.engines.traditional.validateInput(userData);
     }
 
+    async processWithConfiguration(config, userData) {
+        const { method, model } = config;
+
+        // Route to appropriate engine based on method
+        switch(method) {
+            case 'traditional':
+                return await this.processWithEngine('traditional', userData);
+
+            case 'single_stage':
+                return await this.processWithEngine('gemini', {
+                    ...userData,
+                    ai_model: model,
+                    promptStrategy: 'comprehensive'
+                });
+
+            case 'two_stage_optimized':
+                return await this.processWithEngine('gemini', {
+                    ...userData,
+                    ai_model: model,
+                    promptStrategy: 'two_stage_optimized'
+                });
+
+            case 'hybrid_staged':
+                return await this.processWithEngine('hybrid', {
+                    ...userData,
+                    ai_model: model,
+                    promptStrategy: 'hybrid_staged'
+                });
+
+            case 'progressive_refinement':
+                // Use the most capable model for progressive refinement
+                const engineName = this.getBestEngineForModel(model);
+                return await this.processWithEngine(engineName, {
+                    ...userData,
+                    ai_model: model,
+                    promptStrategy: 'progressive_refinement'
+                });
+
+            default:
+                throw new Error(`Unknown analysis method: ${method}`);
+        }
+    }
+
+    getBestEngineForModel(model) {
+        // Map models to their best engines
+        const modelToEngine = {
+            'gemini-2.5-flash': 'gemini',
+            'gemini-2.5-pro': 'gemini',
+            'gpt-4': 'openai',
+            'claude-3.5-sonnet': 'claude'
+        };
+
+        return modelToEngine[model] || 'gemini';
+    }
+
     getEngineComparison(multiResults) {
         if (!multiResults.results || Object.keys(multiResults.results).length < 2) {
             return null;

@@ -10,6 +10,7 @@ class AcquisitionAdvisorApp {
         this.selectedEngine = 'traditional';
         this.selectedEngines = [];
         this.comparisonMode = false;
+        this.methodManager = null;
         this.init();
     }
 
@@ -19,8 +20,30 @@ class AcquisitionAdvisorApp {
         this.setupLinkedInUpload();
         this.setupModelSelection();
         this.updateProgress();
+        this.initializeMethodManager();
         await this.loadAvailableEngines();
         this.setupEngineSelection();
+    }
+
+    initializeMethodManager() {
+        try {
+            if (window.AnalysisMethodManager) {
+                // Wait for DOM to be ready before initializing
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        this.methodManager = new window.AnalysisMethodManager();
+                        console.log('✅ AnalysisMethodManager initialized successfully (after DOM ready)');
+                    });
+                } else {
+                    this.methodManager = new window.AnalysisMethodManager();
+                    console.log('✅ AnalysisMethodManager initialized successfully');
+                }
+            } else {
+                console.warn('⚠️ AnalysisMethodManager not available, falling back to legacy engine selection');
+            }
+        } catch (error) {
+            console.error('❌ Failed to initialize AnalysisMethodManager:', error);
+        }
     }
 
     setupEventListeners() {
@@ -246,7 +269,7 @@ class AcquisitionAdvisorApp {
         try {
             let response, result;
             
-            const API_BASE_URL = 'https://buy-box-mvp.vercel.app';
+            const API_BASE_URL = 'http://localhost:3000';
             
             if (this.comparisonMode && this.selectedEngines.length > 1) {
                 // Multi-engine comparison
@@ -262,9 +285,17 @@ class AcquisitionAdvisorApp {
                 });
             } else {
                 // Single engine analysis
+                // Get analysis configuration from method manager
+                let analysisConfig = null;
+                if (this.methodManager) {
+                    analysisConfig = this.methodManager.getAnalysisConfiguration();
+                    console.log('🔍 Analysis configuration:', analysisConfig);
+                }
+                
                 const requestBody = {
                     userData: formData,
-                    engine: this.selectedEngine
+                    engine: this.selectedEngine,
+                    analysisConfig: analysisConfig
                 };
                 console.log('🔍 Sending request body:', requestBody);
                 
@@ -283,9 +314,9 @@ class AcquisitionAdvisorApp {
             console.log('Server response:', result);
             
             if (result.success) {
-                console.log('Setting analysisResults to:', result.analysisResult);
-                console.log('result.analysisResult keys:', Object.keys(result.analysisResult || {}));
-                this.analysisResults = result.analysisResult;
+                console.log('Setting analysisResults to:', result.data);
+                console.log('result.data keys:', Object.keys(result.data || {}));
+                this.analysisResults = result.data;
                 console.log('this.analysisResults after setting:', this.analysisResults);
                 
                 // Save report to user's account if authenticated
@@ -297,7 +328,7 @@ class AcquisitionAdvisorApp {
                     const reportData = {
                         title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
                         formData: formData,
-                        analysisResults: result.analysisResult,
+                        analysisResults: result.data,
                         aiModel: formData.ai_model || 'gemini-1.5-flash-latest',
                         version: '1.0',
                         tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash-latest'],
@@ -2683,7 +2714,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
     // Engine Management Methods
     async loadAvailableEngines() {
         try {
-            const API_BASE_URL = 'https://buy-box-mvp.vercel.app';
+            const API_BASE_URL = 'http://localhost:3000';
             const response = await fetch(`${API_BASE_URL}/api/engines`);
             const result = await response.json();
             
@@ -3540,7 +3571,7 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
      */
     async callGeminiForExtraction(rawPdfText) {
         try {
-            const API_BASE_URL = 'https://buy-box-mvp.vercel.app';
+            const API_BASE_URL = 'http://localhost:3000';
             const response = await fetch(`${API_BASE_URL}/api/extract-linkedin-data`, {
                 method: 'POST',
                 headers: {

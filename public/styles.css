@@ -848,6 +848,171 @@ body {
     overflow-x: auto;
 }
 
+/* Analysis Method Selection Styles */
+.analysis-method-selection {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 30px 0;
+}
+
+.analysis-method-selection h2 {
+    color: #1e293b;
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.selection-description {
+    color: #64748b;
+    margin-bottom: 25px;
+    font-size: 1rem;
+}
+
+.method-selection, .model-selection {
+    margin-bottom: 25px;
+}
+
+.method-selection h3, .model-selection h3 {
+    color: #374151;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+
+.method-grid, .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.method-card, .model-card {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.method-card:hover, .model-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    transform: translateY(-2px);
+}
+
+.method-card.active, .model-card.active {
+    border-color: #3b82f6;
+    background: #f0f9ff;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.method-header, .model-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.method-icon, .model-icon {
+    font-size: 1.5rem;
+    margin-right: 10px;
+}
+
+.method-header h4, .model-header h4 {
+    margin: 0;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+
+.method-description, .model-description {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+.method-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.feature-tag {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+}
+
+.method-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.method-badge.local { background: #e2e8f0; color: #475569; }
+.method-badge.comprehensive { background: #bfdbfe; color: #1e40af; }
+.method-badge.optimized { background: #dcfce7; color: #166534; }
+.method-badge.hybrid { background: #e9d5ff; color: #7c3aed; }
+.method-badge.advanced { background: #fed7aa; color: #c2410c; }
+
+.model-specs {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.model-specs .speed, .model-specs .cost {
+    background: #f8fafc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+
+.selected-config {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.selected-config h3 {
+    color: #374151;
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+}
+
+.config-display {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.method-display, .model-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.separator {
+    font-size: 1.2rem;
+    color: #64748b;
+    font-weight: 600;
+}
+
 /* AI Engine Selection Styles */
 .ai-engine-selection {
     background: linear-gradient(135deg, #e2e8f0, #f7fafc);
