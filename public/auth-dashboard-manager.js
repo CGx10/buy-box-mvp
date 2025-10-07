@@ -639,7 +639,12 @@ class AuthDashboardManager {
         }
         
         console.log('📋 Creating HTML for reports...');
-        reportsList.innerHTML = reports.map(report => `
+        reportsList.innerHTML = reports.map(report => {
+            // Get the AI method from the report data
+            const aiMethod = report.method || 'Two-Stage Optimized'; // Default fallback
+            const methodDisplayName = this.getMethodDisplayName(aiMethod);
+            
+            return `
             <div class="report-item" data-report-id="${report.id}">
                 <div class="report-header">
                     <div>
@@ -649,12 +654,11 @@ class AuthDashboardManager {
                                 ✏️
                             </button>
                         </div>
-                        <p class="report-date">${new Date(report.generatedAt.seconds * 1000).toLocaleDateString()}</p>
                     </div>
                 </div>
                 <div class="report-meta">
-                    <span class="report-tag">${report.aiModel}</span>
-                    <span class="report-tag">v${report.version}</span>
+                    <span class="report-tag method-tag">${methodDisplayName}</span>
+                    <span class="report-tag model-tag">${report.aiModel}</span>
                 </div>
                 <div class="report-actions">
                     <button class="report-btn report-btn-view" onclick="authDashboardManager.viewReport('${report.id}')">
@@ -665,7 +669,8 @@ class AuthDashboardManager {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
         
         console.log('📋 Reports HTML rendered successfully');
         console.log('📋 reportsList innerHTML length:', reportsList.innerHTML.length);
@@ -880,6 +885,17 @@ class AuthDashboardManager {
             console.error('❌ Error updating report title:', error);
             this.showMessage('Failed to update report title: ' + error.message, 'error');
         }
+    }
+
+    getMethodDisplayName(methodId) {
+        const methodNames = {
+            'traditional': 'Traditional',
+            'single_stage': 'Single-Stage',
+            'two_stage_optimized': 'Two-Stage',
+            'hybrid_staged': 'Hybrid',
+            'progressive_refinement': 'Progressive'
+        };
+        return methodNames[methodId] || 'Two-Stage';
     }
 
     showAnalysisForm() {

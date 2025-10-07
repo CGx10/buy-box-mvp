@@ -332,6 +332,7 @@ class AcquisitionAdvisorApp {
                         formData: formData,
                         analysisResults: result.data,
                         aiModel: formData.ai_model || 'gemini-1.5-flash-latest',
+                        method: analysisConfig?.method || 'two_stage_optimized',
                         version: '1.0',
                         tags: ['buybox-analysis', formData.ai_model || 'gemini-1.5-flash-latest'],
                         notes: ''

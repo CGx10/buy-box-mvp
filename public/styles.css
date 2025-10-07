@@ -2015,3 +2015,15 @@ input:checked + .toggle-slider:before {
 .edit-title-btn:active {
     transform: scale(0.95);
 }
+
+/* Report Tag Styling */
+.report-tag.method-tag {
+    background: #e0f2fe;
+    color: #0277bd;
+    font-weight: 600;
+}
+
+.report-tag.model-tag {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
