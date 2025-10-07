@@ -22,6 +22,7 @@ class ReportService {
   // Save a new report
   async saveReport(userId, reportData) {
     try {
+      console.log('💾 ReportService: Saving report with method:', reportData.method);
       const report = {
         userId: userId,
         title: reportData.title || 'Buybox Analysis Report',
@@ -29,12 +30,14 @@ class ReportService {
         formData: reportData.formData,
         analysisResults: reportData.analysisResults,
         aiModel: reportData.aiModel || 'gemini-2.5-flash',
+        method: reportData.method || 'two_stage_optimized', // Add method field
         version: reportData.version || '1.0',
         isPublic: false,
         tags: reportData.tags || [],
         notes: reportData.notes || ''
       };
 
+      console.log('💾 ReportService: Final report object being saved:', report);
       const docRef = await addDoc(collection(db, this.reportsCollection), report);
       return { success: true, reportId: docRef.id, report: report };
     } catch (error) {
