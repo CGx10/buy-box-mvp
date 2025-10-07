@@ -640,6 +640,12 @@ class AuthDashboardManager {
         
         console.log('📋 Creating HTML for reports...');
         reportsList.innerHTML = reports.map(report => {
+            // Debug: Log the full report object for the first few reports
+            if (reports.indexOf(report) < 3) {
+                console.log('🔍 Full report object:', report);
+                console.log('🔍 Report keys:', Object.keys(report));
+            }
+            
             // Get the AI method from the report data
             const aiMethod = report.method || 'two_stage_optimized'; // Default fallback
             console.log('🔍 Report method:', report.method, 'aiMethod:', aiMethod);
@@ -689,6 +695,7 @@ class AuthDashboardManager {
         }
         
         console.log('💾 Saving report to Firebase...');
+        console.log('💾 Report data being saved:', JSON.stringify(reportData, null, 2));
         const result = await this.reportService.saveReport(this.currentUser.uid, reportData);
         console.log('💾 Save result:', result);
         
