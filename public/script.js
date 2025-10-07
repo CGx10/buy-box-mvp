@@ -257,6 +257,15 @@ class AcquisitionAdvisorApp {
         // Store form data for later use in display functions
         this.currentFormData = formData;
         
+        // Get analysis configuration from method manager (moved outside of if/else blocks)
+        let analysisConfig = { method: 'unknown', model: 'unknown' }; // Initialize to a default object
+        if (this.methodManager) {
+            const managerConfig = this.methodManager.getAnalysisConfiguration();
+            if (managerConfig) { // Ensure getAnalysisConfiguration didn't return null/undefined
+                analysisConfig = managerConfig;
+            }
+            console.log('🔍 Analysis configuration:', analysisConfig);
+        }
         
         // Move to analysis phase
         this.currentPhase = 2;
@@ -285,13 +294,6 @@ class AcquisitionAdvisorApp {
                 });
             } else {
                 // Single engine analysis
-                // Get analysis configuration from method manager
-                let analysisConfig = null;
-                if (this.methodManager) {
-                    analysisConfig = this.methodManager.getAnalysisConfiguration();
-                    console.log('🔍 Analysis configuration:', analysisConfig);
-                }
-                
                 const requestBody = {
                     userData: formData,
                     engine: this.selectedEngine,
