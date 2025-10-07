@@ -696,6 +696,8 @@ class AuthDashboardManager {
         
         console.log('💾 Saving report to Firebase...');
         console.log('💾 Report data being saved:', JSON.stringify(reportData, null, 2));
+        console.log('💾 About to call reportService.saveReport with userId:', this.currentUser.uid);
+        console.log('💾 reportService available:', !!this.reportService);
         const result = await this.reportService.saveReport(this.currentUser.uid, reportData);
         console.log('💾 Save result:', result);
         
