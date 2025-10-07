@@ -424,12 +424,14 @@ class AcquisitionAdvisorApp {
         // Multi-framework analysis - no methodology selection needed
         formData.analysis_methodology = 'multi_framework';
         
-        // Get selected AI model from AnalysisMethodManager
+        // Get selected AI model and method from AnalysisMethodManager
         if (this.methodManager) {
             const config = this.methodManager.getAnalysisConfiguration();
             formData.ai_model = config.model || 'gemini-2.5-flash';
+            formData.method = config.method || 'two_stage_optimized';
         } else {
             formData.ai_model = 'gemini-2.5-flash';
+            formData.method = 'two_stage_optimized';
         }
 
         return formData;

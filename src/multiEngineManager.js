@@ -131,7 +131,14 @@ class MultiEngineManager {
         // Route to appropriate engine based on method
         switch(method) {
             case 'traditional':
-                return await this.processWithEngine('traditional', userData);
+                console.log('🔧 Processing Traditional method with userData:', userData);
+                const traditionalUserData = {
+                    ...userData,
+                    method: 'traditional'
+                };
+                const traditionalResult = await this.processWithEngine('traditional', traditionalUserData);
+                console.log('🔧 Traditional method result:', traditionalResult);
+                return traditionalResult;
 
             case 'single_stage':
                 return await this.processWithEngine('gemini', {
