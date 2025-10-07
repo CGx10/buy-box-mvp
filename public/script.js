@@ -1144,8 +1144,11 @@ class AcquisitionAdvisorApp {
         console.log("🚀 PDF Generation v64 - Reverted to Working Version");
         console.log("📄 Starting PDF generation");
         
-        // Add a small delay to ensure content is fully rendered
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Add a delay to ensure content is fully rendered
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Wait for any pending DOM updates
+        await new Promise(resolve => requestAnimationFrame(resolve));
         
         try {
             // Show loading state
@@ -1166,6 +1169,14 @@ class AcquisitionAdvisorApp {
             const elementsToRender = document.querySelectorAll('.pdf-render-section, .pdf-framework-section');
             console.log('PDF Generation: Found elements to render:', elementsToRender.length);
             console.log('PDF Generation: Elements found:', elementsToRender);
+            
+            // Also check for analysis results content
+            const analysisContent = document.querySelector('#analysisResults');
+            console.log('PDF Generation: Analysis results element:', analysisContent);
+            if (analysisContent) {
+                console.log('PDF Generation: Analysis content height:', analysisContent.scrollHeight);
+                console.log('PDF Generation: Analysis content innerHTML length:', analysisContent.innerHTML.length);
+            }
             
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = pdf.internal.pageSize.getHeight();

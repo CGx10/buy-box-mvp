@@ -805,12 +805,21 @@ class AuthDashboardManager {
     }
     
     formatReportContent(analysisResults) {
-        if (!analysisResults || !analysisResults.rawResponse) {
+        if (!analysisResults) {
             return '<p>Report content not available.</p>';
         }
         
-        // Use the raw response which contains the full formatted report
-        let content = analysisResults.rawResponse;
+        // Check if we have the new data structure or old structure
+        let content = '';
+        if (analysisResults.rawResponse) {
+            // Old structure
+            content = analysisResults.rawResponse;
+        } else if (analysisResults.operatorArchetype) {
+            // New structure - generate content from the structured data
+            content = this.generateReportContentFromStructuredData(analysisResults);
+        } else {
+            return '<p>Report content not available.</p>';
+        }
         
         // Convert markdown-style formatting to HTML
         content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -822,6 +831,76 @@ class AuthDashboardManager {
         content = content.replace(/^## (.*$)/gm, '<h2 style="color: #333; margin-top: 40px; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">$1</h2>');
         content = content.replace(/^# (.*$)/gm, '<h1 style="color: #333; margin-top: 50px; margin-bottom: 25px;">$1</h1>');
         
+        return content;
+    }
+    
+    generateReportContentFromStructuredData(analysisResults) {
+        let content = '<div class="structured-report">';
+        
+        // Analysis Confidence
+        if (analysisResults.confidenceScores) {
+            content += '<h2>Analysis Confidence</h2>';
+            content += `<p><strong>Overall:</strong> ${analysisResults.confidenceScores.overall || 'N/A'}% confident</p>`;
+            content += `<p><strong>Archetype:</strong> ${analysisResults.confidenceScores.archetype || 'N/A'}% | <strong>Industry:</strong> ${analysisResults.confidenceScores.industry || 'N/A'}% | <strong>Data Quality:</strong> ${analysisResults.confidenceScores.dataQuality || 'N/A'}%</p>`;
+        }
+        
+        // Key Strengths
+        if (analysisResults.operatorArchetype) {
+            content += '<h2>Key Strengths</h2>';
+            content += `<p>${analysisResults.operatorArchetype.name || 'N/A'} archetype with ${analysisResults.operatorArchetype.score || 'N/A'}/5.0 composite score</p>`;
+        }
+        
+        // AI Recommendations
+        if (analysisResults.aiInsights) {
+            content += '<h2>AI Recommendations</h2>';
+            content += `<p>${analysisResults.aiInsights}</p>`;
+        }
+        
+        // Multi-Framework Analysis Overview
+        if (analysisResults.acquisitionThesis) {
+            content += '<h2>Multi-Framework Analysis Overview</h2>';
+            content += `<p>${analysisResults.acquisitionThesis}</p>`;
+        }
+        
+        // Your Personalized Buybox
+        if (analysisResults.personalizedBuybox) {
+            content += '<h2>Your Personalized Buybox</h2>';
+            content += '<table style="width: 100%; border-collapse: collapse; margin: 20px 0;">';
+            content += '<tr style="background: #f8f9fa;"><th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Criterion</th><th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Your Target Profile</th><th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Rationale</th></tr>';
+            
+            Object.entries(analysisResults.personalizedBuybox).forEach(([key, value]) => {
+                content += '<tr>';
+                content += `<td style="padding: 12px; border: 1px solid #ddd; font-weight: 600;">${key.replace(/_/g, ' ').toUpperCase()}</td>`;
+                content += `<td style="padding: 12px; border: 1px solid #ddd;">${value.target || 'N/A'}</td>`;
+                content += `<td style="padding: 12px; border: 1px solid #ddd;">${value.rationale || 'N/A'}</td>`;
+                content += '</tr>';
+            });
+            content += '</table>';
+        }
+        
+        // Target Industries
+        if (analysisResults.targetIndustries && analysisResults.targetIndustries.length > 0) {
+            content += '<h2>Target Industries</h2>';
+            content += '<ul>';
+            analysisResults.targetIndustries.forEach(industry => {
+                content += `<li><strong>${industry.name}</strong> (${industry.matchPercentage || 'N/A'}% match) - ${industry.rationale || 'N/A'}</li>`;
+            });
+            content += '</ul>';
+        }
+        
+        // Financial Analysis
+        if (analysisResults.financialAnalysis) {
+            content += '<h2>Financial Analysis</h2>';
+            content += `<p><strong>Leverage Thesis:</strong> ${analysisResults.leverageThesis || 'N/A'}</p>`;
+            if (analysisResults.financialAnalysis.revenueRange) {
+                content += `<p><strong>Revenue Range:</strong> ${analysisResults.financialAnalysis.revenueRange}</p>`;
+            }
+            if (analysisResults.financialAnalysis.ebitdaMargin) {
+                content += `<p><strong>EBITDA Margin:</strong> ${analysisResults.financialAnalysis.ebitdaMargin}</p>`;
+            }
+        }
+        
+        content += '</div>';
         return content;
     }
     
