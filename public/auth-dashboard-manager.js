@@ -641,8 +641,10 @@ class AuthDashboardManager {
         console.log('📋 Creating HTML for reports...');
         reportsList.innerHTML = reports.map(report => {
             // Get the AI method from the report data
-            const aiMethod = report.method || 'Two-Stage Optimized'; // Default fallback
+            const aiMethod = report.method || 'two_stage_optimized'; // Default fallback
+            console.log('🔍 Report method:', report.method, 'aiMethod:', aiMethod);
             const methodDisplayName = this.getMethodDisplayName(aiMethod);
+            console.log('🔍 Method display name:', methodDisplayName);
             
             return `
             <div class="report-item" data-report-id="${report.id}">

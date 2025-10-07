@@ -342,6 +342,8 @@ class AcquisitionAdvisorApp {
                         notes: ''
                     };
                     
+                    console.log('💾 Saving report with method:', analysisConfig?.method, 'reportData.method:', reportData.method);
+                    
                     console.log('💾 Attempting to save report:', reportData.title);
                     try {
                         const saveResult = await window.authDashboardManager.saveCurrentReport(reportData);
