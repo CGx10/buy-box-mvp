@@ -82,10 +82,12 @@ class AcquisitionAdvisorApp {
         // Action buttons
         const downloadBtn = document.getElementById('downloadBtn');
         const downloadPDFBtn = document.getElementById('downloadPDFBtn');
+        const modifyBtn = document.getElementById('modifyBtn');
         const restartBtn = document.getElementById('restartBtn');
         
         if (downloadBtn) downloadBtn.addEventListener('click', this.downloadPDF.bind(this));
         if (downloadPDFBtn) downloadPDFBtn.addEventListener('click', this.downloadPDF.bind(this));
+        if (modifyBtn) modifyBtn.addEventListener('click', this.modifyAnalysis.bind(this));
         if (restartBtn) restartBtn.addEventListener('click', this.restart.bind(this));
         
         // Transparency toggle
@@ -2572,6 +2574,38 @@ Your acquisition strategy should focus on the "fit-first" approach, targeting bu
         errorGroups.forEach(group => {
             group.classList.remove('error');
         });
+    }
+
+    modifyAnalysis() {
+        // Go back to the form with current data pre-filled
+        this.currentPhase = 1;
+        this.analysisResults = null;
+        
+        // Update UI
+        this.updateProgress();
+        this.showPhase('discoveryPhase');
+        
+        // Reset sliders and counters
+        this.setupRatingSliders();
+        
+        // Reset character counters
+        const counters = document.querySelectorAll('.char-counter');
+        counters.forEach(counter => {
+            counter.textContent = '0/200';
+            counter.classList.remove('valid');
+        });
+        
+        // Reset time commitment
+        document.getElementById('time_commitment_value').textContent = '40 hours/week';
+        
+        // Clear validation errors
+        const errorGroups = document.querySelectorAll('.input-group.error, .competency.error');
+        errorGroups.forEach(group => {
+            group.classList.remove('error');
+        });
+        
+        // Scroll to top of form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     toggleTransparency() {
