@@ -134,6 +134,7 @@ class AuthDashboardManager {
             
             async saveReport(userId, reportData) {
                 try {
+                    console.log('💾 ReportService: Saving report with method:', reportData.method);
                     const { collection, addDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                     const report = {
                         userId: userId,
@@ -141,12 +142,15 @@ class AuthDashboardManager {
                         generatedAt: new Date(),
                         formData: reportData.formData,
                         analysisResults: reportData.analysisResults,
-                        aiModel: reportData.aiModel || 'gemini-1.5-flash',
+                        aiModel: reportData.aiModel || 'gemini-2.5-flash',
+                        method: reportData.method || 'two_stage_optimized', // Add method field
                         version: reportData.version || '1.0',
                         isPublic: false,
                         tags: reportData.tags || [],
                         notes: reportData.notes || ''
                     };
+                    
+                    console.log('💾 ReportService: Final report object being saved:', report);
                     
                     const docRef = await addDoc(collection(this.db, 'reports'), report);
                     return { success: true, reportId: docRef.id, report: report };
