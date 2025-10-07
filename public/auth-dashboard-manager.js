@@ -161,10 +161,11 @@ class AuthDashboardManager {
             
             async getUserReports(userId) {
                 try {
-                    const { collection, query, where, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const { collection, query, where, limit, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                     const q = query(
                         collection(this.db, 'reports'),
                         where('userId', '==', userId),
+                        orderBy('generatedAt', 'desc'),
                         limit(50)
                     );
                     
