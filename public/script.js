@@ -1144,6 +1144,9 @@ class AcquisitionAdvisorApp {
         console.log("🚀 PDF Generation v64 - Reverted to Working Version");
         console.log("📄 Starting PDF generation");
         
+        // Add a small delay to ensure content is fully rendered
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         try {
             // Show loading state
             const downloadBtn = document.getElementById('downloadBtn');
