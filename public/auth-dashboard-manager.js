@@ -161,12 +161,11 @@ class AuthDashboardManager {
             
             async getUserReports(userId) {
                 try {
-                    const { collection, query, where, limit, orderBy, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+                    const { collection, query, where, limit, getDocs } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
                     const q = query(
                         collection(this.db, 'reports'),
                         where('userId', '==', userId),
-                        orderBy('generatedAt', 'desc'),
-                        limit(50)
+                        limit(100)
                     );
                     
                     const querySnapshot = await getDocs(q);
@@ -177,12 +176,13 @@ class AuthDashboardManager {
                     
                     // Sort by generatedAt in JavaScript to avoid requiring a composite index
                     reports.sort((a, b) => {
-                        const aTime = a.generatedAt?.seconds || 0;
-                        const bTime = b.generatedAt?.seconds || 0;
-                        return bTime - aTime; // Descending order (newest first)
+                        const dateA = a.generatedAt?.toDate ? a.generatedAt.toDate() : new Date(a.generatedAt);
+                        const dateB = b.generatedAt?.toDate ? b.generatedAt.toDate() : new Date(b.generatedAt);
+                        return dateB - dateA; // Newest first
                     });
                     
-                    return { success: true, reports: reports };
+                    // Take only the first 50 after sorting
+                    return { success: true, reports: reports.slice(0, 50) };
                 } catch (error) {
                     return { success: false, error: error.message };
                 }
