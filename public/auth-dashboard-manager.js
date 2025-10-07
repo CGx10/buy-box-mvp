@@ -643,7 +643,12 @@ class AuthDashboardManager {
             <div class="report-item" data-report-id="${report.id}">
                 <div class="report-header">
                     <div>
-                        <h3 class="report-title">${report.title}</h3>
+                        <div class="report-title-container">
+                            <h3 class="report-title" id="title-${report.id}">${report.title}</h3>
+                            <button class="edit-title-btn" onclick="authDashboardManager.editReportTitle('${report.id}')" title="Edit title">
+                                ✏️
+                            </button>
+                        </div>
                         <p class="report-date">${new Date(report.generatedAt.seconds * 1000).toLocaleDateString()}</p>
                     </div>
                 </div>
@@ -836,6 +841,44 @@ class AuthDashboardManager {
                 console.error('Error deleting report:', error);
                 this.showMessage('Failed to delete report: ' + error.message, 'error');
             }
+        }
+    }
+
+    editReportTitle(reportId) {
+        const titleElement = document.getElementById(`title-${reportId}`);
+        if (!titleElement) {
+            console.error('❌ Title element not found for report:', reportId);
+            return;
+        }
+
+        const currentTitle = titleElement.textContent;
+        const newTitle = prompt('Enter new report title:', currentTitle);
+        
+        if (newTitle && newTitle.trim() !== '' && newTitle !== currentTitle) {
+            this.updateReportTitle(reportId, newTitle.trim());
+        }
+    }
+
+    async updateReportTitle(reportId, newTitle) {
+        try {
+            console.log('📝 Updating report title:', reportId, 'to:', newTitle);
+            
+            // Update in Firebase
+            const { doc, updateDoc } = await import('https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js');
+            await updateDoc(doc(this.db, 'reports', reportId), {
+                title: newTitle
+            });
+            
+            // Update the display immediately
+            const titleElement = document.getElementById(`title-${reportId}`);
+            if (titleElement) {
+                titleElement.textContent = newTitle;
+            }
+            
+            this.showMessage('Report title updated successfully', 'success');
+        } catch (error) {
+            console.error('❌ Error updating report title:', error);
+            this.showMessage('Failed to update report title: ' + error.message, 'error');
         }
     }
 

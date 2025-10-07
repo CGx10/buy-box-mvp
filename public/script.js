@@ -325,8 +325,10 @@ class AcquisitionAdvisorApp {
                 console.log('currentUser:', window.authDashboardManager?.currentUser);
                 
                 if (window.authDashboardManager && window.authDashboardManager.currentUser) {
+                    const now = new Date();
+                    const dateTime = now.toLocaleDateString() + ' ' + now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                     const reportData = {
-                        title: `Buybox Analysis - ${new Date().toLocaleDateString()}`,
+                        title: `Buybox Analysis - ${dateTime}`,
                         formData: formData,
                         analysisResults: result.data,
                         aiModel: formData.ai_model || 'gemini-1.5-flash-latest',
